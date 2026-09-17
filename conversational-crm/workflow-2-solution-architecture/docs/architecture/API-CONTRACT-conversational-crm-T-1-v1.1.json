@@ -1,0 +1,553 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Conversational CRM API",
+    "version": "1.1",
+    "description": "Self-contained OpenAPI 3.1 contract for C-API (CRM API Service), the sole integration point C-WEB (CRM Web App) calls, per solution.json decisions SOL-1/SOL-7. Covers task T-1, scope full-product-v1 (F-1..F-7, US-1..US-21). Authored by the data_integration discipline of Workflow 2 (Solution Architecture). v1.1 adds the login/logout operations and the 429-class rate-limit response that security_nfr's approved SharedLoginAuth resolution (SEC-1, SEC-2, SEC-5, SEC-11) requires but v1.0 did not yet define (workflow sign-off revise, 2026-09-17; see decisions DAT-10/DAT-11) -- none of the 9 v1.0 business operations' own request/response shapes changed. The SharedLoginAuth scheme itself, and every session/lockout/rate-limit policy value (timeouts, attempt thresholds, requests-per-minute), remain security_nfr's decisions (SEC-1..SEC-5, SEC-11); this contract only gives them API surface."
+  },
+  "servers": [
+    { "url": "/api/v1", "description": "C-API base path (exact host/scheme is platform's to finalize)" }
+  ],
+  "security": [ { "SharedLoginAuth": [] } ],
+  "tags": [
+    { "name": "accounts", "description": "Seeded customer accounts and per-account profile view (F-6, F-7)" },
+    { "name": "interactions", "description": "Capture and resolution of interaction notes (F-1, F-2)" },
+    { "name": "qa", "description": "Natural-language memory and Q&A (F-3)" },
+    { "name": "briefs", "description": "Brief-me-on-customer summaries (F-5)" },
+    { "name": "commitments", "description": "Proactive commitment tracking (F-4)" },
+    { "name": "auth", "description": "Session lifecycle for the single shared-login credential -- login and logout (v1.1). Mechanism fixed by security_nfr SEC-1/SEC-2/SEC-5, not decided here." }
+  ],
+  "paths": {
+    "/accounts": {
+      "get": {
+        "operationId": "listAccounts",
+        "tags": ["accounts"],
+        "summary": "List every seeded customer account",
+        "description": "Returns every seeded customer account so the rep can select one (PRD Section 5 step 1) and so every session of the single shared login browses the same account list (F-7). Backing entity: accounts.",
+        "x-story-ids": ["US-20"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Every seeded account, ordered by name ascending (deterministic, case-insensitive) for a stable selection list.",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Account" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/accounts/{accountId}/profile": {
+      "get": {
+        "operationId": "getAccountProfile",
+        "tags": ["accounts"],
+        "summary": "Get one customer's running conversational history (F-6)",
+        "description": "Returns that customer's captured interactions (with their attendees and commitments) in chronological order, or an explicit no-history state. Every session of the shared login reads the same rows here, which is what makes F-7's identical-content requirement (US-20) mechanically true. A note captured via POST /interactions appears here on the very next read of this endpoint with no separate action required (US-19), because both paths read/write the same interactions table -- there is no push/notification mechanism. Backing entities: interactions, interaction_attendees, commitments.",
+        "x-story-ids": ["US-18", "US-19", "US-20"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "parameters": [
+          { "name": "accountId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Account id from GET /accounts." }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile returned. `is_empty=true` and `interactions=[]` together are the explicit 'no history yet' state (US-18 AC2) -- the client must render that state, never a bare empty list with no explanation.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AccountProfile" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/AccountNotFound" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/interactions": {
+      "post": {
+        "operationId": "captureInteraction",
+        "tags": ["interactions"],
+        "summary": "Capture an interaction outcome as typed text or a scanned business card (F-1, F-2)",
+        "description": "Accepts exactly one of two input shapes, distinguished by request content type: `application/json` for typed one-line capture (US-1, US-2, US-5), or `multipart/form-data` for a scanned business-card image (US-4). Extraction (attendees, commitments, due dates -- F-2, US-6, US-7, US-8) happens synchronously in this same request/response (solution.json decision SOL-3) and its results are returned inline; there is no separate polling step. Two sessions may call this concurrently against the same account thread (US-21) -- see the 503 response and 'Concurrency and error semantics' in the accompanying report for how a transient SQLite write conflict is surfaced rather than silently dropped.",
+        "x-story-ids": ["US-1", "US-2", "US-4", "US-5", "US-6", "US-7", "US-8", "US-19", "US-21"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CaptureTextRequest" },
+              "examples": {
+                "typed": { "value": { "raw_text": "met Priya and Arjun from Acme, discussed renewal pricing, they want a demo of module X by Friday" } }
+              }
+            },
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/CaptureBusinessCardRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Interaction note created. `match_status` distinguishes a matched thread (US-1 AC1) from an 'unmatched -- needs customer selection' flag (US-2 AC2) -- both are successful creations, not errors, per PRD F-1 AC1. For a business-card submission, `manual_entry_required=true` with empty `attendees` is the successful-but-unreadable-image outcome (US-4 AC2) -- it is not an HTTP error, since a note is still created and no contact detail is fabricated.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Interaction" } }
+            }
+          },
+          "400": {
+            "description": "Rejected: the entry was empty or whitespace-only (US-2 AC1). No note record is created. error_code=EMPTY_NOTE.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "422": {
+            "description": "The uploaded file is not a readable image at all (wrong content type / corrupt upload) -- distinct from a legible-but-unrecognized business card (which is a 201, see above). error_code=UNSUPPORTED_IMAGE_FORMAT.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/interactions/unmatched": {
+      "get": {
+        "operationId": "listUnmatchedInteractions",
+        "tags": ["interactions"],
+        "summary": "List interaction notes still flagged 'unmatched -- needs customer selection' (US-3)",
+        "description": "Lets the rep find a note the system could not auto-match, so it can be manually resolved via POST /interactions/{interactionId}/resolve-customer. Ordered by captured_at ascending (oldest unresolved first) so nothing sits unresolved indefinitely without being surfaced. Backing entity: interactions (match_status index).",
+        "x-story-ids": ["US-3"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Every interaction currently in the unmatched/needs-selection state. An empty array means none are pending -- not an error.",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Interaction" } } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/interactions/{interactionId}/resolve-customer": {
+      "post": {
+        "operationId": "resolveInteractionCustomer",
+        "tags": ["interactions"],
+        "summary": "Manually attach an unmatched note to the customer the rep selects (US-3)",
+        "description": "Moves an interaction (and its already-extracted attendees/commitments, per F-2 AC3) out of the unmatched state onto the selected account's thread. Also upserts that interaction's embedded vector-store metadata (`account_id`) so subsequent semantic retrieval (F-3, F-5) scopes correctly to the resolved account -- see decision DAT-2 in the accompanying report; the embedding vector itself is not recomputed, only its metadata, since the source text is unchanged.",
+        "x-story-ids": ["US-3"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "parameters": [
+          { "name": "interactionId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResolveCustomerRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interaction re-tagged to the selected account; match_status is now 'matched'.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Interaction" } } }
+          },
+          "404": {
+            "description": "The interaction id, or the account id in the request body, does not exist. error_code is INTERACTION_NOT_FOUND or ACCOUNT_NOT_FOUND, distinguishing which id was bad.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "409": {
+            "description": "The interaction is not currently in the unmatched state (already resolved or was never unmatched) -- rather than silently re-assigning an already-matched note (which the note must never do, per US-3 AC2's 'leave it in the unmatched state -- rather than guessing -- when not yet resolved', read together with F-1 AC4). error_code=INTERACTION_ALREADY_MATCHED.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/qa": {
+      "post": {
+        "operationId": "askQuestion",
+        "tags": ["qa"],
+        "summary": "Ask a natural-language question about a customer thread (F-3)",
+        "description": "Covers all three canonical query types (what did we discuss last time; what did I commit to; who attended) plus any other free-text question, per PRD F-3's description. The customer is identified either from the optional `account_id` hint (when the rep asks from within a profile view already showing one account -- see decision DAT-4) or, when omitted, resolved from the question text itself by C-NLU (US-12's 'a query names exactly one customer'). This dual path is this discipline's own reasonable reconciliation of PRD Section 5 step 1 (rep first selects an account) with F-3 AC4's own wording (the query itself names a customer) -- flagged as an open item (OI-6) for Workflow 3 to confirm against the actual UI flow, not a settled UX decision.",
+        "x-story-ids": ["US-9", "US-10", "US-11", "US-12"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QARequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Always 200 -- 'no history yet' (US-9 AC2), 'no open commitments' (US-10 AC2), 'no attendee information captured' (US-11 AC2), and 'could not identify the customer' (US-12 AC2) are all valid conversational outcomes distinguished by the `resolution` field, not HTTP error statuses, exactly like the empty-state pattern used elsewhere in this contract.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/QAResponse" } } }
+          },
+          "400": {
+            "description": "The `question` field was empty or whitespace-only. error_code=EMPTY_QUESTION.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/briefs": {
+      "post": {
+        "operationId": "generateBrief",
+        "tags": ["briefs"],
+        "summary": "Generate a short pre-meeting brief for a named customer (F-5)",
+        "description": "Combines recent discussion history (interactions + semantically-retrieved embedded content), open commitments, stakeholder/contact names, and a narratively-synthesized opportunity/deal-status component (PRD Section 13.1 -- no discrete deal-stage field exists, per solution.json's own scope boundary). Customer identification follows the same `account_id`-hint-or-resolve-from-text pattern as /qa (decision DAT-4). Always returns whatever partial content is available rather than failing the whole request when one summary component is missing (US-15 AC2).",
+        "x-story-ids": ["US-15", "US-16", "US-17"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BriefRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Always 200 -- 'no history yet' (US-15 AC1) and 'could not identify the requested customer' (US-17 AC2) are conversational outcomes distinguished by `resolution`, not HTTP errors.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BriefResponse" } } }
+          },
+          "400": {
+            "description": "The `request_text` field was empty or whitespace-only. error_code=EMPTY_REQUEST.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/commitments/due": {
+      "get": {
+        "operationId": "listDueCommitments",
+        "tags": ["commitments"],
+        "summary": "List overdue and due-soon open commitments across every account (F-4)",
+        "description": "Computed at request time from commitments.due_date and commitments.status -- no NLU call in this flow (solution.json Section 4.3). `due_soon_window_days` defaults to 7, the PRD's own carried-over illustrative placeholder (US-13 AC2, still `[INFERRED — needs confirmation]` upstream) and may be overridden per request without a contract change. `overdue` and `due_soon` are mutually exclusive and reclassify automatically as the reference date advances (US-13 AC1/AC2); `unspecified` (no due date captured, per F-2) is listed separately, never folded into either bucket or silently omitted (US-13 AC3). `message` is populated only when both `overdue` and `due_soon` are empty (US-14) -- `unspecified` entries alone do not suppress that message, since US-14's AC is scoped to 'no due-soon or overdue commitments' specifically.",
+        "x-story-ids": ["US-13", "US-14"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "parameters": [
+          { "name": "due_soon_window_days", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "default": 7 }, "description": "[INFERRED — needs confirmation upstream, PRD Open Question 6] Look-ahead window in days for the 'due soon' bucket. Default 7 is a carried-over placeholder, not a confirmed business value." },
+          { "name": "reference_date", "in": "query", "required": false, "schema": { "type": "string", "format": "date" }, "description": "Overrides 'today' for deterministic testing against seeded data with known due dates. Defaults to the server's current date." }
+        ],
+        "responses": {
+          "200": {
+            "description": "Three buckets, each ordered by due_date ascending (soonest first) for `overdue`/`due_soon`, and by the commitment's own creation order for `unspecified` (no due_date to sort by).",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DueCommitmentsResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/commitments/{commitmentId}/complete": {
+      "patch": {
+        "operationId": "markCommitmentComplete",
+        "tags": ["commitments"],
+        "summary": "Mark an open commitment complete, excluding it from the due-soon/overdue list",
+        "description": "[INFERRED — needs confirmation] No PRD feature or story describes a rep action for marking a commitment complete, yet F-4 AC1 (US-13 AC1) explicitly requires excluding a commitment from the due-soon/overdue list 'once it is marked complete' -- that acceptance criterion is otherwise untestable and unimplementable without some mechanism to reach the 'complete' state. This operation is this discipline's own minimal, reasonable inference of that missing mechanism, carried forward as Open Item OI-5 rather than treated as a confirmed product decision (see decision DAT-5 in the report). Workflow 3/product owner may replace it with a different mechanism (e.g. inferring completion from a later note) without changing any other operation in this contract.",
+        "x-story-ids": ["US-13"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "parameters": [
+          { "name": "commitmentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commitment marked complete; it is excluded from all future GET /commitments/due responses.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Commitment" } } }
+          },
+          "404": { "$ref": "#/components/responses/CommitmentNotFound" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "tags": ["auth"],
+        "summary": "Exchange the single shared credential for a session (v1.1 -- resolves security_nfr's SEC-1)",
+        "description": "Validates the one shared application credential (username/password, SEC-1 -- there is no per-individual account) and, on success, issues the opaque, server-validated session token via the `session` cookie the `SharedLoginAuth` scheme already names, with the flags and idle/absolute lifetime SEC-2 fixed (HttpOnly, Secure, SameSite=Strict; 2h idle / 12h absolute -- this contract does not restate those values, only that the cookie carries them). This operation itself decides nothing about the mechanism -- it is the API surface security_nfr's SEC-1 needed and v1.0 did not yet provide (see decision DAT-10; workflow sign-off revise, 2026-09-17). x-story-ids names US-20 (F-7's 'authenticated via the shared login' framing) as the closest genuine functional tie in scope -- no story's acceptance criteria actually exercises the login action itself, since every story assumes a session already exists; this is disclosed, not presented as a confirmed story requirement (DAT-10, Open Item OI-18).",
+        "x-story-ids": ["US-20"],
+        "security": [],
+        "x-public-reason": "Login must be reachable with no session yet established -- that is the entire point of the operation. 'Public' here means unauthenticated network reachability only, not uncontrolled access: SEC-1's shared credential is still required to succeed (401 on a wrong credential), and SEC-5's lockout (429, see LoginLocked below) bounds brute-force attempts against this specific openness.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credential accepted. The response body only confirms the outcome; the session itself is carried entirely by the `Set-Cookie` header below, per the `SharedLoginAuth` scheme (`type: apiKey`, `in: cookie`, `name: session`) v1.0 already named.",
+            "headers": {
+              "Set-Cookie": {
+                "schema": { "type": "string" },
+                "description": "`session=<opaque-token>; HttpOnly; Secure; SameSite=Strict` (SEC-2). Idle timeout 2h, absolute lifetime 12h, enforced server-side -- this contract names the cookie's flags because SEC-2 fixed them, but the concrete token format/value is an implementation detail, not a contract concern."
+              }
+            },
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } }
+            }
+          },
+          "401": {
+            "description": "The submitted username/password did not match the one shared credential. error_code=INVALID_CREDENTIALS. Distinct from the `Unauthorized` response used elsewhere in this contract, which means 'no valid session cookie' -- this means 'the credential itself was wrong'.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "429": { "$ref": "#/components/responses/LoginLocked" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "tags": ["auth"],
+        "summary": "Invalidate the current session server-side (v1.1 -- resolves security_nfr's SEC-2 logout requirement)",
+        "description": "Invalidates the caller's session in the server-side session store (SEC-2) so the same cookie value can never be reused after this call, and instructs the client to discard the cookie. This is the API surface security_nfr's SEC-2 needed and v1.0 did not yet provide (see decision DAT-10; workflow sign-off revise, 2026-09-17). x-story-ids names US-20 for the same disclosed reason as `login` (Open Item OI-18) -- no story's acceptance criteria describes a logout action.",
+        "x-story-ids": ["US-20"],
+        "security": [ { "SharedLoginAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "Session invalidated server-side; the previous session token is no longer accepted by any operation. The response instructs the client to discard the cookie.",
+            "headers": {
+              "Set-Cookie": {
+                "schema": { "type": "string" },
+                "description": "`session=; Max-Age=0` -- clears the cookie client-side, mirroring the server-side invalidation."
+              }
+            },
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LogoutResponse" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "503": { "$ref": "#/components/responses/RetryLater" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "SharedLoginAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session",
+        "description": "The single-shared-login access model fixed by the PRD (Section 7, Access Control NFR), solution.json (no per-individual authentication in this version), and resolved with a concrete mechanism by security_nfr (SEC-1: shared credential exchanged for an opaque, server-validated session token; SEC-2: session lifecycle). v1.1 adds the `login`/`logout` operations (tag `auth`) that issue and invalidate this cookie -- this scheme's own shape (`apiKey`/`cookie`/`session`) is unchanged from v1.0."
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "No valid shared-login session (missing, expired, or invalidated-by-logout cookie). Mechanism fixed by security_nfr SEC-1/SEC-2. error_code=UNAUTHENTICATED.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "AccountNotFound": {
+        "description": "No seeded account exists with that id. error_code=ACCOUNT_NOT_FOUND.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "CommitmentNotFound": {
+        "description": "No commitment exists with that id. error_code=COMMITMENT_NOT_FOUND.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "RetryLater": {
+        "description": "The write could not be serialized against SQLite's single-writer behavior within the configured busy-timeout and retry budget (decision DAT-3) -- an operational condition, not data loss: no write that reached this response was ever partially applied. The client should retry after the given delay; no session's data has been silently dropped (consistent with US-21 AC2).",
+        "headers": {
+          "Retry-After": { "schema": { "type": "integer" }, "description": "Seconds to wait before retrying." }
+        },
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "RateLimited": {
+        "description": "v1.1 (decision DAT-11, resolves security_nfr's SEC-11/NFR-10). The per-session request rate for this operation exceeded the proposed limit (security_nfr SEC-11: 30 requests/minute, independent of the login-specific lockout in SEC-5/LoginLocked below) -- a cost/DoS control on the three operations that each trigger a Bedrock invocation (POST /interactions, POST /qa, POST /briefs). No Bedrock invocation occurs for a throttled request (NFR-10 verification). error_code=RATE_LIMITED.",
+        "headers": {
+          "Retry-After": { "schema": { "type": "integer" }, "description": "Seconds to wait before retrying, per SEC-11's per-session window." }
+        },
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "LoginLocked": {
+        "description": "v1.1 (decision DAT-11, resolves security_nfr's SEC-5/NFR-4). The login endpoint has locked out/backed off after 5 failed attempts within a rolling 15-minute window per source IP (security_nfr SEC-5) -- a brute-force/credential-stuffing control distinct from RateLimited above: SEC-5 guards the one shared credential itself (a failed-attempt lockout), while RateLimited guards an already-authenticated session's request volume. Kept as a separate response/error_code so a client's own logging/alerting can distinguish 'someone is guessing the shared password' from 'a session is calling too fast' -- the same distinction platform's own PLA-8 alarms already treat as separately meaningful. error_code=LOGIN_LOCKED.",
+        "headers": {
+          "Retry-After": { "schema": { "type": "integer" }, "description": "Seconds remaining in the lockout window, per SEC-5." }
+        },
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error_code", "message"],
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "enum": [
+              "EMPTY_NOTE", "UNSUPPORTED_IMAGE_FORMAT", "INTERACTION_NOT_FOUND", "ACCOUNT_NOT_FOUND",
+              "INTERACTION_ALREADY_MATCHED", "COMMITMENT_NOT_FOUND", "EMPTY_QUESTION", "EMPTY_REQUEST",
+              "UNAUTHENTICATED", "RETRY_LATER", "INVALID_CREDENTIALS", "LOGIN_LOCKED", "RATE_LIMITED"
+            ]
+          },
+          "message": { "type": "string", "description": "Human-readable, safe to display to the rep verbatim." },
+          "details": { "type": ["object", "null"], "additionalProperties": true }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      },
+      "Attendee": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "company": { "type": ["string", "null"] },
+          "role": { "type": ["string", "null"] }
+        }
+      },
+      "Commitment": {
+        "type": "object",
+        "required": ["id", "account_id", "interaction_id", "text", "due_date", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "account_id": { "type": ["string", "null"], "description": "Null exactly when the parent interaction is unmatched (F-2 AC3) -- denormalized from the parent interaction; set when it is resolved via resolve-customer." },
+          "interaction_id": { "type": "string" },
+          "text": { "type": "string" },
+          "due_date": { "type": ["string", "null"], "format": "date", "description": "Null means unspecified (F-2 AC2/AC4) -- never a guessed date." },
+          "status": { "type": "string", "enum": ["open", "complete"] }
+        }
+      },
+      "Interaction": {
+        "type": "object",
+        "required": ["id", "account_id", "raw_text", "source_type", "match_status", "captured_at", "attendees", "commitments"],
+        "properties": {
+          "id": { "type": "string" },
+          "account_id": { "type": ["string", "null"], "description": "Null exactly when match_status='unmatched' (F-1 AC1/AC4)." },
+          "raw_text": { "type": "string", "description": "Verbatim captured text, retained in full even when downstream extraction is incomplete (PRD Section 13.1)." },
+          "source_type": { "type": "string", "enum": ["typed", "business_card"] },
+          "match_status": { "type": "string", "enum": ["matched", "unmatched"] },
+          "manual_entry_required": { "type": "boolean", "description": "business_card submissions only: true when the image could not be read or no contact fields were recognized (US-4 AC2). Always false for source_type='typed'." },
+          "captured_at": { "type": "string", "format": "date-time" },
+          "attendees": { "type": "array", "items": { "$ref": "#/components/schemas/Attendee" } },
+          "commitments": { "type": "array", "items": { "$ref": "#/components/schemas/Commitment" } }
+        }
+      },
+      "AccountProfile": {
+        "type": "object",
+        "required": ["account", "interactions", "is_empty"],
+        "properties": {
+          "account": { "$ref": "#/components/schemas/Account" },
+          "interactions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Interaction" },
+            "description": "Ordered by captured_at ascending, id ascending as a deterministic tie-breaker for equal timestamps (decision DAT-6)."
+          },
+          "is_empty": { "type": "boolean", "description": "True exactly when interactions=[] -- the client must render the explicit 'no history yet' state (US-18 AC2), never a bare empty list." }
+        }
+      },
+      "CaptureTextRequest": {
+        "type": "object",
+        "required": ["raw_text"],
+        "properties": {
+          "raw_text": { "type": "string", "minLength": 0, "description": "Must contain at least one non-whitespace character (US-1 AC2) or the request is rejected with 400 EMPTY_NOTE (US-2 AC1); minLength is not set to 1 here because whitespace-only strings satisfy minLength:1 too -- the non-whitespace check is a semantic validation the schema alone cannot express, and is enforced by the server." }
+        }
+      },
+      "CaptureBusinessCardRequest": {
+        "type": "object",
+        "required": ["business_card_image"],
+        "properties": {
+          "business_card_image": { "type": "string", "contentEncoding": "base64", "contentMediaType": "image/*", "description": "The scanned business-card image (US-4). Not retained after synchronous processing -- decision DAT-8." }
+        }
+      },
+      "ResolveCustomerRequest": {
+        "type": "object",
+        "required": ["account_id"],
+        "properties": {
+          "account_id": { "type": "string", "description": "The account the rep selected from GET /accounts to resolve this unmatched note (US-3 AC1)." }
+        }
+      },
+      "QARequest": {
+        "type": "object",
+        "required": ["question"],
+        "properties": {
+          "question": { "type": "string", "description": "Free-text natural-language question, e.g. \"what did we discuss last time?\", \"what did I commit to?\", \"who attended from their side?\", or any other question naming a customer (F-3)." },
+          "account_id": { "type": ["string", "null"], "description": "Optional hint when the rep is already viewing one account's profile (decision DAT-4). When omitted, the account is resolved from `question` itself." }
+        }
+      },
+      "QAResponse": {
+        "type": "object",
+        "required": ["resolution"],
+        "properties": {
+          "resolution": { "type": "string", "enum": ["answered", "no_history", "no_open_commitments", "no_attendees_captured", "not_identified"] },
+          "account_id": { "type": ["string", "null"] },
+          "answer_text": { "type": ["string", "null"], "description": "Populated only when resolution='answered'." },
+          "message": { "type": ["string", "null"], "description": "Populated for every non-'answered' resolution -- an explicit, human-readable statement of the empty/failure state (US-9 AC2, US-10 AC2, US-11 AC2, US-12 AC2), never a silent empty response." }
+        }
+      },
+      "BriefRequest": {
+        "type": "object",
+        "required": ["request_text"],
+        "properties": {
+          "request_text": { "type": "string", "description": "e.g. \"brief me on Acme\" (F-5)." },
+          "account_id": { "type": ["string", "null"], "description": "Optional hint, same pattern as QARequest.account_id (decision DAT-4)." }
+        }
+      },
+      "BriefSummary": {
+        "type": "object",
+        "properties": {
+          "history_text": { "type": ["string", "null"], "description": "Bounded, short-form synthesis of recent discussion history (US-15 AC2)." },
+          "open_commitments": { "type": "array", "items": { "$ref": "#/components/schemas/Commitment" } },
+          "stakeholders": { "type": "array", "items": { "$ref": "#/components/schemas/Attendee" }, "description": "Drawn from interaction_attendees and the seeded contacts roster for this account." },
+          "opportunity_status": { "type": ["string", "null"], "description": "[INFERRED — needs confirmation, PRD Assumption 13/Open Question 14] Narrative synthesis only -- no discrete deal-stage field exists (PRD Section 13.1). Null means nothing captured yet (US-16 AC2), not a fabricated stage." }
+        }
+      },
+      "BriefResponse": {
+        "type": "object",
+        "required": ["resolution"],
+        "properties": {
+          "resolution": { "type": "string", "enum": ["generated", "no_history", "not_identified"] },
+          "account_id": { "type": ["string", "null"] },
+          "summary": { "anyOf": [ { "$ref": "#/components/schemas/BriefSummary" }, { "type": "null" } ] },
+          "message": { "type": ["string", "null"], "description": "Populated for 'no_history' and 'not_identified' -- explicit statement, never a silently empty/fabricated brief (US-15 AC1, US-17 AC2)." }
+        }
+      },
+      "DueCommitmentsResponse": {
+        "type": "object",
+        "required": ["overdue", "due_soon", "unspecified"],
+        "properties": {
+          "overdue": { "type": "array", "items": { "$ref": "#/components/schemas/Commitment" } },
+          "due_soon": { "type": "array", "items": { "$ref": "#/components/schemas/Commitment" } },
+          "unspecified": { "type": "array", "items": { "$ref": "#/components/schemas/Commitment" }, "description": "Commitments with due_date=null, listed separately, never omitted or folded into overdue/due_soon (US-13 AC3)." },
+          "message": { "type": ["string", "null"], "description": "Populated exactly when overdue=[] and due_soon=[] -- the explicit 'nothing due or overdue' statement (US-14 AC1)." }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string", "description": "The single shared application credential's username (security_nfr SEC-1). Not a per-individual identity -- the same value for every rep using this demo." },
+          "password": { "type": "string", "description": "The single shared application credential's password (SEC-1). Never logged (SEC-10) or echoed back in any response." }
+        },
+        "description": "v1.1. The actual credential value, who holds it, and its distribution/rotation cadence are an operational/human decision (security_nfr Open Item OI-8), not fixed by this schema."
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": ["authenticated"],
+        "properties": {
+          "authenticated": { "type": "boolean", "description": "Always true on a 200 -- a failed login is a 401 or 429, never a 200 with authenticated=false." }
+        },
+        "description": "v1.1. The session itself is carried by the `session` cookie (SharedLoginAuth scheme), set via the 200 response's Set-Cookie header -- this body only confirms the outcome, it does not restate cookie-carried session state or any session-lifetime value (those are SEC-2's to set, not this schema's to repeat)."
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "required": ["invalidated"],
+        "properties": {
+          "invalidated": { "type": "boolean", "description": "Always true on a 200 -- logout either invalidates the session and returns 200, or the session was already invalid and the call fails 401, never a 200 with invalidated=false." }
+        },
+        "description": "v1.1. Confirms server-side session invalidation (SEC-2); the client is expected to also discard the cookie per the accompanying Set-Cookie header."
+      }
+    }
+  }
+}

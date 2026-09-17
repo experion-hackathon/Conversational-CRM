@@ -1,37 +1,831 @@
 {
   "role": "platform",
   "field": "platform",
-  "document": null,
-  "version": null,
-  "status": "not_started",
-  "summary": null,
-  "drafted_at": null,
-  "readiness": null,
-  "source_references": [],
-  "artifacts": [],
-  "decisions": [],
-  "traceability": [],
-  "open_items": [],
-  "checks": [],
+  "document": "docs/architecture/PLATFORM-DESIGN-conversational-crm-T-1-v1.0.md",
+  "version": "1.0",
+  "status": "drafted",
+  "summary": "Designed the platform for the full T-1 scope (7 features, 21 stories) against all three approved upstream disciplines: one single compute host (Nginx + C-API + colocated C-SQL/C-VEC on an encrypted data volume), with C-NLU (Bedrock) and a managed secrets store the only off-host dependencies. Resolved security_nfr's Open Item OI-11 (PLA-2: Chroma runs embedded/persistent-local, not networked, keeping TB-4 the same-process boundary security_nfr already analysed and leaving their conditional mTLS rejection undisturbed). Carried out SEC-9 (data-at-rest/file-permission boundary, explicitly recorded upstream as platform's requirement, not security_nfr's to implement) as PLA-4: dedicated non-root OS user, encrypted volume, no other principal with read access. Sized compute (~2 vCPU/2 GiB) with stated evidence (NFR-9's single-instance/no-HA scope, NLU compute offloaded to Bedrock per SOL-3/TB-5, NFR-3's two-session concurrency target) rather than a bare number, tagged [INFERRED -- needs confirmation] and carried to Open Item OI-14. Defined 3 environments (dev/ci/demo) and a promotion flow requiring ci to pass plus an explicit human-triggered deploy with a pre-deploy backup (PLA-7), rollback mechanisms for code-only, schema-affecting, and host-failure cases, and an operational signal design (process supervision + host metrics/logs + alarms, PLA-8) with no APM platform introduced (matches the explicit 'modest, not enterprise-scale' sizing instruction given constraints.budget_usd is null). Recorded 9 decisions (PLA-1..PLA-9), including PLA-9 which places SEC-11's rate limiting at the reverse-proxy layer as a defense-in-depth interim measure without duplicating or resolving security_nfr's already-recorded, still-open returned_findings entry (RF-1/V-SEC2, owned by data_integration) -- deliberately not re-raised here per this task's own instruction not to duplicate it. Traced all 21 stories to platform-specific verification_scenarios (persistence-across-redeploy, IAM/secrets scoping, latency/sizing confirmation, rollback-safety), with operation_ids/entity_names recorded as [] and not_applicable per the same disclosed check-artifacts narrowed-tool-scope workaround solution and security_nfr already used. Independently recomputed all 8 upstream source hashes (3 from Workflow 1, 5 from this workflow's own already-approved disciplines); all 8 matched exactly -- no new drift found. Recorded 4 new open items (OI-14..OI-17), none blocking.",
+  "drafted_at": "2026-09-17T17:24:00Z",
+  "readiness": "ready",
+  "source_references": [
+    {
+      "role": "product_state",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../state/workflow-1-discovery-to-stories/workflow.json",
+      "version": "locked",
+      "sha256": "fb25e9c8829f6e0d0d9ccf9cddf5db8ae9b0cb7eba5873baff9e7e8bffc21b27",
+      "note": "Workflow 1's own workflow.json, confirming its locked status (workflow.status='locked', gates.workflow_signoff.status='approved') at the moment this discipline read it, before drafting against all three approved Workflow 2 disciplines. Hash computed directly by this discipline; matches solution.json/data_integration.json/security_nfr.json's own recorded values exactly."
+    },
+    {
+      "role": "prd",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md",
+      "version": "1.5",
+      "sha256": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64",
+      "note": "Computed directly by this discipline against current file bytes (CRLF). Matches exactly the hash solution.json, data_integration.json, and security_nfr.json all independently recorded, including the already-disclosed, already-resolved line-ending discrepancy against Workflow 1's own LF-based lock hash (solution's OI-1, not re-raised here as new)."
+    },
+    {
+      "role": "user_stories",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../workflow-1-discovery-to-stories/docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+      "version": "1.0",
+      "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+      "note": "Computed directly by this discipline; matches every other role file's recorded value and Workflow 1's own lock manifest exactly. Acceptance criteria in this discipline's traceability table were copied verbatim from this same source (via workflow-1's roles/stories.json, the authoritative copy), not from this published Markdown's own quoting."
+    },
+    {
+      "role": "solution",
+      "workflow": "workflow-2-solution-architecture",
+      "path": "docs/architecture/SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "99038391a4a33ae850e1ddc50e4709cfebb2b66525b10614f848c44b8368cc04",
+      "note": "Read in full as the upstream design this discipline places (5 components, SOL-1..SOL-9 decisions, system context/data-flow diagrams). Hash computed directly; matches solution.json's own recorded artifacts[0].sha256 and gate.artifact_manifest exactly -- no drift since solution's gate approval."
+    },
+    {
+      "role": "data_integration",
+      "workflow": "workflow-2-solution-architecture",
+      "path": "docs/architecture/DATA-AND-INTEGRATION-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "98933f68639a8cf1640bc1d74c3007a17283bb6e35fd4970f4becb87318c4001",
+      "note": "Read in full for the concurrency mechanism (DAT-3, SQLite WAL/busy_timeout/retry) this discipline's rollback and US-8/US-21 traceability rows depend on. Hash computed directly; matches data_integration.json's own recorded value exactly."
+    },
+    {
+      "role": "data_integration",
+      "workflow": "workflow-2-solution-architecture",
+      "path": "docs/architecture/API-CONTRACT-conversational-crm-T-1-v1.0.json",
+      "version": "1.0",
+      "sha256": "b048e263f2b43c43ee99e4844df48b12856a1cef977d3af2e65041db8d2ec745",
+      "note": "Read to confirm the current API surface (no login/logout/429 operations exist yet -- security_nfr's already-recorded, already-tracked gap, not re-derived here). Hash matches data_integration.json's recorded value exactly."
+    },
+    {
+      "role": "data_integration",
+      "workflow": "workflow-2-solution-architecture",
+      "path": "docs/architecture/DATA-MODEL-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "66b0f4fb0b3462e8706eb48969efd704f7106777b33bc0fe1e895390e5da8dab",
+      "note": "Read for schema-migration implications (Open Item OI-15). Hash matches data_integration.json's recorded value exactly."
+    },
+    {
+      "role": "security_nfr",
+      "workflow": "workflow-2-solution-architecture",
+      "path": "docs/architecture/SECURITY-AND-NFR-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "e22ca533051b734fab63af5f151e61b1659c0a7a1f2a6d2cba1a670c070c88b6",
+      "note": "Read in full -- this is the artifact naming every NFR/control this discipline must carry (SEC-9 explicitly, plus NFR-3/6/7/9/10 and Open Items OI-10/OI-11/OI-12/OI-13). Hash computed directly; matches security_nfr.json's own recorded value exactly -- no drift since security_nfr's gate approval."
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "platform",
+      "path": "docs/architecture/PLATFORM-DESIGN-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "74aab3a74cc333603fc4ef378b019e1fb1ebd16cc3aab388f255900baed4ecc6"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "PLA-1",
+      "category": "Infrastructure topology",
+      "choice": "One single compute host runs Nginx (TLS termination, static C-WEB hosting, reverse proxy), C-API, and both data stores' on-disk state (C-SQL's SQLite file, C-VEC's embedded Chroma persistent directory) colocated on the same encrypted data volume. C-NLU (Bedrock) remains genuinely off-host, unchanged from solution's TB-5 boundary.",
+      "alternatives": [
+        "A multi-service container-orchestration platform (ECS/Kubernetes) with C-API, C-VEC, and static hosting as separate services",
+        "Separate static hosting via S3+CloudFront for C-WEB"
+      ],
+      "rationale": "solution's SOL-1 already fixed a single modular-monolith backend; security_nfr's NFR-9 explicitly scopes to single-instance, best-effort availability with no HA target. Colocating C-SQL/C-VEC's files with C-API keeps TB-3/TB-4 as the same-process trust zone security_nfr already analysed -- introducing a network hop here would silently invalidate that analysis and reopen security_nfr's own conditionally-rejected mTLS control.",
+      "source": "solution SOL-1, SOL-7; security_nfr NFR-9, Section 2.2 (TB-3/TB-4), Section 4.2 (HA rejection)",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-2",
+      "category": "Data-store deployment mode",
+      "choice": "Chroma (C-VEC) runs in embedded/persistent-local mode -- an in-process library instance inside C-API writing to a persistent directory on the same host -- not as a separate, networked Chroma server process. Resolves security_nfr's Open Item OI-11.",
+      "alternatives": [
+        "A standalone, networked Chroma server C-API talks to over the network"
+      ],
+      "rationale": "solution's SOL-9 explicitly left this deployment-mode choice to platform; security_nfr's Open Item OI-11 names exactly this decision as changing TB-4's threat profile depending on which way it goes. Choosing embedded means TB-4 remains the same-process/same-host boundary security_nfr already analysed -- no revisit of that analysis or the conditionally-rejected mTLS control is triggered.",
+      "source": "solution SOL-9; security_nfr Open Item OI-11, Section 2.2 (TB-4), Section 4.2 (mTLS rejection)",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-3",
+      "category": "Sizing, with evidence",
+      "choice": "One instance in the ~2 vCPU / 2 GiB RAM class (e.g. AWS t3.small-class or nearest equivalent).",
+      "alternatives": [
+        "A larger instance class",
+        "A smaller/burstable-minimum class (e.g. t3.micro)"
+      ],
+      "rationale": "NFR-9 caps ambition at single-instance/best-effort; the compute-heavy work (model inference, embedding generation) happens inside Bedrock, off this host, per SOL-3/TB-5; NFR-3's concurrency target is two sessions, not a production population. [INFERRED -- needs confirmation] since no target repository exists to profile against -- see Open Item OI-14.",
+      "source": "security_nfr NFR-3, NFR-6, NFR-7, NFR-9; solution SOL-3",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-4",
+      "category": "Data-at-rest / file-permission boundary",
+      "choice": "C-SQL's file and C-VEC's persistent directory live on a dedicated, encrypted data volume; both are owned by a dedicated, non-root OS user the C-API process runs as; containing directories are permissioned so no other OS principal on the host has read access.",
+      "alternatives": [
+        "Default root-owned or world-readable application directories",
+        "An unencrypted volume"
+      ],
+      "rationale": "security_nfr's SEC-9 is explicitly recorded as 'a requirement on platform, not implemented by this discipline' -- this decision is platform's own carrying-out of that requirement, not a re-derivation of why it is needed.",
+      "source": "security_nfr SEC-9; Section 2.2 (TB-3/TB-4 analysis)",
+      "owner": "platform-architect (design), Workflow 4 (implementation)",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-5",
+      "category": "Secrets management",
+      "choice": "The Bedrock-invocation IAM credential (SEC-6) is delivered via the host's own IAM instance profile/role, never a long-lived access key on disk. The shared-login credential's hashed secret and the session-signing key (SEC-1/SEC-3) are stored in AWS Secrets Manager or SSM Parameter Store (SecureString) and injected as environment variables at process start.",
+      "alternatives": [
+        "Credentials in a checked-in .env/config file",
+        "A long-lived IAM user access key stored on the host"
+      ],
+      "rationale": "Directly carries out SEC-3 (credential storage) and SEC-6 (least-privilege Bedrock egress) with a concrete, named AWS mechanism, rather than leaving 'how' open.",
+      "source": "security_nfr SEC-3, SEC-6",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-6",
+      "category": "Environment topology",
+      "choice": "Three environments -- dev (local/individual, may stub Bedrock), ci (ephemeral, per-commit, mocked externals, no real spend), demo (the one long-lived deployed environment, real credentials, real Bedrock calls).",
+      "alternatives": [
+        "A full enterprise-style dev/staging/production progression",
+        "A single environment with no automated ci gate"
+      ],
+      "rationale": "Matches the 'small demo, not enterprise scale' framing while still giving every change an automated gate before it can reach demo.",
+      "source": "constraints.budget_usd/constraints.source (demo scope framing); security_nfr NFR-9",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-7",
+      "category": "Release process",
+      "choice": "ci must pass before a build is deployable; promoting a build to demo is always an explicit, human-triggered step, never automatic; that step always takes a timestamped backup of demo's SQLite file and Chroma persistent directory immediately before proceeding.",
+      "alternatives": [
+        "Fully automatic deploy-on-green",
+        "Skipping the pre-deploy backup"
+      ],
+      "rationale": "Ties the release process directly to root CLAUDE.md's own standing rule on destructive/risky operations, and gives the rollback mechanism something real to restore from.",
+      "source": "Root CLAUDE.md ('never run a destructive operation... without an explicit human confirmation step first'); security_nfr NFR-3 / data_integration DAT-3",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-8",
+      "category": "Observability",
+      "choice": "Process-level auto-restart, plus CloudWatch-class host metrics and SEC-10-compliant application-log shipping, alarmed on restart count, 5xx rate, disk-space threshold, and Bedrock error rate. No distributed-tracing/APM platform is introduced.",
+      "alternatives": [
+        "No centralized log/metric shipping (manual log inspection only)",
+        "A full APM/tracing stack"
+      ],
+      "rationale": "The cheapest AWS-native option that still gives a genuine 'did it go wrong' signal, matching the modest-not-enterprise sizing instruction given constraints.budget_usd is null.",
+      "source": "security_nfr NFR-9, SEC-10",
+      "owner": "platform-architect",
+      "status": "proposed"
+    },
+    {
+      "id": "PLA-9",
+      "category": "Defense-in-depth placement",
+      "choice": "The reverse proxy (Nginx) in front of C-API can enforce a request-rate ceiling (e.g. limit_req, keyed by session cookie or client IP) as an infrastructure-layer placement for SEC-11's per-session rate limit, usable as soon as Workflow 3/4 build the application, independent of whether data_integration's API contract has yet added the formal 429 response schema.",
+      "alternatives": [
+        "Waiting until the app-level 429 response exists before adding any rate limiting at all",
+        "Building the actual application-level throttling/response logic in this discipline's own artifact"
+      ],
+      "rationale": "Gives a real, deployable control today without overstepping into the contract change that is legitimately data_integration's to make. Does not resolve, duplicate, or supersede security_nfr's already-recorded returned_findings entry RF-1/V-SEC2 -- only names where platform's own layer can help meanwhile.",
+      "source": "security_nfr SEC-11, Open Item OI-13, returned_findings[0] (RF-1, acknowledged, not resolved by this discipline)",
+      "owner": "platform-architect",
+      "status": "proposed"
+    }
+  ],
+  "traceability": [
+    {
+      "feature_id": "F-1",
+      "story_id": "US-1",
+      "acceptance_criteria": [
+        "The system must create a structured interaction note and associate it with the correct customer thread when the rep's typed entry unambiguously matches exactly one seeded customer account.",
+        "The system must save the entry as a new interaction note when the entry contains at least one non-whitespace character."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Confirm a captured interaction row survives an application restart/redeploy on the demo host (SQLite file on the persistent, encrypted data volume per PLA-4, not ephemeral storage).",
+        "Confirm the deployed instance's IAM role permits exactly the Bedrock invocation this capture triggers (SEC-6/PLA-5), no broader AWS permission."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "The real operation/entity mapping for this story is already established in data_integration's own approved traceability table (Gate 2). Not re-populated here because a narrowed check-artifacts run for a single non-bundle discipline cannot load another discipline's API contract to validate operation_ids against -- only data_integration's own narrowed run can. Same disclosed workaround solution and security_nfr already used."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-2",
+      "acceptance_criteria": [
+        "The system must reject the submission with an explicit 'cannot save an empty note' message, and must not create any note record, when the rep submits an empty or whitespace-only entry.",
+        "The system must flag the note as 'unmatched — needs customer selection' — rather than attaching it to a default or incorrect account — when no seeded customer account can be unambiguously identified from the entry text."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm the rejection path leaves the persistent SQLite file unchanged (pre/post backup diff, PLA-7).",
+        "Confirm no raw_text-containing log line reaches the shipped log stream (SEC-10/PLA-8)."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-3",
+      "acceptance_criteria": [
+        "The system must attach a previously flagged 'unmatched' note to the customer thread the rep selects when the rep manually resolves the flag.",
+        "The system must leave the note in the unmatched/needs-selection state — rather than guessing an account — when the rep has not yet resolved it."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm resolving an unmatched note persists across a redeploy the same way as US-1 -- the row already exists, so no separate migration step is triggered."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-4",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must extract the contact's name, company and role from a scanned business-card image into the structured interaction note when the image is legible and contains recognizable contact fields. The OCR mechanism was never discussed in discovery (PRD Assumption 5, Open Question 5); whether this is worth building for the demo at all is still open.",
+        "[INFERRED — needs confirmation] The system must inform the rep that manual entry is required — without fabricating contact details — when the image cannot be read or no contact fields are recognized."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm the business-card image never lands in persistent storage or logs (data_integration's DAT-8, reaffirmed by SEC-10).",
+        "Confirm the 5 MB upload ceiling (SEC-7/NFR-8) is additionally enforced at the reverse-proxy layer (e.g. Nginx client_max_body_size) before the request reaches C-API."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-5",
+      "acceptance_criteria": [
+        "The system must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item — recording one item per distinct person named (e.g., 'met Priya and Arjun from Acme...' must yield two attendee items, not one merged string) — when the entry text names at least one identifiable person.",
+        "The system must record zero attendee items for that interaction — rather than fabricating a name — when the entry text names no one.",
+        "[INFERRED — needs confirmation] The exact name-recognition/disambiguation mechanism was never discussed in discovery (PRD Assumption 14, Open Question 15); only the underlying capability (AC1/AC2) is treated as confirmed."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Same persistence and IAM-scoping confirmation as US-1 -- attendee extraction shares the same captureInteraction call and deployed Bedrock invocation path."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-6",
+      "acceptance_criteria": [
+        "The system must extract each distinct commitment, follow-up or next step mentioned in a captured note's text as a separate tracked item when the note contains one or more of them.",
+        "The system must record no commitment items when the note describes discussion only, with no forward-looking commitment."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm commitment rows persist across restart/redeploy the same way as US-1 -- same SQLite file, same backup/restore procedure (PLA-4/PLA-7)."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-7",
+      "acceptance_criteria": [
+        "The system must record a due date on an extracted commitment when the captured text states a concrete date or an unambiguous relative date term resolvable against the interaction's timestamp (e.g., 'by Friday').",
+        "The system must mark the commitment's due date as unspecified — rather than guessing a date — when the text uses a vague temporal reference (e.g., 'soon,' 'sometime') or gives no date information at all."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Same persistence confirmation as US-6 -- no additional platform-specific behavior beyond the shared SQLite file."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-8",
+      "acceptance_criteria": [
+        "The system must tag every extracted discussion point and commitment to the same customer thread as its source interaction note when that note is matched to a thread.",
+        "The system must flag an extracted item for manual thread assignment — rather than tagging it to an incorrect thread — when the source note itself is unmatched to a customer thread (per F-1)."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm the account-tagging write lands in the same request/transaction as the rest of captureInteraction, so a mid-deploy restart cannot leave a commitment tagged inconsistently with its parent interaction -- depends on the deployed instance actually running SQLite's WAL/busy-timeout configuration (data_integration's DAT-3), which PLA-1's colocation makes possible but does not by itself configure (Workflow 4 implementation task)."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-9",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about a customer's most recent discussion by returning content drawn from that customer's most recent interaction note(s) when the thread has at least one captured note.",
+        "The system must respond that no history exists yet for that customer when the thread is empty."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Confirm the deployed instance meets NFR-7's p95 <= 8s target for a full Q&A round trip (embedded-Chroma retrieval per PLA-2 plus a Bedrock synthesis call) under the sizing assumed in PLA-3; re-measure and adjust sizing (OI-14) if missed."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-10",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about the rep's own open commitments for a customer by listing the commitments extracted and tagged to that thread when any exist.",
+        "The system must state that there are no open commitments for that customer when none exist."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Same NFR-7 latency/sizing confirmation as US-9."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-11",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about interaction attendees by returning the contact names extracted from that thread's interaction notes when attendee names were captured.",
+        "The system must state that no attendee information was captured when none was extracted."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Same NFR-7 latency/sizing confirmation as US-9."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-12",
+      "acceptance_criteria": [
+        "The system must resolve and answer against the correct customer thread when a query names exactly one customer that matches a seeded account.",
+        "The system must respond that it could not identify the customer — rather than guessing or returning another customer's data — when the query names no customer or an unrecognized one."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm the unrecognized-customer rejection path still completes within the same NFR-7 latency budget as the success path -- a full response, not a fast-path bypass, on the deployed instance."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-4",
+      "story_id": "US-13",
+      "acceptance_criteria": [
+        "The system must list every open commitment whose due date has passed as 'overdue' when the current date is past that due date, and must exclude a commitment from this list once it is marked complete.",
+        "[INFERRED — needs confirmation] The system must list every open commitment whose due date falls within the next 7 days as 'due soon,' and must reclassify it as 'overdue' instead once its due date has passed. The 7-day window is a carried-over illustrative placeholder from the PRD, not a confirmed value (PRD Open Question 6).",
+        "The system must list a commitment with an unspecified due date (per F-2) separately from the due-soon/overdue list — rather than omitting it entirely or treating it as overdue — when no due date was captured."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm this filter-only read never triggers a Bedrock invocation on the deployed instance (CloudWatch-class metric filter counting Bedrock calls per operation, PLA-8) and completes well inside NFR-6's budget."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-4",
+      "story_id": "US-14",
+      "acceptance_criteria": [
+        "The system must state explicitly that there are no due-soon or overdue commitments — rather than showing an empty list with no explanation — when none exist."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Same no-Bedrock-call confirmation as US-13, for the empty-state path."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-15",
+      "acceptance_criteria": [
+        "The system must generate a summary containing recent discussion history, open commitments and stakeholder/contact names for a named customer when that customer has at least one captured note, and must state that no history exists yet for that customer — rather than generating a summary with fabricated content — when the thread is empty.",
+        "[INFERRED — needs confirmation] The system must return a bounded, short-form summary (a few sentences or bullets, not a multi-page document) under normal conditions, and must still return whatever partial content is available, rather than failing the whole request, when data for one of the summary components is missing (PRD Open Question 7)."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Same NFR-7 latency/sizing confirmation as US-9 -- generateBrief follows the same retrieval-plus-synthesis shape."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-16",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must synthesize the opportunity/deal-status component narratively from that customer's recorded interaction notes and commitments — since no discrete deal-stage field exists in the structured store — when the thread contains content indicating where the deal/opportunity stands (PRD Assumption 13, Open Question 14).",
+        "The system must state that no opportunity/deal-status information has been captured yet for that customer — rather than fabricating a stage or outcome — when the thread contains no such content."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Same NFR-7 latency/sizing confirmation as US-15."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-17",
+      "acceptance_criteria": [
+        "The system must generate the summary for a named customer when the request unambiguously identifies exactly one seeded customer account.",
+        "The system must respond that it could not identify the requested customer — rather than guessing — when the request names an unrecognized or ambiguous customer."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Same rejection-path latency confirmation as US-12, applied to generateBrief."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-6",
+      "story_id": "US-18",
+      "acceptance_criteria": [
+        "The system must display a customer's captured notes and extracted items in chronological order on that customer's profile view when at least one note exists.",
+        "The system must display an explicit 'no history yet' state when none exists."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm reading a customer's full history from the deployed SQLite file does not regress against NFR-6's spirit as seeded data volume grows on the sizing chosen in PLA-3 -- this path makes no model call."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-6",
+      "story_id": "US-19",
+      "acceptance_criteria": [
+        "The system must display a newly captured note and its extracted items on the correct customer's profile view automatically, without requiring the rep to take further action, when the note is tagged to that customer's thread.",
+        "The system must not display that note or its items on any other customer's profile view when it is not tagged to that customer."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm a newly captured note is visible on the very next profile read with no deploy/restart in between -- a same-process-consistency property of PLA-1's colocated topology, which platform's own deployment choices must never silently break."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-7",
+      "story_id": "US-20",
+      "acceptance_criteria": [
+        "The system must show the same customer thread content to every session authenticated via the shared login when two sessions view the same customer.",
+        "The system must not partition data by which physical person is at the keyboard, since no per-rep identity exists in this version."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm it is specifically PLA-1's topology (one host, one SQLite file) that guarantees two sessions see identical content -- flag immediately if a future scaling change is ever introduced without also introducing shared/networked storage."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    },
+    {
+      "feature_id": "F-7",
+      "story_id": "US-21",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must persist a note added from one session so that it is immediately visible to another concurrent session viewing the same customer thread. The conflict-handling mechanism was never discussed in discovery (PRD Open Question 9).",
+        "[INFERRED — needs confirmation] The system must not silently lose one session's addition when another session adds to the same thread at nearly the same time."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm the deployed instance's SQLite actually runs with data_integration's DAT-3 WAL/busy_timeout/retry configuration -- PLA-1's colocation makes this possible but does not by itself configure it (Workflow 4 implementation task).",
+        "Confirm the pre-deploy backup (PLA-7) would let a human recover either session's write if a deploy ever raced with a live concurrent capture."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "Endpoint/entity-level mapping already established in data_integration's approved traceability table. Not re-populated here due to the check-artifacts narrowed-tool-scope limitation (see US-1's row)."
+    }
+  ],
+  "open_items": [
+    {
+      "id": "OI-14",
+      "detail": "Compute sizing (PLA-3, ~2 vCPU/2 GiB) is [INFERRED -- needs confirmation] -- no target repository or real profiling data exists to size against (inputs.target_repository is null).",
+      "source": "PLA-3; Section 3 of this discipline's document",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "platform / Workflow 3",
+      "resolution_needed": "Run a smoke/load test against the actual built application before the first live demo and adjust instance size if NFR-6/NFR-7's latency targets are missed."
+    },
+    {
+      "id": "OI-15",
+      "detail": "data_integration has not yet defined a schema-migration/versioning mechanism for C-SQL (e.g. Alembic or an equivalent). Platform's backup-before-deploy/restore-on-rollback procedure (PLA-7) is the only safety net for a schema-affecting deploy until one exists, and does not by itself support running two schema versions side by side during a gradual migration.",
+      "source": "PLA-7; Section 6.2 of this discipline's document",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "data_integration / platform",
+      "resolution_needed": "Before a second schema change ships, adopt an explicit migration-versioning tool; until then, every schema-affecting deploy must go through PLA-7's backup step."
+    },
+    {
+      "id": "OI-16",
+      "detail": "The actual AWS account/region, the specific approved Bedrock model ARN(s) (also needed by SEC-6), and the actual shared-login credential value are all unconfirmed -- no human decision has named them yet.",
+      "source": "PLA-3, PLA-5; security_nfr SEC-6, OI-8",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "Product owner / whoever provisions the real AWS account",
+      "resolution_needed": "Confirm the target AWS account, region, and approved Bedrock model ARN(s) before Workflow 4 provisions real infrastructure."
+    },
+    {
+      "id": "OI-17",
+      "detail": "No application-level health-check endpoint exists in data_integration's approved API contract. Platform's monitoring (PLA-8) currently relies on process/port-level liveness only, which cannot distinguish 'the process is up' from 'the process is up but stuck' (e.g. a held SQLite lock).",
+      "source": "PLA-8; Section 6.3 of this discipline's document",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "data_integration / backend (Workflow 3), at their discretion",
+      "resolution_needed": "Consider a lightweight /health endpoint in a future API-contract revision; until then, platform's signal remains process/port-level only."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Every sizing figure has a stated basis",
+      "required": true,
+      "result": "pass",
+      "summary": "Section 3's table gives evidence for compute, storage, network, and the secrets store; none is a bare number."
+    },
+    {
+      "name": "The design fits the recorded budget ceiling, or the shortfall is an open item",
+      "required": true,
+      "result": "pass",
+      "summary": "constraints.budget_usd is null -- no ceiling to fail against. Section 4 records explicitly what the absent ceiling does and does not license, so 'no ceiling' is not read as 'no discipline'."
+    },
+    {
+      "name": "Every NFR target from security_nfr that the platform must carry is addressed or recorded as unmet",
+      "required": true,
+      "result": "pass",
+      "summary": "NFR-1 through NFR-10 all addressed or explicitly carried as an open item (NFR-9 accepted outright as single-instance/no-HA; NFR-10 addressed at the infrastructure-placement level via PLA-9 without duplicating OI-13/RF-1). None found unmet without a recorded reason."
+    },
+    {
+      "name": "Rollback is described for every stage that changes a running system",
+      "required": true,
+      "result": "pass",
+      "summary": "Section 6.2 covers code-only changes, schema/data-shape changes, and host-level failure, each with its own mechanism."
+    },
+    {
+      "name": "Nothing here is an applyable script -- this is a design, and Workflow 4 owns the code",
+      "required": true,
+      "result": "pass",
+      "summary": "No script, Dockerfile, IaC module, or config file is included anywhere in the document; Section 7 states the design/implementation line explicitly."
+    },
+    {
+      "name": "source_references records every upstream artifact consumed, with real hashes",
+      "required": true,
+      "result": "pass",
+      "summary": "All 8 hashes (3 from Workflow 1, 5 from this workflow's own approved disciplines) computed independently via sha256sum and cross-checked against every other role file's own recorded values -- exact match on all 8, no drift found."
+    },
+    {
+      "name": "Every selected story maps to at least one component and a platform-specific verification scenario",
+      "required": true,
+      "result": "pass",
+      "summary": "All 21 stories (US-1..US-21) carry non-empty component_ids and a platform-specific verification_scenarios entry; operation_ids/entity_names are [] with a not_applicable note as a disclosed check-artifacts tool-limitation workaround."
+    },
+    {
+      "name": "Independent validation of v1.0",
+      "required": true,
+      "result": "fail",
+      "summary": "Ran. A separate agent reviewed v1.0 and raised 1 finding(s): 1 low. Worst severity: low."
+    }
+  ],
   "self_verification": {
-    "result": null,
-    "checked_at": null
+    "result": "PASS",
+    "checked_at": "2026-09-17T17:24:00Z"
   },
-  "report_sha256": null,
-  "validation": null,
+  "report_sha256": "74aab3a74cc333603fc4ef378b019e1fb1ebd16cc3aab388f255900baed4ecc6",
+  "validation": {
+    "result": "issues_found",
+    "version_reviewed": "1.0",
+    "summary": "platform v1.0 is a strong, well-boundaried draft: PLA-2 genuinely resolves security_nfr's Open Item OI-11 (embedded-vs-networked Chroma) rather than restating the question -- it picks embedded mode and explicitly confirms TB-4 stays the same-process boundary security_nfr already analysed, so no mTLS revisit is triggered. PLA-4 genuinely carries out SEC-9's data-at-rest/file-permission requirement (dedicated non-root OS user, encrypted volume, no other OS principal with read access) -- a real implementation, not something adjacent. PLA-9's reverse-proxy-layer rate limiting is correctly scoped as an interim, additive control: it does not mark security_nfr's returned_findings entry RF-1/V-SEC2 resolved, does not claim to have added the missing login/logout/429 API surface, and does not introduce any new open item that restates RF-1/OI-13 (platform's own OI-14..OI-17 are all genuinely distinct, forward-looking items). All 21 traceability rows' acceptance_criteria were spot-checked against workflow-1's roles/stories.json and matched verbatim (US-1, US-9, US-13, US-16, US-21 checked in full); operation_ids/entity_names are correctly recorded as [] with a not_applicable note matching the same disclosed check-artifacts narrowed-tool-scope workaround solution and security_nfr already used -- not a new or inconsistent pattern. NFR-1 through NFR-10 (read directly from security_nfr's own Section 5 table, not just platform's paraphrase) are each either addressed with a stated mechanism or explicitly out of platform's carrying scope for a stated reason; none is silently unmet. No document/state drift was found between platform.json and the published PLATFORM-DESIGN document (unlike the drift pattern caught in two of the three prior discipline reviews) -- open items, checks, and self-verification bullets all agree word-for-word between the two. No script/IaC/config is included; the design/Workflow-4-implementation boundary is stated explicitly and never crossed. No placeholders, no credential-like strings, no real-looking PII found (pattern check only). One low-severity finding below: I have no hashing/Bash tool in this session and could not independently recompute any of the 8 claimed SHA-256 values from actual file bytes, so platform's own checks[] claim of an independent sha256sum computation is corroborated only by cross-file string consistency, not verified at the byte level.",
+    "independence": "Read platform.json, the full published PLATFORM-DESIGN document, and workflow.json directly. Cross-read solution.json + SOLUTION-ARCHITECTURE document, data_integration.json + all 3 of its artifacts, security_nfr.json + the full SECURITY-AND-NFR document (all sections, not just the decisions/open-items platform cites), workflow-1's workflow.json (lock state) and roles/stories.json (the authoritative acceptance-criteria source). Independently read OI-11's and SEC-9's full text from security_nfr's own document/state (not just platform's paraphrase of them) to judge whether PLA-2 and PLA-4 actually answer/implement them. Independently read RF-1's full returned_findings entry and OI-13's full text to judge whether PLA-9 stays inside its stated boundary. Diffed 5 of platform's 21 traceability acceptance_criteria entries (US-1, US-9, US-13, US-16, US-21) character-for-character against workflow-1 roles/stories.json rather than trusting the drafting agent's 'copied verbatim' claim. Cross-compared all 8 SHA-256 strings platform.json/the document claim for upstream artifacts against the same files' own hash values as recorded independently by solution.json, data_integration.json, and security_nfr.json -- all 8 are identical strings, well-formed 64-hex-character values, across every file that records them; I could not go further and recompute any of them from actual file bytes (no Bash/hashing tool in this session). Line-compared every open item (OI-14..OI-17) and every checks[]/self-verification bullet in platform.json against the equivalent text in the published document to check for the document/state drift pattern that was found in two of the three earlier discipline reviews (V-SOL1/V-SOL2, V-SEC1) -- none found here.",
+    "fix_verification": {},
+    "findings": [
+      {
+        "id": "V-PLA1",
+        "severity": "low",
+        "finding": "Hash-verification limitation, disclosed rather than papered over: this review has no hashing/Bash tool available and could not independently compute or compare any of the 8 SHA-256 values platform.json's source_references[]/artifacts[]/report_sha256 claim, nor the specific claim in platform.json's checks[] ('All 8 hashes ... computed independently via sha256sum and cross-checked against every other role file's own recorded values -- exact match on all 8'). What was verified: all 8 hash strings are well-formed 64-hex-character values, and every one of them is the identical literal string already recorded independently by solution.json, data_integration.json, and/or security_nfr.json for the same underlying file -- i.e. platform's claimed values are fully self-consistent with every other role file's own account, which is meaningful corroboration but not a byte-level proof. This is the same class of limitation two of the three prior discipline validations (V-SOL3 on solution, V-DI2 on data_integration) recorded as a low-severity finding rather than only a background note, so this finding follows that same established convention for this project rather than silently deferring to 'not_checked' alone.",
+        "evidence": "platform.json source_references[] and artifacts[] sha256 values (e.g. fb25e9c8829f6e0d0d9ccf9cddf5db8ae9b0cb7eba5873baff9e7e8bffc21b27 for product_state) are each 64 hex characters and identical, string-for-string, to the corresponding value already recorded in solution.json, data_integration.json, and security_nfr.json's own source_references/artifacts entries for the same files. No Bash/sha256sum-equivalent tool was available to this review to recompute any of them from actual file bytes on disk.",
+        "suggested_fix": "Before this gate closes, have the coordinator/orchestrator (which has actual hash-computation tooling, per this project's established pattern at the solution and data_integration gates) perform and record a real sha256sum comparison for all 8 files platform.json cites, rather than relying on this review's cross-file string-consistency check alone."
+      }
+    ],
+    "checked": [
+      "self_verification field present and result = PASS (not missing/FAIL) -- no automatic structural finding on that front",
+      "project.phase in workflow-2's workflow.json = 'platform_review', matching the invocation's stated phase",
+      "Workflow 1 lock confirmed directly via workflow-1's own workflow.json (workflow.status='locked', gates.workflow_signoff.status='approved', reply='lock') and cross-read against platform's source_references[0] claim",
+      "solution.gate.status='approved'/readiness='ready', data_integration.gate.status='approved'/readiness='ready', and security_nfr.gate.status='approved'/readiness='ready' all independently confirmed in their own role files -- platform correctly drafted only after all three upstream gates closed",
+      "OI-11's full text read directly from security_nfr.json/document and compared against PLA-2's actual choice: OI-11 asks platform to confirm Chroma's deployment mode because it changes TB-4's threat profile; PLA-2 genuinely answers this (embedded mode chosen, TB-4 explicitly confirmed to remain the same-process boundary, no mTLS revisit triggered) rather than merely acknowledging the question",
+      "SEC-9's full text read directly from security_nfr.json/document and compared against PLA-4's actual choice: SEC-9 requires OS-level user/file-permission restriction plus disk-level encryption, recorded explicitly as platform's implementation to make; PLA-4 implements exactly this (dedicated non-root OS user, encrypted volume, no other OS principal with read access) -- a genuine implementation, not an adjacent substitute",
+      "RF-1's full returned_findings entry and OI-13's full text read directly from security_nfr.json; confirmed PLA-9 (a) does not mark RF-1 resolved anywhere, (b) does not claim to have added the missing login/logout/429 API surface itself, (c) does not introduce a new open item restating the same gap RF-1/OI-13 already state -- platform's own OI-14/OI-15/OI-16/OI-17 are each a genuinely distinct, forward-looking item unrelated to the login/logout/rate-limit contract gap; (d) platform never edits security_nfr.json's own returned_findings array, respecting the single-writer rule",
+      "All 9 PLA-N decisions' source citations (solution SOL-1/7/9, security_nfr NFR-3/6/7/9/SEC-3/6/9/10/11, Section 2.2/4.2 references) read directly against the actual cited sections/decisions in solution.json and security_nfr.json/document -- every citation resolves to a real, topically matching passage; none invented or mismatched",
+      "5 of 21 traceability rows' acceptance_criteria (US-1, US-9, US-13, US-16, US-21) diffed word-for-word against workflow-1 roles/stories.json's stories[].acceptance_criteria -- all match verbatim, no paraphrasing found",
+      "All 21 traceability rows carry non-empty component_ids and a platform-specific (deployment/persistence/sizing/rollback-focused) verification_scenario, distinct from the functional/security scenarios solution/data_integration/security_nfr already recorded for the same stories",
+      "operation_ids/entity_names recorded as [] with a not_applicable note on all 21 rows, matching the same disclosed check-artifacts narrowed-tool-scope workaround already used identically by solution and security_nfr -- explanation text present, consistent, and not contradicted anywhere else in the document (no V-SEC1-style drift found)",
+      "All 10 NFR targets read directly from security_nfr's own Section 5 table (not platform's paraphrase): NFR-1/NFR-2 reasonably addressed at the topology level; NFR-3 addressed via PLA-1/PLA-2 colocation plus the DAT-3 WAL dependency named in US-8/US-21; NFR-4/NFR-5 correctly scoped as application-level, out of platform's carrying responsibility beyond secrets delivery (PLA-5); NFR-6/NFR-7 addressed with sizing evidence and carried to OI-14; NFR-8 addressed with a defense-in-depth reverse-proxy check; NFR-9 addressed outright by accepting single-instance/no-HA in PLA-1; NFR-10 addressed at the infrastructure-placement level via PLA-9 without duplicating or resolving OI-13/RF-1 -- none found unmet without a recorded reason",
+      "Document-vs-state drift check: every open item (OI-14..OI-17) and every checks[]/self-verification bullet in platform.json line-compared against the published document's Section 10/Section 11 equivalents -- word-for-word consistent; none of the drift patterns found in two of the three prior discipline reviews (V-SOL1/V-SOL2, V-SEC1) recurred here",
+      "Design-vs-build category check: scanned the full document for any claim that something is already built, tested, or verified -- none found; Section 6.1's release-gate checklist and Section 11's self-verification are both written in future/design tense, consistent with 'nothing in Workflow 2 has been built'",
+      "Scanned the full document and state for any script, Dockerfile, Terraform/IaC module, or CI config file -- none present; Section 0 and Section 7 both state the design/Workflow-4-implementation boundary explicitly and the document never crosses it",
+      "Security/PII scan across the full document and state -- no API keys, tokens, credential-like strings, or real-looking personal data found; example names (Priya, Arjun, Acme) are the canonical synthetic examples carried from the PRD/Stories throughout this workflow -- this is a pattern check, not a guarantee",
+      "Placeholder check -- no bare 'TBD' or 'Coming soon' anywhere in the document or state; the only bracketed placeholder tag used is the permitted '[INFERRED -- needs confirmation]', applied to PLA-3's sizing decision and carried to OI-14",
+      "Inference-honesty spot check -- PLA-3's sizing is explicitly tagged [INFERRED -- needs confirmation] and carried to OI-14; OI-16's unconfirmed AWS account/region/credential/model-ARN values are tagged as unconfirmed, not invented; no confident-sounding statement found stated with the certainty of fact where the source only supports an inference",
+      "Timestamp check: drafted_at and self_verification.checked_at are both 2026-09-17T17:24:00Z, within the stated real-time window (~17:2x-17:3xZ) and chronologically consistent with security_nfr's prior publish at 17:07:24Z -- no FUTURE_TIMESTAMP found",
+      "gate object (status='pending', reviewed_by=null, artifact_manifest=[]) correctly reflects an un-gated v1.0 draft"
+    ],
+    "not_checked": [
+      "No hash comparison was run by me -- see finding V-PLA1. The coordinator/record-validation tooling should perform actual SHA-256 comparison against real file bytes before this gate closes, not rely on this review's cross-file string-consistency check.",
+      "Whether `node scripts/architecture-tools.cjs check-artifacts --discipline platform` or a full 4-discipline run would itself flag anything was not tested -- no way to run that tool in this session; all findings/checks above are from direct document/state reading, not tool output.",
+      "Whether workflow sign-off will actually action security_nfr's returned_findings entry (RF-1/V-SEC2) via a revise against data_integration cannot yet be checked -- that is a workflow-sign-off-stage decision, outside this discipline's own gate and outside this review's scope.",
+      "Only 5 of the 21 traceability rows' acceptance_criteria were diffed word-for-word against workflow-1 roles/stories.json; the remaining 16 were spot-read but not independently character-diffed against the source given this review's time budget.",
+      "Runtime/implementation-level behavior (whether the described topology, sizing, or rollback mechanisms would actually work as designed once built) cannot be checked from a design document alone -- this is a design review, not a build/deployment verification, and nothing in Workflow 2 has been built or run."
+    ],
+    "checked_at": "2026-09-17T17:31:00Z"
+  },
   "validation_history": [],
-  "published": null,
-  "gate": {
-    "status": "pending",
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "reply": null,
-    "artifact_manifest": [],
-    "owner_role": "devops",
-    "answered_by": null
+  "published": {
+    "target": "confluence",
+    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5885821154/Conversational+CRM+Platform+Design+v1.0",
+    "published_at": "2026-09-17T17:40:39.856Z",
+    "approval_comment_id": null
   },
-  "cost_log": [],
-  "audit_trail": [],
+  "gate": {
+    "status": "approved",
+    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+    "reviewed_at": "2026-09-17T17:40:00Z",
+    "reply": "publish",
+    "artifact_manifest": [
+      {
+        "role": "platform",
+        "path": "docs/architecture/PLATFORM-DESIGN-conversational-crm-T-1-v1.0.md",
+        "version": "1.0",
+        "sha256": "74aab3a74cc333603fc4ef378b019e1fb1ebd16cc3aab388f255900baed4ecc6"
+      }
+    ],
+    "owner_role": "devops",
+    "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
+  },
+  "cost_log": [
+    {
+      "stage": "platform",
+      "agent": "platform-architect-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 32000,
+      "note": "Drafted the Platform Design document: confirmed Workflow 1 lock and all 3 Workflow 2 upstream role gates approved (readiness='ready') before drafting, read solution/data_integration/security_nfr's full documents plus the PRD/Stories, computed real SHA-256 hashes for all 8 upstream artifacts (all matched every other role file's recorded values exactly, confirming no drift). Designed a single-host topology resolving security_nfr's Open Item OI-11 and carrying out SEC-9, sized compute with stated evidence, defined 3 environments/promotion, release gates/rollback/operational signal, and the explicit Workflow 4 boundary. Recorded 9 decisions (PLA-1..PLA-9) and a full 21-story traceability table.",
+      "timestamp": "2026-09-17T17:24:00Z"
+    }
+  ],
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-17T17:24:00Z",
+      "actor": "platform-architect-agent",
+      "phase": "platform",
+      "event": "drafted",
+      "detail": "Platform Design v1.0 written: single-host topology (Nginx + C-API + colocated C-SQL/C-VEC on an encrypted data volume, C-NLU/Bedrock and a managed secrets store the only off-host dependencies), resolving security_nfr's Open Item OI-11 (PLA-2: Chroma embedded, not networked) and carrying out SEC-9 (PLA-4: dedicated non-root OS user, encrypted volume, file-permission isolation) as the requirement security_nfr explicitly recorded against platform, not itself. Sized compute (~2 vCPU/2 GiB) with stated evidence (NFR-9 single-instance scope, NLU compute offloaded to Bedrock, NFR-3's two-session concurrency target), tagged [INFERRED -- needs confirmation] and carried to Open Item OI-14. Defined 3 environments (dev/ci/demo) and a promotion flow requiring ci to pass plus an explicit human-triggered deploy with a pre-deploy backup (PLA-7); rollback described for code-only, schema-affecting, and host-failure cases; an operational signal design (process supervision + host metrics/logs + alarms, PLA-8) with no APM platform introduced, consistent with the explicit modest-not-enterprise sizing instruction given constraints.budget_usd is null. Recorded 9 decisions (PLA-1..PLA-9), including PLA-9 placing SEC-11's rate limiting at the reverse-proxy layer without duplicating or resolving security_nfr's already-recorded, still-open returned_findings entry (RF-1/V-SEC2, owned by data_integration) -- deliberately not re-raised here per this task's own instruction not to duplicate it. Traced all 21 stories to platform-specific verification_scenarios; operation_ids/entity_names recorded as [] with not_applicable per the same disclosed check-artifacts narrowed-tool-scope workaround solution and security_nfr already used. Independently recomputed all 8 upstream source hashes; all 8 matched exactly, no new drift found. Recorded 4 new open items (OI-14..OI-17), none blocking. Self-verification PASS."
+    },
+    {
+      "timestamp": "2026-09-17T17:36:58.963Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "platform_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.0 recorded: 1 finding(s) (1 low). Gate manifest pinned to docs/architecture/PLATFORM-DESIGN-conversational-crm-T-1-v1.0.md@74aab3a74cc3. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T17:38:00Z",
+      "actor": "orchestrator",
+      "phase": "platform_review",
+      "event": "corrected",
+      "detail": "Resolved V-PLA1 (low): the validator had no Bash/hashing tool in its session and could not independently recompute any of the 8 claimed SHA-256 values from actual file bytes, so it could only confirm cross-file string consistency. The orchestrator ran `sha256sum` directly against all 8 real files on disk (workflow-1 workflow.json, PRD, User Stories, and this workflow's own solution/data_integration x3/security_nfr documents) and all 8 matched platform.json's recorded source_references[]/artifacts[] values exactly -- no drift found at the byte level. V-PLA1's underlying concern is resolved; no state or document change was needed since the values were already correct, only unverified."
+    },
+    {
+      "timestamp": "2026-09-17T17:40:00Z",
+      "actor": "human",
+      "phase": "platform_review",
+      "event": "gate-reply",
+      "detail": "Human (DAI Team3, sparc.team5@experionglobal.com) replied 'publish' to v1.0, the only validator finding (V-PLA1, low) already independently resolved. This is the fourth and final Workflow 2 discipline gate -- workflow now proceeds to sign-off. Gate set to approved."
+    },
+    {
+      "timestamp": "2026-09-17T17:40:39.856Z",
+      "actor": "orchestrator",
+      "phase": "platform",
+      "event": "published",
+      "detail": "confluence -- https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5885821154/Conversational+CRM+Platform+Design+v1.0. Published directly in the orchestrator turn (consistent with this workflow's established precedent: publisher-agent cannot reach live Atlassian tools from within a spawned subagent context in this session). Content verified correct on this publish (the actual document body, not a placeholder) before recording this entry, following the lesson learned at security_nfr's publish."
+    }
+  ],
   "owner_role": null,
   "note": "Owned by this stage's agent. Single writer -- never edit another role's file. Cloud topology, resource assumptions and budget evidence, plus CI, environments, release gates, rollback and operations. Source disciplines: infra-arch, deployment-arch."
 }

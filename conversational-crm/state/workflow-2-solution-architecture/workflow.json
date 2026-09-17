@@ -3,7 +3,7 @@
   "project": {
     "name": "conversational-crm",
     "name_source": "workflow-1-discovery-to-stories (locked)",
-    "phase": "platform",
+    "phase": "data_integration",
     "created_at": "2026-09-17"
   },
   "workflow": {

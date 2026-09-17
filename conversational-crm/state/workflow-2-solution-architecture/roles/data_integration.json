@@ -796,10 +796,10 @@
   "validation_history": [],
   "published": null,
   "gate": {
-    "status": "approved",
-    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
-    "reviewed_at": "2026-09-17T16:15:00Z",
-    "reply": "publish",
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "reply": null,
     "artifact_manifest": [
       {
         "role": "data_integration",
@@ -821,7 +821,8 @@
       }
     ],
     "owner_role": "architect",
-    "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
+    "answered_by": null,
+    "note": "Reset to pending by the workflow_signoff revise below -- v1.0's manifest is preserved above as history until the redraft records its own v1.1 manifest."
   },
   "cost_log": [
     {
@@ -876,6 +877,13 @@
       "phase": "data_integration_review",
       "event": "published",
       "detail": "confluence -- https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5886050449/Conversational+CRM+Data+Integration+v1.0 (approval comment 5885329672). Published directly in the orchestrator turn (consistent with this project's established precedent)."
+    },
+    {
+      "timestamp": "2026-09-17T17:50:00Z",
+      "actor": "human",
+      "phase": "workflow_signoff",
+      "event": "revise",
+      "detail": "At Workflow 2 sign-off, human (DAI Team3, sparc.team5@experionglobal.com) replied 'revise: data_integration <feedback>', sending this discipline's already-approved v1.0 gate back for a redraft rather than locking with a known gap. Feedback (verbatim): security_nfr's already-approved SharedLoginAuth resolution (SEC-1: login step + session-token issuance; SEC-2: session lifecycle incl. logout invalidation; SEC-5: login-endpoint lockout after 5 failed attempts in 15 minutes; SEC-11/NFR-10: 429-class rate-limit rejection on POST /interactions, POST /qa, POST /briefs) requires API surface this contract does not have: no /login (or equivalent) operation to exchange the shared credential for the session cookie the contract already names, no /logout (or equivalent) operation to invalidate that session server-side, and no 429/TooManyRequests-class response defined anywhere (only 200/201/400/404/409/422/401/503 exist today). Recorded by security_nfr as returned_findings[0] (id RF-1, finding_id V-SEC2, severity high -- independently confirmed by security_nfr's own Validator) and mirrored as security_nfr's Open Item OI-13 with blocks_development: true, which is why workflow_signoff's lock reply was refused (this workflow's own rule: lock requires no open item anywhere with blocks_development: true). Add: (1) a login operation that accepts the shared credential and issues the session cookie SharedLoginAuth already names; (2) a logout operation that invalidates that session server-side; (3) a 429-class response (e.g. a RateLimited component matching the existing Unauthorized/AccountNotFound/CommitmentNotFound/RetryLater pattern) applied to POST /interactions, POST /qa, and POST /briefs. This is new API surface to add, not a change to any of the 9 existing business operations' own request/response shapes -- security_nfr's Section 3 already confirmed 'no change to any existing operation's security requirement or schema is needed.' Increment the bundle to v1.1 per this workflow's rule that all three bundle artifacts version together on revision; re-run self-verification, check-artifacts, and independent validation before this gate is presented again."
     }
   ],
   "published": {
