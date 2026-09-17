@@ -1,0 +1,391 @@
+{
+  "role": "discovery",
+  "field": "discovery",
+  "interview_log": [
+    {
+      "question": "Problem & goals — What's the core problem today, and what does success look like if this is solved?",
+      "answer": "Traditional CRMs fail because logging a meeting means stopping to fill forms — a disconnected step reps skip or delay, so data quality suffers and adoption stays low. Commitments made in conversation live only in memory or inboxes, with no system tracking follow-through, and reconstructing \"where things stand\" with a customer means manually piecing together notes and emails. Success means capture becomes as effortless as sending a text, so it happens every time. Commitments get tracked automatically and surfaced before they're due, and relationship history becomes instantly queryable instead of archaeological. The result: reps actually use it because it removes work rather than adds it, and relationship knowledge lives in a shared system, not individual heads.",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:08:17.070Z"
+    },
+    {
+      "question": "Primary users — Who is this mainly for? What do they need in order to use it at all?",
+      "answer": "sales rep, and for prerquisite we will be having seeded data",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:09:47.735Z"
+    },
+    {
+      "question": "Follow-up: do reps need to log in individually (so commitments/notes are attributed to a specific person), or is a single shared login enough for the demo, given it is a web app used on presumably a laptop/desktop after a meeting?",
+      "answer": "single shared login for the demo",
+      "type": "follow_up",
+      "timestamp": "2026-09-17T06:11:13.962Z"
+    },
+    {
+      "question": "Other participants — Is there a second group with different needs, or is it genuinely single-audience?",
+      "answer": "same role sharing the same capabilities",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:13:48.130Z"
+    },
+    {
+      "question": "Current pain points — What do people do today instead, and what is wrong with it?",
+      "answer": "not sure what people use these days, we are building a demo based on what we know and have shared",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:14:56.562Z"
+    },
+    {
+      "question": "Scope boundaries — What is explicitly out of scope for this first version?",
+      "answer": "for the demo we are not focusing on any real integrations, and no multi team and multi tenant support. There won't be any real system integrations. We'll use adapters to simulate the external connections.",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:17:20.878Z"
+    },
+    {
+      "question": "Constraints & integrations — Any existing systems, data sources, platform requirements or policies this has to work within?",
+      "answer": "we will be using seeded data for the demo purposes, seeded data will have MOM, emails, sharepoint.",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:22:02.837Z"
+    },
+    {
+      "question": "Success metrics — How would we know, concretely, that this worked?",
+      "answer": "agents functioning end to end on the seeded data.",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:25:00.836Z"
+    },
+    {
+      "question": "Risks & compliance — Anything sensitive here — personal data, money, safety, regulation — that needs care?",
+      "answer": "seeded data only no real data for now",
+      "type": "baseline",
+      "timestamp": "2026-09-17T06:25:57.459Z"
+    }
+  ],
+  "open_items": [
+    {
+      "id": "DISC-OPEN-5",
+      "text": "Brief v1.1 Section 9 (\"Carried Forward From Original Idea\") lists the specific agents/capabilities from project.idea_input (Capture Agent, Extraction Agent, Memory/Q&A Agent, Commitment Tracking Agent, Brief-Me-on-Customer Agent, business-card scanning, the example NL queries, due-soon/overdue list, customer profile view, shared view, optional voice-note capture) that were never confirmed via the discovery interview. requirements-agent must explicitly evaluate and reconcile each one against the confirmed interview scope (adopt in-scope with rationale, explicitly defer/out-of-scope, or flag back to a human) before any is treated as an in-scope PRD feature -- this is a mandatory checkpoint per the human Gate 1 reply responding to validator finding V-D2, not an assumption to silently drop or silently adopt.",
+      "source": "Gate 1 revise reply (V-D2)",
+      "blocks_development": false,
+      "resolved": false
+    }
+  ],
+  "human_confirmed_sufficient": true,
+  "confirmed_at": "2026-09-17T06:27:24.741Z",
+  "brief_document": "docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md",
+  "drafted_at": "2026-09-17T07:03:03.744Z",
+  "self_verification": {
+    "result": "PASS",
+    "checked_at": "2026-09-17T07:03:03.744Z",
+    "fixed_before_handoff": [],
+    "note": "Re-ran the discovery-agent Self-Verification checklist against v1.1. Sections 1-7 unchanged from v1.0; Section 8 gains one new item (5) pointing to Section 9 (already PASS). New Section 9 is sourced verbatim from project.idea_input and explicitly labeled as not yet confirmed via the interview transcript, so it does not misrepresent unconfirmed material as interview-grounded fact -- no fixes needed."
+  },
+  "published": {
+    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5882773547/Conversational+CRM+Discovery+Brief+v1.1",
+    "published_at": "2026-09-17T07:40:45.960Z",
+    "approval_comment_id": "5883396124"
+  },
+  "gate": {
+    "status": "approved",
+    "reviewed_by": "Harikrishnan M",
+    "reviewed_at": "2026-09-17T07:17:18.610Z",
+    "reply": "publish",
+    "artifact_manifest": [
+      {
+        "role": "discovery",
+        "path": "docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md",
+        "version": "1.1",
+        "sha256": "04d6a1eb48dca2dfb8746da49630d014cc61f63b8c02a685f4e88facfb6332ff"
+      }
+    ],
+    "owner_role": "business-analyst",
+    "answered_by": "Harikrishnan M"
+  },
+  "cost_log": [
+    {
+      "stage": "discovery-interview",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 6000,
+      "note": "rough self-estimate for the whole live interview turn",
+      "timestamp": "2026-09-17T06:27:24.741Z"
+    },
+    {
+      "stage": "discovery",
+      "agent": "discovery-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 9000,
+      "note": "rough self-estimate for drafting the Discovery Brief from the confirmed interview transcript",
+      "timestamp": "2026-09-17T06:30:00.939Z"
+    },
+    {
+      "stage": "discovery-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 12000,
+      "note": "Independent review of the Discovery Brief v1.0: read the full brief, cross-checked every section against discovery.interview_log and against project.idea_input, and read tools/record-validation.cjs to confirm the role file's schema actually supports recording this review. Found 4 issues, including one (missing artifacts/version fields) that would block record-validation from running at all.",
+      "timestamp": "2026-09-17T07:05:00.000Z"
+    },
+    {
+      "estimate": true,
+      "run_id": null,
+      "stage": "discovery-revise",
+      "agent": "discovery-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 7000,
+      "note": "Redrafted Discovery Brief to v1.1 per Gate 1 revise reply: read v1.0 in full, added new Section 9 carrying forward the specific agents/capabilities from project.idea_input verbatim, added a corresponding Open Items entry, re-ran self-verification. Sections 1-8 left unchanged.",
+      "timestamp": "2026-09-17T07:03:03.744Z"
+    },
+    {
+      "stage": "discovery-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 11000,
+      "note": "Re-review of v1.1 after Gate 1 revise cycle: read v1.0 and v1.1 in full and diffed them line by line, cross-checked every Section 9 bullet verbatim against project.idea_input, re-verified V-D1/V-D3/V-D4 carried over correctly, re-ran full universal checks (security/PII, inference-honesty, placeholder) and discovery-specific checks (8 baseline topics, persona sourcing) fresh against v1.1 rather than assuming the prior v1.0 review still holds. Found 1 new low-severity finding (V-D5: minor 'unchanged' overclaim in the revision note/self_verification, since Section 8 gained one new item).",
+      "timestamp": "2026-09-17T07:20:00.000Z"
+    },
+    {
+      "stage": "discovery-publish",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 8000,
+      "note": "Published directly in the orchestrator turn after publisher-agent (both mcp__atlassian and mcp__claude_ai_Atlassian tool grants) could not reach the live Atlassian MCP tools from within a spawned subagent context, despite the orchestrator having working authenticated access to the identical tools. Created Confluence page, corrected two transcription errors introduced while manually pasting the body, and posted the gate-approval footer comment.",
+      "timestamp": "2026-09-17T07:40:45.960Z"
+    }
+  ],
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-17T06:05:29.296Z",
+      "run_id": null,
+      "actor": "orchestrator",
+      "phase": "discovery",
+      "event": "seeded",
+      "detail": "Idea stated by human: Conversational CRM / Relationship Memory Assistant"
+    },
+    {
+      "timestamp": "2026-09-17T06:27:24.746Z",
+      "run_id": null,
+      "actor": "human",
+      "phase": "discovery",
+      "event": "interview-confirmed",
+      "detail": "Human confirmed the 8-question baseline interview is sufficient to draft the Discovery Brief."
+    },
+    {
+      "timestamp": "2026-09-17T06:30:00.939Z",
+      "actor": "discovery-agent",
+      "phase": "discovery",
+      "event": "drafted",
+      "detail": "Brief written, self-verification PASS, 4 open items carried forward"
+    },
+    {
+      "timestamp": "2026-09-17T07:05:00.000Z",
+      "actor": "validator-agent",
+      "phase": "discovery_review",
+      "event": "validated",
+      "detail": "4 issues found — top severity critical (roles/discovery.json has no `artifacts` array, so record-validation.cjs will refuse to record this very review until that's added)"
+    },
+    {
+      "timestamp": "2026-09-17T06:35:38.567Z",
+      "actor": "orchestrator",
+      "phase": "discovery_review",
+      "event": "corrected",
+      "detail": "Added missing version/artifacts fields (version=1.0, artifacts=[{role, path: brief_document, version}]) so record-validation.cjs can build the gate manifest — validator finding V-D1 (critical). No new facts introduced: path/version already matched discovery.brief_document."
+    },
+    {
+      "timestamp": "2026-09-17T06:35:57.340Z",
+      "actor": "orchestrator",
+      "phase": "discovery_review",
+      "event": "corrected",
+      "detail": "In-place correction of DISCOVERY-BRIEF v1.0 per validator findings V-D3 (tagged the untagged authentication/authorization inference in Constraints & Integrations as [INFERRED — needs confirmation], matching the equivalent claim already tagged in Target Users) and V-D4 (fixed an inaccurate internal cross-reference: Problem Statement pointed at Scope Boundaries for current-pain-points context, corrected to point at Assumptions). Carve-out applies: draft has never been published and has no gate approval yet, same version (1.0)."
+    },
+    {
+      "timestamp": "2026-09-17T06:36:22.581Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "discovery_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.0 recorded: 4 finding(s) (1 critical, 1 high, 1 medium, 1 low). Gate manifest pinned to docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.0.md@8bb355fdb126. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T07:00:36.889Z",
+      "actor": "human",
+      "phase": "discovery_review",
+      "event": "revise",
+      "detail": "Gate 1 reply: revise: we need to consider V-D2 as part of the requirements — human accepts the Brief's single-persona/generic framing as correctly sourced from the interview, but wants validator finding V-D2 (the Brief lost every specific named agent/capability from the original idea: Capture Agent, Extraction Agent, Memory/Q&A Agent, Commitment Tracking Agent, Brief-Me-on-Customer Agent, business-card scan, example NL queries, due-soon/overdue list, customer profile view, shared view) recorded as an explicit, prominent forward item so Requirements deliberately reconciles it, rather than resolved via a further discovery interview round."
+    },
+    {
+      "timestamp": "2026-09-17T07:03:03.753Z",
+      "run_id": null,
+      "actor": "discovery-agent",
+      "phase": "discovery",
+      "event": "drafted",
+      "detail": "Redrafted per Gate 1 revise feedback ('we need to consider V-D2 as part of the requirements'): added an explicit Open Items subsection carrying forward the specific agents/capabilities from project.idea_input for Requirements to reconcile, without altering the interview-grounded sections. Self-verification PASS."
+    },
+    {
+      "timestamp": "2026-09-17T07:20:00.000Z",
+      "actor": "validator-agent",
+      "phase": "discovery_review",
+      "event": "validated",
+      "detail": "Re-review of v1.1: confirmed V-D1, V-D2, V-D3 and V-D4 all landed correctly and hold everywhere checked (state fields, Section 9 content and instruction, carried-over tags/cross-reference). 1 new low-severity finding (V-D5): the revision note and self_verification both claim Sections 1-8 are 'unchanged' from v1.0, but Section 8 gained one new item pointing to Section 9 — a minor but literal overclaim, not a content problem."
+    },
+    {
+      "timestamp": "2026-09-17T07:07:28.801Z",
+      "actor": "orchestrator",
+      "phase": "discovery_review",
+      "event": "corrected",
+      "detail": "In-place correction of DISCOVERY-BRIEF v1.1 per validator finding V-D5 (low): revision note and self_verification.note both overclaimed Sections 1-8 unchanged when Section 8 gained item 5; reworded to Sections 1-7 unchanged, Section 8 +1 item. Carve-out applies: v1.1 has no gate approval yet."
+    },
+    {
+      "timestamp": "2026-09-17T07:07:34.029Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "discovery_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.1 recorded: 1 finding(s) (1 low). The prior review of v1.0 moved to validation_history. Gate manifest pinned to docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md@04d6a1eb48dc. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T07:17:18.610Z",
+      "actor": "human",
+      "phase": "discovery_review",
+      "event": "gate-reply",
+      "detail": "Gate 1 reply: publish. Discovery Brief v1.1 approved (validator issues_found: 1 low, V-D5, wording-only, already corrected in place before this reply)."
+    },
+    {
+      "timestamp": "2026-09-17T07:40:45.960Z",
+      "actor": "orchestrator",
+      "phase": "discovery_review",
+      "event": "published",
+      "detail": "confluence — https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5882773547/Conversational+CRM+Discovery+Brief+v1.1 (approval comment 5883396124). Published directly by the orchestrator, not publisher-agent: two subagent spawn attempts (mcp__atlassian, then mcp__claude_ai_Atlassian tool grants) both failed with 'no Confluence/Jira connection available' even though the orchestrator's own turn had working authenticated Atlassian tools throughout — apparent limitation in spawned-subagent access to this session's deferred MCP tools, not an auth/config problem. Worth investigating before relying on publisher-agent for future gates in this run."
+    },
+    {
+      "timestamp": "2026-09-17T09:02:40.968Z",
+      "actor": "orchestrator",
+      "phase": "discovery_review",
+      "event": "corrected",
+      "detail": "Backfilled discovery.artifacts[0].sha256 from the value already pinned in gate.artifact_manifest by record-validation.cjs — coherence.cjs flagged APPROVED_WITHOUT_HASH because artifacts[].sha256 was never populated (a gap in discovery-agent.md fixed alongside V-D1, but incompletely: it added the artifacts array without sha256). No new fact recorded; the hash already existed in this same file, just in a different field. Also fixed at the tool level: record-validation.cjs now backfills artifacts[].sha256 automatically going forward."
+    },
+    {
+      "timestamp": "2026-09-17T10:06:11.038Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "project.idea_input replaced with the full canonical source document (\"Idea 5\"), supplied verbatim by the human, after a cross-verification check found the version recorded at run start was an incomplete paraphrase -- it dropped \"where the opportunity stands\" from the Brief-Me-on-Customer description (among only cosmetic differences elsewhere, all otherwise reconciled as non-issues). Prior idea_input text (for the record): We are seeking a web-based Conversational CRM / Relationship Memory Assistant — a CRM updated by talking to it instead of filling forms — seeded with a few demo customer accounts, each with a handful ..."
+    }
+  ],
+  "owner_role": null,
+  "note": "Owned by this stage's agent. Single writer -- never edit another role's file.",
+  "version": "1.1",
+  "artifacts": [
+    {
+      "role": "discovery",
+      "path": "docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md",
+      "version": "1.1",
+      "sha256": "04d6a1eb48dca2dfb8746da49630d014cc61f63b8c02a685f4e88facfb6332ff"
+    }
+  ],
+  "validation_history": [
+    {
+      "result": "issues_found",
+      "version_reviewed": "1.0",
+      "summary": "Discovery Brief is well-grounded in the interview transcript and correctly avoids inventing a second persona, but recording this very review will currently fail (no `artifacts` array in the role file), and the Brief silently lost the specific named agents/capabilities present in the original seed idea.",
+      "independence": "Cross-checked the drafted Brief section-by-section against discovery.interview_log (not the Brief's own claims about itself), and separately against project.idea_input in workflow.json -- the original seed idea, which is richer than what made it into the interview transcript. Also read tools/record-validation.cjs itself to confirm the role file's actual schema supports recording a review, rather than assuming the standard shape applies -- this is where V-D1 was found.",
+      "findings": [
+        {
+          "id": "V-D1",
+          "severity": "critical",
+          "finding": "roles/discovery.json has no `artifacts` array (and no `version` field). `tools/record-validation.cjs` builds the gate manifest strictly from `s.artifacts`, and refuses to record any review when that array is empty or absent (\"the role records no artifacts, so there is nothing for the gate manifest to pin\"). As currently written, `./sparc.sh record-validation workflow-1-discovery-to-stories discovery <findings.json>` will exit with an error and record nothing -- this review would never actually land in state.",
+          "evidence": "roles/discovery.json holds only `discovery.brief_document` as a bare string path; there is no top-level `version` or `artifacts` field anywhere in the file. record-validation.cjs lines ~121-137: `const artifacts = s.artifacts ?? []; ... if (!manifest.length) die('the role records no artifacts, so there is nothing for the gate manifest to pin. A validation of no artifact is not evidence.');`. discovery-agent.md's Output section (lines ~101-107) never instructs the agent to write a `version` or `artifacts` field, only `discovery.brief_document`.",
+          "suggested_fix": "Before running record-validation, add to roles/discovery.json: `\"version\": \"1.0\"` and `\"artifacts\": [{ \"role\": \"discovery\", \"path\": \"docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.0.md\", \"version\": \"1.0\" }]`. Longer term, discovery-agent.md's Output section should be updated to always write these two fields, the same way workflow-2/3 role files already do, so this does not recur on every future run of workflow 1."
+        },
+        {
+          "id": "V-D2",
+          "severity": "high",
+          "finding": "The Discovery Brief omits every specific named agent and concrete capability described in the original seed idea (`project.idea_input`): the Capture Agent, Extraction Agent, Memory/Q&A Agent, Commitment Tracking Agent, and Brief-Me-on-Customer Agent are never mentioned, nor are business-card scanning, natural-language query examples (\"what did we discuss last time?\"), the due-soon/overdue commitment list, the customer profile view, the shared view for a second team member, or optional voice-note capture. `discovery.interview_log`'s answers already paraphrase these away into generic language (\"capture becomes effortless\", \"commitments get tracked automatically\"), and the Brief -- correctly, given its own rule of only using the transcript -- inherited that genericness. Because Requirements/PRD is instructed to build strictly from this Brief (not from `idea_input` directly), there is a real risk that the concrete, differentiating product capabilities named in the original idea never resurface as PRD features.",
+          "evidence": "workflow.json `project.idea_input` names five specific agents and several concrete UX flows in detail. None of these terms or flows appear anywhere in DISCOVERY-BRIEF-conversational-crm-v1.0.md, whose Goals section is generic paraphrase. discovery-agent.md's Startup step 3 instructs the agent to read only `discovery.interview_log` and `discovery.open_items`, not `project.idea_input`, so nothing in the process re-checks the Brief against the original idea.",
+          "suggested_fix": "Before Requirements drafts the PRD, have a human confirm at the discovery gate whether these specific agents/capabilities are still intended for this build. If so, either run one more interview round to surface them explicitly (so they enter `interview_log` and can be added to the Brief without violating its own no-new-facts rule), or explicitly note in the Brief's Open Items that `project.idea_input` contains product specifics not yet reconciled with the interview transcript."
+        },
+        {
+          "id": "V-D3",
+          "severity": "medium",
+          "finding": "Inconsistent [INFERRED -- needs confirmation] tagging: Section 5 (Constraints & Integrations) states as plain fact that \"no individual authentication/authorization system is required for this version,\" but this is the same strength of inference as the claim in Section 2 that IS correctly tagged INFERRED (\"commitments and notes captured during the demo will not be attributed to a specific individual rep\") -- both are derived from the same single answer (\"single shared login for the demo\"), yet only one is flagged.",
+          "evidence": "Brief Section 2: '`[INFERRED — needs confirmation]` A consequence of the shared-login decision is that commitments and notes...will not be attributed to a specific individual rep.' Brief Section 5: 'Access is via a single shared login (see Target Users) — no individual authentication/authorization system is required for this version.' -- stated with no INFERRED tag, though the interview transcript never used the words 'authentication' or 'authorization' at all (interview_log entry 3: 'single shared login for the demo').",
+          "suggested_fix": "Add the `[INFERRED — needs confirmation]` tag to the Section 5 sentence, or fold it into the existing Section 2 inference so the same underlying inference isn't stated once as fact and once as a flagged assumption."
+        },
+        {
+          "id": "V-D4",
+          "severity": "low",
+          "finding": "Section 1 (Problem Statement) points a reader to 'the \"Current pain points\" answer under Scope Boundaries / Assumptions below' -- but Scope Boundaries (Section 4) contains no discussion of current pain points at all; only Assumptions (Section 7) does. The citation to 'Scope Boundaries' is inaccurate and would mislead a reader trying to verify the claim by following the pointer as written.",
+          "evidence": "Brief Section 1: 'see the \"Current pain points\" answer under Scope Boundaries / Assumptions below.' Brief Section 4 (Scope Boundaries) discusses only in/out-of-scope items, with no mention of current pain points or the interview answer. Brief Section 7 (Assumptions) is the only section that actually discusses it.",
+          "suggested_fix": "Correct the cross-reference to read '... see the \"Current pain points\" answer discussed under Assumptions below', dropping the inaccurate 'Scope Boundaries' half of the pointer."
+        }
+      ],
+      "checked": [
+        "self_verification field present and PASS (no missing/FAIL finding needed)",
+        "All 8 baseline discovery-interview topics (problem & goals, primary users, other participants, current pain points, scope boundaries, constraints & integrations, success metrics, risks & compliance) present in discovery.interview_log and reflected in the Brief's sections 1-6",
+        "Single-persona claim (Sales Rep only) cross-checked against interview_log entry for 'Other participants' ('same role sharing the same capabilities') -- not invented, and no second persona was fabricated to fill a table",
+        "Full text of the Brief scanned for API keys/tokens/credential-like strings and real-looking personal data (name+address/phone/email combinations) -- none found",
+        "Placeholder check -- no bare 'TBD' or 'Coming soon' anywhere in the Brief",
+        "Every [INFERRED — needs confirmation] tag in the Brief traced back to whether the underlying claim is actually only implied (not stated) in interview_log",
+        "Brief content cross-checked against project.idea_input (the original seed idea recorded in workflow.json), not only against the interview transcript",
+        "Internal cross-references within the Brief (section pointers) checked for accuracy",
+        "File naming convention (kebab-case, product slug, version suffix) and forward-slash relative path in `discovery.brief_document` checked against CLAUDE.md conventions",
+        "project.phase ('discovery_review') checked against the invocation's stated phase and against roles/discovery.json's own gate status ('pending')",
+        "Read tools/record-validation.cjs and its test fixture to confirm the actual schema roles/discovery.json needs to have in order for this review to be recordable at all"
+      ],
+      "not_checked": [
+        "Whether the omission of the specific named agents (V-D2) was a deliberate simplification decision made live in the interview but not fully transcribed, versus detail that was genuinely lost -- only a human (or a further interview round) can resolve which",
+        "No hash comparison was run by me; I read the Brief file directly rather than computing/comparing SHA-256 myself. record-validation.cjs will compute the real hash when it runs (assuming V-D1 is fixed first)",
+        "Downstream Requirements/User Stories artifacts do not exist yet, so no traceability check against them was possible or attempted"
+      ],
+      "checked_at": "2026-09-17T06:36:22.581Z"
+    }
+  ],
+  "validation": {
+    "result": "issues_found",
+    "version_reviewed": "1.1",
+    "summary": "All four v1.0 findings (V-D1 critical, V-D2 high, V-D3 medium, V-D4 low) landed correctly and are confirmed present in v1.1: version/artifacts fields exist, Section 9 carries forward the specific agents/capabilities from the original idea without stating them as confirmed interview fact and gives Requirements an actionable three-way reconciliation instruction, and the auth INFERRED tag / corrected cross-reference both carried over unchanged. One new low-severity finding: the revision note and self_verification both claim Sections 1-8 are 'unchanged' from v1.0, but Section 8 (Open Items) gained a new item 5 pointing to Section 9 -- a minor but literal overclaim.",
+    "independence": "Read v1.0 and v1.1 of the Brief file-for-file and diffed them line by line (not relying on the revision note's own claim of what changed), cross-checked every Section 9 bullet's verbatim quotes against project.idea_input in workflow.json word-for-word, re-read discovery.interview_log fresh against Sections 1-8, and re-ran the security/placeholder/inference-honesty scans against the full v1.1 text rather than assuming the v1.0 review still covers it.",
+    "fix_verification": {
+      "V-D1": "fixed -- roles/discovery.json now has top-level \"version\": \"1.1\" and \"artifacts\": [{ \"role\": \"discovery\", \"path\": \"docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md\", \"version\": \"1.1\" }], matching discovery.brief_document exactly.",
+      "V-D2": "fixed -- v1.1 adds Section 9 (\"Carried Forward From Original Idea (Not Yet Confirmed via Interview)\"), listing all of: Capture Agent, business-card scanning, Extraction Agent, Memory/Q&A Agent (with the three example NL queries verbatim), Commitment Tracking Agent (due-soon/overdue list), Brief-Me-on-Customer Agent, customer profile view, shared view, optional voice-note capture, plus the enterprise-grade-access-control stretch goal for completeness. All quotes checked verbatim against project.idea_input and match exactly. The section is explicitly labeled 'not yet confirmed via the interview transcript' and does not restate any item in Sections 1-8 as fact. It closes with a concrete, non-vague instruction: requirements-agent must record each item as (1) adopted with rationale tied to an interview-confirmed goal, (2) explicitly deferred/out-of-scope with a reason, or (3) flagged back to a human -- and explicitly names both silent-drop and silent-adopt as the two wrong outcomes to avoid. A corresponding open_items entry (DISC-OPEN-5) was also added to the role file itself, not just the document, so the instruction travels with state as well as prose. Sections 1-8's interview-grounded content was not weakened or contradicted -- confirmed by full-text diff against v1.0, identical except one added Open Items bullet (item 5, a pointer to Section 9).",
+      "V-D3": "fixed, carried over correctly -- Section 5 in v1.1 still reads '[INFERRED — needs confirmation] Access is via a single shared login ... no individual authentication/authorization system is required for this version', identical to the corrected v1.0 text.",
+      "V-D4": "fixed, carried over correctly -- Section 1 in v1.1 still reads '...see the \"Current pain points\" answer under Assumptions below...', identical to the corrected v1.0 text. No remaining reference to the old, inaccurate 'Scope Boundaries' pointer anywhere in the document."
+    },
+    "findings": [
+      {
+        "id": "V-D5",
+        "severity": "low",
+        "finding": "The v1.1 revision note (document header) and self_verification.note both assert 'Sections 1-8 are otherwise unchanged from v1.0' / 'Sections 1-8 unchanged from v1.0', but Section 8 (Open Items) is not byte-identical: v1.1 adds a new item 5 pointing to Section 9. The added item does not introduce a new product fact and does not weaken or contradict the interview-grounded content, so this is not the V-D2-class problem recurring -- but the literal claim of 'unchanged' is not accurate, and it appears in two places (the document's own revision note and self_verification), not just one.",
+        "evidence": "v1.1 line 9: 'Sections 1–8 are otherwise unchanged from v1.0'. v1.1 Section 8 has 5 items; v1.0 Section 8 (read directly from DISCOVERY-BRIEF-conversational-crm-v1.0.md) has only 4 items, ending at 'has not been discussed and is unresolved.' Item 5 in v1.1 ('The original idea statement...See Section 9 below...') does not exist in v1.0. discovery.self_verification.note (roles/discovery.json) repeats the same 'Sections 1-8 unchanged from v1.0' claim.",
+        "suggested_fix": "Reword the revision note and self_verification note to 'Sections 1-7 are unchanged from v1.0; Section 8 gains one new item (5) pointing to the new Section 9' -- a small wording fix, not a content fix, since the added item itself is appropriate and necessary for Section 9 to be discoverable from the Open Items list."
+      }
+    ],
+    "checked": [
+      "Full line-by-line diff of v1.0 vs v1.1 Brief files (not just reading the revision note's claim of what changed)",
+      "roles/discovery.json version and artifacts fields present, correct path/version, matching discovery.brief_document (V-D1 re-check)",
+      "Every bullet in new Section 9 cross-checked verbatim, word-for-word, against project.idea_input in workflow.json (V-D2 re-check)",
+      "Section 9's framing checked to confirm it does not restate any carried-forward item as confirmed interview fact, and that Sections 1-8's interview-grounded claims were not altered to match the richer idea text",
+      "Section 9's closing instruction to requirements-agent checked for being concrete/actionable (three explicit dispositions) rather than vague",
+      "roles/discovery.json open_items array checked for a corresponding DISC-OPEN-5 entry matching the Brief's Section 9/item 5 instruction",
+      "Section 5's auth INFERRED tag re-confirmed present in v1.1 (V-D3 re-check)",
+      "Section 1's corrected cross-reference to Assumptions (not Scope Boundaries) re-confirmed present in v1.1 (V-D4 re-check)",
+      "Fresh re-run of: all 8 baseline discovery-interview topics reflected in Sections 1-6, cross-checked against discovery.interview_log",
+      "Fresh re-run of: single-persona (Sales Rep) claim in Section 2 cross-checked against interview_log 'Other participants' answer -- not fabricated",
+      "Fresh re-run of: full v1.1 text scanned for API keys/tokens/credential patterns and real-looking personal data -- none found",
+      "Fresh re-run of: placeholder check across full v1.1 text -- no bare 'TBD' or 'Coming soon'",
+      "Fresh re-run of: every [INFERRED — needs confirmation] tag in v1.1 traced back to whether the underlying claim is genuinely only implied, not stated, in interview_log",
+      "self_verification field present with result PASS (not missing/FAIL)",
+      "project.phase / gate.status cross-checked against the stated review phase (discovery_review, gate still pending)"
+    ],
+    "not_checked": [
+      "No hash comparison was run by me; I read the v1.1 file directly rather than computing/comparing SHA-256. The coordinator should perform the actual hash comparison via record-validation.cjs before the gate.",
+      "Whether the original omission behind V-D2 (specific agents/capabilities never surfacing in the interview) reflects a deliberate simplification made live vs. detail genuinely lost remains unresolved -- this is exactly what Section 9's forward instruction defers to Requirements/a human, not something a document review can settle.",
+      "Downstream Requirements/User Stories artifacts do not exist yet, so no check of whether requirements-agent will actually honor the Section 9 instruction was possible -- that becomes checkable only once the PRD is drafted."
+    ],
+    "checked_at": "2026-09-17T07:20:00.000Z"
+  },
+  "checks": [
+    {
+      "name": "Independent validation of v1.1",
+      "required": true,
+      "result": "fail",
+      "summary": "Ran. A separate agent reviewed v1.1 and raised 1 finding(s): 1 low. Worst severity: low."
+    }
+  ]
+}

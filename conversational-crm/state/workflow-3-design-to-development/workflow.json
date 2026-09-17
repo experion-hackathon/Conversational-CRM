@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "conversational-crm",
+    "name_source": null,
+    "phase": "ui_ux",
+    "created_at": null
+  },
+  "workflow": {
+    "name": "workflow-3-design-to-development",
+    "status": "not_started",
+    "locked_at": null
+  },
+  "stack": {
+    "components": [],
+    "components_note": "One entry per part of the product that gets built. `kind` is free text -- frontend, backend, desktop-app, cli, service, library, mobile-app, pipeline. `implemented_by` names the Workflow 3 role that builds it.",
+    "decision_source": null
+  },
+  "inputs": {
+    "product": {
+      "workflow": "workflow-1-discovery-to-stories"
+    },
+    "architecture": {
+      "workflow": "workflow-2-solution-architecture",
+      "document": null,
+      "version": null,
+      "approval_reference": null,
+      "api_contract": null,
+      "data_model": null,
+      "source_references": [],
+      "population_note": "These fields are NOT hand-filled. They are populated only from the locked Workflow 2 state file."
+    },
+    "task": {
+      "id": null,
+      "scope_name": null
+    },
+    "target": {
+      "root": null,
+      "root_resolution": null
+    }
+  },
+  "publish_targets": {
+    "confluence_parent_page": null
+  },
+  "layout": "per-role",
+  "roles": [
+    "ui_ux",
+    "application",
+    "frontend",
+    "backend",
+    "test"
+  ],
+  "gates": {
+    "workflow_signoff": {
+      "status": "pending",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "reply": null,
+      "artifact_manifest": [],
+      "owner_role": null,
+      "owner_note": "Sign-off is cross-cutting and belongs to whoever drives the workflow, not to one specialist.",
+      "answered_by": null
+    }
+  },
+  "note": "Workflow-level facts. Stage state lives in roles/. Never store stage output here."
+}

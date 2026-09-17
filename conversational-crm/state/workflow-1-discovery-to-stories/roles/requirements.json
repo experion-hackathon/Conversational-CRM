@@ -1,0 +1,852 @@
+{
+  "role": "requirements",
+  "field": "prd",
+  "document": "docs/requirements/PRD-conversational-crm-v1.5.md",
+  "version": "1.5",
+  "problem_statement": "Sales reps do not log interactions in a traditional CRM today because doing so means stopping to fill in forms -- a disconnected step reps skip or delay, so data quality suffers and adoption stays low. Commitments made in conversation live only in memory or inboxes with no system tracking follow-through, and reconstructing where things stand with a customer means manually piecing together notes and emails.",
+  "personas": [
+    {
+      "name": "Sales Rep",
+      "needs": "Effortless capture of what happened in an interaction; automatic tracking of commitments and due dates; instant natural-language answers about a customer's history; a quick pre-meeting brief; a way to see a customer's running history at a glance. Single persona confirmed by discovery interview -- no second persona identified."
+    }
+  ],
+  "scope": {
+    "in": [
+      "F-1 Conversational Interaction Capture",
+      "F-2 Automatic Extraction & Thread Tagging",
+      "F-3 Natural-Language Memory & Q&A",
+      "F-4 Proactive Commitment Tracking",
+      "F-5 Brief-Me-on-Customer Summary",
+      "F-6 Customer Profile / Conversational History View",
+      "F-7 Shared Customer Thread Access"
+    ],
+    "out": [
+      "Real external system integrations (adapters simulate instead)",
+      "Multi-team support",
+      "Multi-tenant support",
+      "Individual per-rep authentication / commitment-note attribution",
+      "Voice-note capture (explicitly deferred -- idea statement itself frames it as droppable, typed one-liners are the confirmed substitute)",
+      "Enterprise-grade access control and governance (explicitly deferred -- idea statement itself frames it as a stretch goal, consistent with the confirmed single-shared-login simplification)"
+    ]
+  },
+  "features": [
+    {
+      "id": "F-1",
+      "name": "Conversational Interaction Capture",
+      "priority": "Must",
+      "source": "Discovery Brief Section 1 (Problem Statement) + Section 3 Goal 1 + Section 9 item 'Capture Agent'. Typed one-line capture ties directly to a confirmed goal; business-card scanning adopted as in-scope but [INFERRED -- needs confirmation] on its specific mechanism.",
+      "acceptance_criteria": [
+        "System must create a structured interaction note and associate it with the correct customer thread when the entry text unambiguously matches exactly one customer account already present in the seeded data, and must flag the note as 'unmatched — needs customer selection' — rather than attaching it to a default or incorrect account — when no seeded customer account can be unambiguously identified from the entry.",
+        "[INFERRED — needs confirmation] System must extract the contact's name, company and role from a scanned business-card image into the structured interaction note when the image is legible and contains recognizable contact fields, and must inform the rep that manual entry is required — without fabricating contact details — when the image cannot be read or no contact fields are recognized.",
+        "System must save the entry as a new interaction note when it contains at least one non-whitespace character, and must reject the submission with an explicit 'cannot save an empty note' message — without creating any note record — when the rep submits an empty or whitespace-only entry.",
+        "System must attach a previously flagged 'unmatched' note to the customer thread the rep selects when the rep manually resolves the flag, and must leave the note in the unmatched/needs-selection state — rather than guessing an account — when the rep has not yet resolved it.",
+        "[Added v1.5] [Confirmed — capability, per design discussion analyzing F-3 AC3's existing dependency] System must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item — recording one item per distinct person named (e.g., 'met Priya and Arjun from Acme...' must yield two attendee items, not one merged string) — when the entry text names at least one identifiable person, and must record zero attendee items for that interaction — rather than fabricating a name — when the entry text names no one. [INFERRED — needs confirmation] The specific name-recognition/disambiguation mechanism (how the system determines that 'Priya and Arjun' names two people rather than one compound string, and how confidently a token must be recognized as a person's name before it is recorded) was never discussed in the interview and remains [INFERRED — needs confirmation], carried to Assumption 14 and Open Question 15; only the underlying capability — that attendee names must be extracted from typed text, not solely from the optional business-card path (AC2) — is confirmed by this revision, since F-3 AC3 already depends on it existing."
+      ]
+    },
+    {
+      "id": "F-2",
+      "name": "Automatic Extraction & Thread Tagging",
+      "priority": "Must",
+      "source": "Discovery Brief Section 3 Goal 2 and Goal 3 + Section 9 item 'Extraction Agent'. Direct tie to confirmed goals -- no inference needed on the core capability.",
+      "acceptance_criteria": [
+        "System must extract each distinct commitment, follow-up or next step mentioned in a captured note's text as a separate tracked item when the note contains one or more of them, and must record no commitment items when the note describes discussion only with no forward-looking commitment.",
+        "System must record a due date on an extracted commitment when the captured text states or clearly implies one (e.g., 'by Friday'), and must mark the commitment's due date as unspecified -- rather than guessing a date -- when the text gives no date information.",
+        "System must tag every extracted discussion point and commitment to the same customer thread as its source interaction note, and must flag an extracted item for manual thread assignment when the source note itself is unmatched to a customer thread (per F-1 AC4), rather than tagging it to an incorrect thread.",
+        "System must record a best-effort due date only when the captured text names a concrete date or an unambiguous relative date term resolvable against the interaction's timestamp (e.g., 'by Friday'), and must leave the due date unspecified -- rather than guessing an exact date -- when the text uses a vague temporal reference (e.g., 'soon', 'sometime') that cannot be resolved to a specific date."
+      ]
+    },
+    {
+      "id": "F-3",
+      "name": "Natural-Language Memory & Q&A",
+      "priority": "Must",
+      "source": "Discovery Brief Section 1 / Section 3 Goal 3 + Section 9 item 'Memory/Q&A Agent' and its three example queries. [INFERRED -- needs confirmation] the three example queries are illustrative, not confirmed as the exhaustive supported query set.",
+      "acceptance_criteria": [
+        "System must answer a natural-language question about a customer's most recent discussion by returning content drawn from that customer's most recent interaction note(s) when the thread has at least one captured note, and must respond that no history exists yet for that customer when the thread is empty.",
+        "System must answer a natural-language question about the rep's own open commitments for a customer by listing the commitments extracted and tagged to that thread when any exist, and must state that there are no open commitments for that customer when none exist.",
+        "System must answer a natural-language question about interaction attendees by returning the contact names extracted from that thread's interaction notes when attendee names were captured, and must state that no attendee information was captured when none was extracted.",
+        "System must resolve and answer against the correct customer thread when a query names exactly one customer that matches a seeded account, and must respond that it could not identify the customer -- rather than guessing or returning another customer's data -- when the query names no customer or an unrecognized one."
+      ]
+    },
+    {
+      "id": "F-4",
+      "name": "Proactive Commitment Tracking",
+      "priority": "Must",
+      "source": "Discovery Brief Section 3 Goal 2 + Section 9 items 'Commitment Tracking Agent' and 'due-soon/overdue commitment list'. Direct, strong tie to a confirmed goal -- no inference needed on the core capability.",
+      "acceptance_criteria": [
+        "System must list every open commitment whose due date has passed as 'overdue' when the current date is past that due date, and must exclude a commitment from this list once it is marked complete.",
+        "[INFERRED -- needs confirmation] System must list every open commitment whose due date falls within a defined look-ahead window as 'due soon' when that window is confirmed (the exact window was not stated in discovery), and must reclassify it as 'overdue' instead once its due date has passed.",
+        "System must list every qualifying commitment individually when at least one exists, and must state explicitly that there are no due-soon or overdue commitments -- rather than showing an empty list with no explanation -- when none exist.",
+        "System must include a commitment with a stated due date in the due-soon/overdue list per AC1/AC2, and must list a commitment with an unspecified due date (per F-2 AC2/AC4) separately from that list -- rather than omitting it entirely or treating it as overdue -- when no due date was captured."
+      ]
+    },
+    {
+      "id": "F-5",
+      "name": "Brief-Me-on-Customer Summary",
+      "priority": "Should",
+      "source": "Section 9 item 'Brief-Me-on-Customer Agent'. [INFERRED -- needs confirmation] This capability was not independently confirmed in the interview; adopted as in-scope as a composition of the confirmed 'instantly queryable' goal (Section 1/3) and the Commitment Tracking capability (F-4), since a pre-meeting brief is a synthesis of exactly the history and open-items data those two confirmed capabilities already produce. [Confirmed -- canonical idea document, Idea 5 -- added v1.3] Idea 5's own pitch text states the Brief-Me synthesis draws on 'history, open commitments, key stakeholders, and where the opportunity stands' -- a fourth component this PRD's v1.0 through v1.2 omitted, because project.idea_input had been recorded, since this run started, as an incomplete paraphrase that dropped it; the omission is corrected in this revision. This directly confirms the CAPABILITY that Brief-Me must also state opportunity/deal status -- it is no longer merely inferred from composition -- but the specific MECHANISM for representing that status (see AC4, and Section 13.1) was never discussed in the interview and remains [INFERRED -- needs confirmation].",
+      "acceptance_criteria": [
+        "System must generate a summary containing recent discussion history, open commitments, stakeholder/contact names, and where the opportunity/deal stands for a named customer when that customer has at least one captured note, and must state that no history exists yet for that customer when the thread is empty, rather than generating a summary with fabricated content.",
+        "[INFERRED -- needs confirmation] System must return a bounded, short-form summary (a few sentences or bullets, not a multi-page document) under normal conditions -- no explicit length limit was stated in discovery, carried to Open Questions (Section 11) -- and must still return whatever partial content is available when data for one of the four summary components (history, commitments, stakeholders, opportunity/deal status) is missing, rather than failing the whole request.",
+        "System must generate the summary for a named customer when the request unambiguously identifies exactly one seeded customer account, and must respond that it could not identify the requested customer -- rather than guessing -- when the request names an unrecognized or ambiguous customer.",
+        "[INFERRED -- needs confirmation] System must synthesize the opportunity/deal-status component narratively from that customer's recorded interaction notes and commitments -- since no discrete deal-stage field exists in the structured store (Section 13.1) -- when the thread contains content indicating where the deal/opportunity stands, and must state that no opportunity/deal-status information has been captured yet for that customer -- rather than fabricating a stage or outcome -- when the thread contains no such content."
+      ]
+    },
+    {
+      "id": "F-6",
+      "name": "Customer Profile / Conversational History View",
+      "priority": "Must",
+      "source": "Section 9 item 'a customer profile view ... showing the running conversational history', tied directly to confirmed Goal 3 and Goal 4 (Section 3). [INFERRED -- needs confirmation] exact layout/fields not discussed in the interview.",
+      "acceptance_criteria": [
+        "System must display a customer's captured notes and extracted items in chronological order on that customer's profile view when at least one note exists, and must display an explicit 'no history yet' state when none exists.",
+        "System must display a newly captured note and its extracted items (per F-1, F-2) on the correct customer's profile view automatically, without requiring the rep to take further action, when the note is tagged to that customer's thread, and must not display that note or its items on any other customer's profile view when it is not tagged to that customer."
+      ]
+    },
+    {
+      "id": "F-7",
+      "name": "Shared Customer Thread Access",
+      "priority": "Must",
+      "source": "Discovery Brief Sections 2, 5, 7 (single shared login, confirmed via interview follow-up) reconciled against Section 9 item 'a simple shared view so a second team member ... can see and add to the same customer thread'. [INFERRED -- needs confirmation] adopted as already satisfied by the confirmed single-shared-login access model rather than as a feature requiring a distinct second persona.",
+      "acceptance_criteria": [
+        "System must show identical customer-thread content to every session authenticated via the shared login, and must not present different content to two sessions viewing the same customer at the same time, since no per-rep identity exists in this version.",
+        "[INFERRED -- needs confirmation] System must persist a note added from one session so that it is immediately visible to another concurrent session viewing the same customer thread, and must not silently lose one session's addition when another session adds to the same thread at nearly the same time."
+      ]
+    }
+  ],
+  "nfrs": [
+    {
+      "category": "Security / Privacy",
+      "requirement": "System must operate only on seeded demo data and must not process real customer PII (personally identifiable information) in this version -- this constraint applies equally to the structured store and to the vector store of embeddings (Section 13): an embedding of real PII would be exactly as non-compliant as a structured record of it."
+    },
+    {
+      "category": "Access Control",
+      "requirement": "System must authenticate all use via a single shared login and must not implement per-individual authentication in this version. Override reason: explicit demo simplification, confirmed via interview follow-up."
+    },
+    {
+      "category": "Integration",
+      "requirement": "System must simulate every external system touchpoint via adapters -- including the CRM, calendar, SharePoint and email adapters detailed in Section 14 -- and must not call a real external system in this version."
+    },
+    {
+      "category": "Concurrency",
+      "requirement": "[INFERRED -- needs confirmation] System must handle at least two concurrent shared-login sessions accessing the same customer thread without silently losing data."
+    },
+    {
+      "category": "Data Architecture",
+      "requirement": "System must persist core CRM entities (accounts, contacts, interactions, commitments) in a structured, queryable store, and must additionally hold embeddings of extracted unstructured content (MoM, free text, email, SharePoint-derived material) in a vector store, so that F-3 and F-5 can retrieve context semantically rather than by exact keyword/exact-match search alone. Added in v1.1 per Gate 2 revise feedback; elaborated in Section 13."
+    }
+  ],
+  "success_metrics": [
+    {
+      "metric": "Demo agents functioning end-to-end on seeded data (Discovery Brief Section 3 stated success metric)",
+      "target": "Every feature F-1 through F-7's defined acceptance criteria executes successfully against the seeded demo dataset",
+      "how_measured": "Manual walkthrough of the full capture -> extraction -> query -> commitment-tracking -> brief flow against seeded accounts. [INFERRED -- needs confirmation] exact seed-scenario list not yet enumerated, carried to Open Questions."
+    },
+    {
+      "metric": "[INFERRED -- needs confirmation] Commitment due-date classification accuracy",
+      "target": "100% of commitments with a stated due date are correctly classified as due-soon or overdue per F-4",
+      "how_measured": "Manual check of seeded commitments with known due dates against the due-soon/overdue list on a known reference date"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency": "Seeded demo dataset (customer accounts, contacts, prior interaction history including MOM, email and SharePoint content)",
+      "impact_level": "TIGHT",
+      "status": "Required before any feature can be exercised"
+    },
+    {
+      "dependency": "Adapters simulating external systems in place of real integrations -- specifically a CRM adapter, a calendar adapter, a SharePoint adapter, and (added in v1.1 per Gate 2 feedback) an email adapter, each backed by stub/seeded data behind a defined interface contract",
+      "impact_level": "MODERATE",
+      "status": "Needed to represent CRM/calendar/SharePoint/email-sourced content without real connections; concrete interface-contract detail elaborated in Section 14"
+    },
+    {
+      "dependency": "[INFERRED -- needs confirmation] Natural-language understanding/extraction capability underlying Capture, Extraction, Memory/Q&A and Brief-Me-on-Customer agents",
+      "impact_level": "TIGHT",
+      "status": "Not explicitly named in the interview but functionally required; status open"
+    },
+    {
+      "dependency": "Structured/historical data store for core CRM entities (accounts, contacts, interactions, commitments)",
+      "impact_level": "TIGHT",
+      "status": "Added in v1.1 per Gate 2 revise feedback; F-1, F-2, F-4, F-6 and F-7 all read from or write to this store -- elaborated in Section 13.1"
+    },
+    {
+      "dependency": "Vector database holding embeddings of extracted unstructured content (MoM, free text, email, SharePoint docs)",
+      "impact_level": "TIGHT",
+      "status": "Added in v1.1 per Gate 2 revise feedback; F-3 and F-5's semantic-retrieval requirement depends on this store existing -- elaborated in Section 13.2"
+    }
+  ],
+  "assumptions": [
+    "[INFERRED -- needs confirmation] The problem statement is based on general CRM-adoption knowledge, not validated research on this specific rep population.",
+    "[INFERRED -- needs confirmation] Single shared login means commitments/notes are not attributed to an individual rep in this version.",
+    "[INFERRED -- needs confirmation] 'End-to-end on seeded data' requires the seed dataset to exercise every feature in this PRD (F-1-F-7).",
+    "[INFERRED -- needs confirmation] A future phase moving to real customer data would require revisiting compliance/PII handling.",
+    "[INFERRED -- needs confirmation] Business-card scanning is included as an in-scope, additional capture input alongside typed one-liner capture; exact OCR/parsing approach is unconfirmed.",
+    "[INFERRED -- needs confirmation] Brief-Me-on-Customer is treated as a composition of the confirmed Memory/Q&A and Commitment Tracking capabilities rather than an independently confirmed capability.",
+    "[INFERRED -- needs confirmation] The confirmed single-shared-login model is assumed sufficient to satisfy Section 9's 'second team member shared view' item, without introducing a second persona.",
+    "[INFERRED -- needs confirmation] The three example Memory/Q&A queries are illustrative of the required NL query capability, not an exhaustive supported list.",
+    "[RESOLVED -- Gate 2 decision, 2026-09-17] The structured-store and vector-store technologies (Section 13) were unconfirmed as of v1.1. The human decided them directly rather than leaving them to the Architecture stage: structured store = SQLite, vector store = Chroma.",
+    "[INFERRED -- needs confirmation, partially resolved] Gate 2's second reply confirmed the vector store's chunking strategy directly: semantic chunking (Section 13.2). The specific embedding model, and the re-embedding trigger strategy for when a source note or document changes, remain unconfirmed and are still left to the Architecture stage.",
+    "[DELEGATED DECISION -- human authorized requirements-agent to choose at Gate 2] The full interface contract per adapter (CRM, calendar, SharePoint, email), beyond the two illustrative method names given at the first Gate 2 reply, was delegated by the human to requirements-agent's own judgment (\"you can choose the best method as needed\") rather than confirmed directly. A proposed contract is recorded in Section 14.1a -- an authorized design choice, not a human-confirmed exhaustive contract.",
+    "[DELEGATED DECISION -- human authorized requirements-agent to choose at Gate 2] The email adapter's required operations were likewise delegated to requirements-agent's judgment. Section 14.1a proposes read-only message retrieval only, with no simulated send capability, since no feature in this PRD requires composing or sending email.",
+    "[INFERRED -- needs confirmation] The Brief-Me-on-Customer opportunity/deal-status component (F-5, added in v1.3 per the corrected canonical idea document) is synthesized narratively from existing Interactions/Commitments content (Section 13.1) rather than read from a new structured deal-stage field, since no feature in this PRD provides a mechanism to capture or set a discrete deal stage.",
+    "[Added v1.5] [INFERRED — needs confirmation] The mechanism for recognizing and disambiguating distinct attendee names within a typed free-text interaction entry (e.g., determining that \"Priya and Arjun\" names two people rather than one compound string, and how confidently a token must be recognized as a person's name before it is recorded) was never discussed in the interview. Only the underlying capability — that attendee names must be extracted from typed text, not solely from the optional business-card path — is confirmed by this revision (F-1 AC5); the mechanism itself remains open."
+  ],
+  "open_questions": [
+    "Current-state pain points and the tools reps actually use today were not identified in discovery -- validate with real reps before treating the problem statement as more than a working assumption. (Carried from Discovery Brief Open Item 1.)",
+    "The exact set of seed scenarios -- and any numeric thresholds -- that constitute 'agents functioning end-to-end' are not yet defined. (Carried from Discovery Brief Open Item 2, refined.)",
+    "Whether commitments/notes will ever need per-rep attribution beyond this demo is unresolved. (Carried from Discovery Brief Open Item 3.)",
+    "The compliance/data-handling path for a future phase using real customer data has not been discussed and is unresolved. (Carried from Discovery Brief Open Item 4.)",
+    "Is business-card OCR scanning worth implementing for this demo, or is typed-only capture acceptable? (Relates to F-1 AC2.)",
+    "Is the 'due soon' look-ahead window for commitment tracking a specific number of days, and if so, what is it? (Relates to F-4 AC2.)",
+    "Is there a maximum length or format expected for the Brief-Me-on-Customer summary beyond 'short'? (Relates to F-5 AC2.)",
+    "Are the three example Memory/Q&A queries exhaustive, or must additional query types be explicitly supported? (Relates to F-3.)",
+    "Should concurrent-session editing conflicts on a shared customer thread (F-7 AC2) be handled a specific way, or is last-write-wins acceptable for this demo?",
+    "RESOLVED -- Gate 2 decision (2026-09-17): Structured store = SQLite; vector store = Chroma, decided directly by the human reviewer rather than left to the Architecture stage. Hosting/cost constraints were not raised as part of this decision and are not a currently known open item. (Relates to Section 13; see Assumption 9.)",
+    "PARTIALLY RESOLVED -- Gate 2 decision (2026-09-17): the chunking strategy is confirmed as semantic chunking (Section 13.2). Still open: which specific embedding model to use, and how re-embedding should be triggered when a source note or document changes. (Relates to Section 13.2; see Assumption 10.)",
+    "RESOLVED BY DELEGATION -- Gate 2 (2026-09-17): the human explicitly delegated this decision to requirements-agent (\"you can choose the best method as needed\") rather than answering it directly. A proposed interface contract for all four adapters is recorded in Section 14.1a, tagged [DELEGATED DECISION] since it is an authorized design choice, not a human-confirmed exhaustive contract. (Relates to Section 14.1a; see Assumption 11.)",
+    "PARTIALLY RESOLVED BY DELEGATION -- Gate 2 (2026-09-17): the human delegated adapter-related decisions to requirements-agent; Section 14.1a proposes read-only message retrieval for the email adapter (no simulated send), tagged [DELEGATED DECISION]. Still open: whether a specific vendor/stakeholder communication artifact is required beyond this PRD's Section 14.2 disclosure statement -- the Gate 2 decision did not address this half of the question. (Relates to Section 14.2; see Assumption 12.)",
+    "ADDED v1.3: Is the Brief-Me-on-Customer summary's opportunity/deal-status component (F-5 AC4) expected to be a structured, selectable pipeline-style field (e.g., Prospecting/Demo/Negotiation/Closed, analogous to a traditional CRM pipeline stage), or a free-text narrative synthesized from existing interaction-note/commitment content with no distinct stored field? This was never discussed in the interview; v1.3 adopts narrative synthesis as its working design (Section 13.1), pending human confirmation. (Relates to Section 13.1; see Assumption 13.)",
+    "ADDED v1.5: What specific mechanism should the Capture Agent use to recognize and disambiguate distinct attendee names within a typed free-text entry (e.g., named-entity recognition, an LLM-based extraction step, or a simpler heuristic), and how confidently must a token be recognized as a person's name before it is recorded as an attendee? This was never discussed in the interview — F-1 AC5 confirms the capability (attendee names must be extracted from typed text, not only from a business-card scan) but not the mechanism. (Relates to F-1 AC5, Section 13.1; see Assumption 14.)"
+  ],
+  "self_verification": {
+    "result": "PASS",
+    "checked_at": "2026-09-17T11:09:52.192Z",
+    "fixed_before_handoff": [],
+    "note": "Ran an actual diff -u between PRD v1.4 and this v1.5 draft before writing the revision note, and wrote the revision note directly from that diff output rather than from memory (per the standing checklist item added after V-P2/V-P4/V-P5/V-P6). The diff produced exactly 9 hunks, landing in: Section 1 (Overview/revision note, fully rewritten each cycle), Section 6 F-1 (Source paragraph extended; Description extended; new AC5 appended after existing AC4), Section 10 (new Assumption 14 row appended), Section 11 (new Open Question 15 appended), Section 12 (supersession chain: v1.3 line reworded from '(superseded by this document)' to '(superseded)', new v1.4-superseded line added), and Section 13.1 (introductory sentence's entity list extended; Interactions bullet restated with explicit fields; new Interaction-attendees bullet added; Commitments bullet restated with explicit fields; new discussion-points-have-no-entity paragraph added; new relational-schema confirmatory note added) and Section 13.3 (one wholly new cross-reference bullet naming the v1.5 additions, plus its pre-existing Section 10 and Section 11 bullets each edited in place -- three changed items, not two, and only one genuinely new). Confirmed zero diff hunks fall within every section/AC claimed unchanged: Sections 2, 3, 4, 5, 7, 8, 9, 14 in full; F-2, F-3 (including AC3 itself, which is untouched — only F-1 now supplies the attendee data F-3 AC3 already promised to read), F-4, F-5, F-6, F-7 within Section 6; Assumptions 1-13; Open Questions 1-14; Section 13.2 in full. No existing acceptance criterion's wording changed anywhere in this cycle — F-1 AC5 is a pure addition after the existing AC1-AC4, none of which were edited, so no AC re-count disclosure beyond 'AC5 is new' is needed (unlike v1.3's cycle, which both added an AC and edited two existing ones). requirements.json's structured fields (document/version, artifacts, features[F-1].acceptance_criteria, assumptions, open_questions) were updated in step with the document so state does not diverge from it. This revision's provenance (a human-agent design discussion analyzing the canonical capture example, not a validator finding and not an idea-document cross-check) is stated in both the document's revision note and this note."
+  },
+  "drafted_at": "2026-09-17T11:09:52.192Z",
+  "published": {
+    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5883166742/Conversational+CRM+PRD+v1.2",
+    "published_at": "2026-09-17T09:40:51.194Z",
+    "approval_comment_id": "5883691066"
+  },
+  "gate": {
+    "status": "approved",
+    "reviewed_by": "Harikrishnan M",
+    "reviewed_at": "2026-09-17T11:26:09.915Z",
+    "reply": "publish",
+    "artifact_manifest": [
+      {
+        "role": "requirements",
+        "path": "docs/requirements/PRD-conversational-crm-v1.5.md",
+        "version": "1.5",
+        "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5"
+      }
+    ],
+    "owner_role": "business-analyst",
+    "answered_by": "Harikrishnan M"
+  },
+  "cost_log": [
+    {
+      "stage": "requirements",
+      "agent": "requirements-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 42000,
+      "timestamp": "2026-09-17T07:52:10.240Z"
+    },
+    {
+      "stage": "prd-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 17000,
+      "note": "Independent review of PRD v1.0: read the full PRD, cross-checked it against Discovery Brief v1.1 (all sections, with particular attention to Section 9's 11 carried-forward items and stretch goal), verified requirements.json's version/artifacts fields landed correctly (V-D1-class fix), spot-checked acceptance criteria for two-branch structure, confirmed the Mermaid flowchart, and ran the universal security/PII/inference-honesty/placeholder checks. Found 1 medium finding (V-P1: Success Metrics target text covers only F-1-F-6, excluding Must-priority F-7, contradicting the PRD's own Assumption 3).",
+      "timestamp": "2026-09-17T08:15:00.000Z"
+    },
+    {
+      "stage": "requirements-revise",
+      "agent": "requirements-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 21000,
+      "note": "Redraft of PRD v1.0 -> v1.1 per Gate 2 revise feedback: read v1.0 in full, added Section 13 (Data Architecture) and Section 14 (Integration Approach -- Adapter-Only), cross-referenced/updated the 2 existing NFR rows and 1 existing dependency row those sections touch, added 2 new dependency rows, 1 new NFR row, 4 new assumptions and 4 new open questions, re-ran full self-verification checklist against the whole v1.1 document.",
+      "timestamp": "2026-09-17T08:58:42.443Z"
+    },
+    {
+      "stage": "prd-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 19000,
+      "note": "Independent re-review of PRD v1.1 (re-review after revise cycle): diffed v1.0 against v1.1 section by section directly rather than trusting the drafting agent's revision note; confirmed V-P1's fix carried over unchanged in both the document and requirements.json; cross-checked new Sections 13-14 against the verbatim Gate 2 revise feedback (two distinct stores each tied to named features, all four adapters named with interface-contract framing, explicit vendor/stakeholder disclosure line present); confirmed illustrative technical details are tagged [INFERRED]; confirmed Section 14's treatment reconciles with the pre-existing Section 9 adapter-simulation dependency row rather than duplicating/contradicting it; cross-checked requirements.json's nfrs/dependencies/assumptions/open_questions/success_metrics arrays against the document for drift; re-ran universal security/PII/inference-honesty/placeholder checks and PRD-specific checks (feature sources, Mermaid flowchart, AC success+failure branches) fresh against the full v1.1 document. Found 2 lower-severity issues: V-P2 (medium -- the document's own Section 1 revision note undercounts its actual diff, omitting a new NFR row in Section 7 and a new line in Section 12) and V-P3 (low -- a pre-existing audit-trail timestamp-ordering oddity from the v1.0 review cycle, unrelated to this revision's content).",
+      "timestamp": "2026-09-17T09:20:00.000Z"
+    },
+    {
+      "stage": "requirements-revise-2",
+      "agent": "requirements-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 15000,
+      "note": "Second redraft of PRD v1.1 -> v1.2 per Gate 2's second revise reply: read v1.1 in full, updated Section 13 to state SQLite/Chroma/semantic-chunking as Gate-2-confirmed facts (with a description of what semantic chunking means for MoM/free-text/email/SharePoint content types), added Section 14.1a proposing a concrete interface contract for all four adapters tagged as a delegated decision, updated Section 7 (1 NFR row), Section 9 (3 dependency rows), Section 10 (Assumptions 9-12) and Section 11 (Open Questions 10-13), re-ran full self-verification checklist against the whole v1.2 document.",
+      "timestamp": "2026-09-17T09:21:34.443Z"
+    },
+    {
+      "stage": "prd-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 20000,
+      "note": "Independent second re-review of PRD v1.2 (re-review after second revise cycle): read v1.1 and v1.2 in full and diffed them section-by-section directly; verified Section 13's three Gate 2-decided facts (SQLite, Chroma, semantic chunking) are tagged [RESOLVED -- Gate 2 decision, 2026-09-17] with an explicit citation, distinct from a bare removed inference tag; verified the embedding model and re-embedding trigger strategy remain correctly tagged [INFERRED -- needs confirmation] and are not conflated with the resolved chunking-strategy decision anywhere in the document (Section 13.2, Section 7, Section 9); verified Section 14.1a's proposed interface contract for all four adapters is tagged [DELEGATED DECISION -- human authorized requirements-agent to choose at Gate 2] consistently, without blurring into either a human-confirmed fact or a plain unconfirmed inference; verified the email adapter's read-only scoping states a reason tied to F-1..F-7's actual needs (no feature requires composing/sending email) rather than asserting it unsupported; cross-checked Open Questions 10-13 and Assumptions rows 9-12 in both the document and requirements.json against each other and against Section 13/14 content for drift; confirmed Sections 1-6 and 8 (features, personas, ACs, success metrics) are byte-identical to v1.1; re-ran universal security/PII/placeholder/inference-honesty checks and PRD-specific checks (Mermaid flowchart, feature sources, AC success+failure coverage) fresh against the complete v1.2 document. Found 1 medium finding: the v1.2 revision note (Section 1) and requirements.json's self_verification.note both omit that Section 12 (Related Pages) changed in this revision -- a recurrence of the exact defect class the prior review caught as V-P2 (revision note undercounting its own diff), this time on the same section again.",
+      "timestamp": "2026-09-17T09:38:00.000Z"
+    },
+    {
+      "stage": "requirements-publish",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 12000,
+      "note": "Published directly in the orchestrator turn (publisher-agent still cannot reach this session's live Atlassian tools from within a spawned subagent context, per the discovery-stage precedent). Created Confluence page, caught and corrected an updateConfluencePage mistake (it replaces the whole page body, not a section -- briefly wiped the page down to one paragraph while trying to fix a markdown round-trip artifact; restored full content within the same turn, verified via token-level diff), fixed a markdown round-trip defect (a line-start \"+\" that re-parsed as a bullet), and posted the gate-approval footer comment.",
+      "timestamp": "2026-09-17T09:40:51.194Z"
+    },
+    {
+      "stage": "requirements-revise-3",
+      "agent": "requirements-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 24000,
+      "note": "Exceptional redraft of PRD v1.2 -> v1.3, reopening an already-approved-and-published gate: read v1.2 in full, read the corrected project.idea_input (Idea 5's full canonical text) fresh, added opportunity/deal status as F-5's fourth synthesized component (Description + new AC4 + Source note distinguishing the now-confirmed capability from the still-inferred mechanism), added a reasoned no-new-structured-entity decision to Section 13.1 with an explicit cross-reference in 13.3 stating Sections 7/9 needed no new row, updated Section 4's scope row and Section 5's journey step to keep the document internally consistent, added Assumption 13 and Open Question 14, updated Section 12's supersession chain. Caught and reverted a self-introduced Section 7/9 edit that would have contradicted the document's own revision note before handoff. Re-ran full self-verification checklist, including the 'On a revise' items, against the whole v1.3 document.",
+      "timestamp": "2026-09-17T10:15:34.731Z"
+    },
+    {
+      "stage": "prd-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 23000,
+      "note": "Exceptional independent re-review of PRD v1.3 (post-publish gate reopened by human cross-verification against the corrected canonical idea document, Idea 5). Diffed v1.2 against v1.3 section-by-section directly rather than trusting the drafting agent's revision note or self_verification claims; cross-checked F-5's added fourth component (opportunity/deal status) verbatim against project.idea_input's actual pitch text; verified the capability-vs-mechanism distinction (canonical-source-confirmed capability vs. still-[INFERRED] representation mechanism) is maintained correctly throughout Source, Description, AC4, Section 13.1, Assumption 13 and Open Question 14; verified Section 13.1's reasoned no-new-structured-entity decision is sound and consistent with F-5's actual acceptance criteria; verified Sections 7 and 9 are genuinely byte-identical to v1.2 by direct diff. Found that Section 13.2's F-5 bullet was in fact edited (now naming the opportunity/deal-status component) even though the document's own Section 1 revision note flatly states 'Section 13.2 itself is unchanged' -- the same revision-note-undercounts-its-own-diff defect class caught previously as V-P2 and V-P4, this time an outright false 'unchanged' claim rather than an omission (V-P5, high). Also found the revision note and self_verification.note both describe the AC changes as 'a new AC4' without disclosing that AC1 and AC2's existing text were also edited in place (V-P6, medium). Also noticed, while reading the full role file, a byte-identical duplicate entry in validation_history for the v1.1 review (same checked_at timestamp, same findings, same text twice) -- a data-integrity issue unrelated to this revision's content (V-P7, low). Re-ran universal security/PII/placeholder/inference-honesty checks and PRD-specific checks fresh against the complete v1.3 document.",
+      "timestamp": "2026-09-17T10:38:00.000Z"
+    },
+    {
+      "stage": "requirements-revise-4",
+      "agent": "requirements-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 16000,
+      "note": "Fourth redraft of PRD v1.3 -> v1.4, per Gate 2's fourth revise reply: a terminology generalization renaming the capture concept from 'meeting' to 'interaction' throughout (Sections 2-7, 9-13.2), while deliberately leaving every genuine scheduled-calendar-meeting reference unchanged (pre-meeting/next-meeting phrasing, the Calendar adapter's 'upcoming meeting(s)', and the MOM/'minutes of meeting' acronym). Ran an actual diff -u against v1.3 before writing the revision note, per the standing self-check added after V-P2/V-P4/V-P5's recurring 'revision note undercounts its own diff' finding class.",
+      "timestamp": "2026-09-17T10:50:13.000Z"
+    },
+    {
+      "stage": "requirements-revise-5",
+      "agent": "requirements-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 18000,
+      "note": "Fifth redraft of PRD v1.4 -> v1.5, per Gate 2's fifth revise reply, closing two gaps surfaced by a human-agent design discussion (not a validator finding): (1) F-1's typed-text capture path now commits to extracting attendee names as a new AC5, extending F-1's Description and Source paragraph; (2) Section 13.1 now states explicit field-level shape for Interactions and Commitments plus a new Interaction-attendees child entity, with an explicit no-structured-entity statement for generic discussion points and a confirmatory relational-schema note. Added Assumption 14 and Open Question 15 for the still-open attendee-name-extraction mechanism. Ran an actual diff -u against v1.4 before writing the revision note, per the standing self-check added after V-P2/V-P4/V-P5/V-P6's recurring 'revision note undercounts its own diff' finding class.",
+      "timestamp": "2026-09-17T11:09:52.192Z"
+    },
+    {
+      "stage": "prd-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 26000,
+      "note": "Independent re-review of PRD v1.5, covering BOTH the v1.3->v1.4 terminology rename (never independently validated before this cycle) and the v1.4->v1.5 content additions. Read the full text of v1.3, v1.4 and v1.5 directly and diffed them section-by-section, line-by-line myself (no Bash/shell tool available in this session, so diffing was done by direct side-by-side reading rather than a mechanical `diff -u`) rather than trusting the drafting agent's revision notes or requirements.json's self_verification claims. Confirmed the meeting->interaction rename is complete and correctly scoped, with all three legitimate exceptions (pre-meeting/next-meeting phrasing, the Calendar adapter's 'upcoming meeting(s)', the MOM acronym) correctly preserved and no missed or over-applied instance found. Confirmed F-1 AC5 states both a success and a failure/empty branch, confirmed F-3 AC3's dependency framing is accurate, confirmed the new Interaction-attendees entity (Section 13.1) matches AC5's cardinality/field treatment and cross-references correctly, and confirmed the discussion-points-get-no-entity reasoning is sound and matches F-3 AC1's existing design. Re-confirmed V-P1, V-P4 and V-P7's fixes still hold. Found 2 new medium findings, both the same recurring 'revision note/self-check misdescribes its own diff' defect class as V-P2/V-P4/V-P5/V-P6: V-P8, F-1 AC5's own leading [INFERRED -- needs confirmation] tag covers the whole AC including the capability assertion, contradicting AC5's own trailing text, F-1's Description/Source, Assumption 14 and Open Question 15, all of which treat the capability as confirmed and only the mechanism as inferred (unlike F-5's precedent, which used a distinct [Confirmed] tag for exactly this split); V-P9, Section 13.3's actual diff is 1 new bullet plus edits to 2 existing bullets, but the document's revision note says 'a new cross-reference bullet' (singular) and requirements.json's self_verification.note says 'two new cross-reference bullets' -- neither matches the actual 1-new-plus-2-edited reality. Re-ran universal security/PII/placeholder/inference-honesty checks and PRD-specific checks (Mermaid flowchart, feature sources, AC success+failure coverage) fresh against the complete v1.5 document.",
+      "timestamp": "2026-09-17T11:34:18.657Z"
+    }
+  ],
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-17T07:52:10.240Z",
+      "actor": "requirements-agent",
+      "phase": "requirements",
+      "event": "drafted",
+      "detail": "PRD written, 7 features (F-1..F-7), self-verification PASS (8 items fixed during self-check before handoff). Section 9's 11 carried-forward items reconciled: 9 adopted in-scope (folded into F-1..F-7, several tagged [INFERRED -- needs confirmation]), 2 explicitly deferred (voice-note capture, enterprise access control) -- none silently dropped, none silently adopted as confirmed fact."
+    },
+    {
+      "timestamp": "2026-09-17T08:15:00.000Z",
+      "actor": "validator-agent",
+      "phase": "requirements_review",
+      "event": "validated",
+      "detail": "1 issue found -- medium severity (V-P1: Success Metrics target text covers only F-1 through F-6, silently excluding Must-priority F-7, contradicting Assumption 3's own statement that the seed dataset must exercise every feature F-1-F-7). Confirmed all 11 Discovery Brief Section 9 items plus the stretch goal are explicitly disposed (adopted-with-rationale or explicitly-deferred) with no silent-drop or silent-adopt, and confirmed requirements.json's version/artifacts fields are now present and correct (V-D1-class fix held on this role file)."
+    },
+    {
+      "timestamp": "2026-09-17T07:57:37.240Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "In-place correction of PRD v1.0 per validator finding on Success Metrics: the F-1..F-6 metric target excluded Must-priority F-7, contradicting Assumption 3 (which says the seed dataset must exercise every feature F-1-F-7). Extended to F-1..F-7 in both the PRD document and requirements.json.success_metrics. Carve-out applies: v1.0 has no gate approval yet."
+    },
+    {
+      "timestamp": "2026-09-17T07:57:42.640Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "requirements_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.0 recorded: 1 finding(s) (1 medium). Gate manifest pinned to docs/requirements/PRD-conversational-crm-v1.0.md@f1ceb632b4b2. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T08:52:15.690Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "revise",
+      "detail": "Gate 2 reply: revise: Add the following items along with the tasks that you have created. **Data architecture** - Two data stores: a historical/structured database for core CRM entities (accounts, contacts, meetings, commitments), and a vector database holding embeddings of extracted unstructured content (MoM, free text, emails, SharePoint docs) so the Memory/Q&A and Brief-Me agents can retrieve context semantically. **Integration approach — adaptor-only** Connections to a real CRM, calendar, SharePoint, and (worth adding) email are scoped as adapters only — each defining a clear interface contract (e.g., getUpcomingEvents(), fetchDocument()) backed by stub/seeded data, not real auth, sync, or error handling. This proves extensibility (\"swap the stub for a real connector later\") without spending build budget on commodity integration work. This limitation should be flagged explicitly to the vendor and stakeholders so the demo isn't later read as having live integrations it doesn't have."
+    },
+    {
+      "timestamp": "2026-09-17T08:58:42.443Z",
+      "actor": "requirements-agent",
+      "phase": "requirements",
+      "event": "drafted",
+      "detail": "Redrafted per Gate 2 revise feedback: added Section 13 (Data Architecture: structured store + vector store for semantic retrieval) and Section 14 (Integration Approach -- Adapter-Only: CRM/calendar/SharePoint/email adapters with defined interface contracts, explicit vendor/stakeholder disclosure note). Self-verification PASS."
+    },
+    {
+      "timestamp": "2026-09-17T09:20:00.000Z",
+      "actor": "validator-agent",
+      "phase": "requirements_review",
+      "event": "validated",
+      "detail": "Re-review of PRD v1.1 after revise cycle: 2 issues found (1 medium, 1 low). V-P1's fix confirmed durably carried over unchanged. V-P2 (medium): the document's own Section 1 revision note undercounts its own diff -- doesn't disclose a wholly new NFR row added to Section 7 (only mentions two edited rows) or the new cross-reference line added to Section 12. V-P3 (low): a pre-existing audit-trail timestamp-ordering oddity from the v1.0 review cycle, unrelated to this revision."
+    },
+    {
+      "timestamp": "2026-09-17T09:07:39.088Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "In-place correction of PRD v1.1 per validator finding V-P2 (medium): the Section 1 revision note undercounted its own diff (omitted the new NFR row in Section 7 and the new line in Section 12). Reworded to name every touched section accurately. Carve-out applies: v1.1 has no gate approval yet. V-P3 (low, a pre-existing audit_trail timestamp-ordering anomaly from the v1.0 review cycle) is historical and not corrected — audit_trail is append-only."
+    },
+    {
+      "timestamp": "2026-09-17T09:07:39.132Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "requirements_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.1 recorded: 2 finding(s) (1 medium, 1 low). The prior review of v1.0 moved to validation_history. Gate manifest pinned to docs/requirements/PRD-conversational-crm-v1.1.md@98a315d83758. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T09:14:34.519Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "revise",
+      "detail": "Gate 2 reply: revise: DB : SQLite, VectorDB: Chroma, embedding/chunking strategy: semantic chunking, and other adapter related information, you can choose the best method as needed -- resolves Open Questions 10 (DB tech) and 11 (embedding/chunking strategy) with concrete human decisions; explicitly delegates the remaining adapter interface-contract details (Open Questions 12-13) to requirements-agent's judgment rather than leaving them open."
+    },
+    {
+      "timestamp": "2026-09-17T09:21:34.537Z",
+      "actor": "requirements-agent",
+      "phase": "requirements",
+      "event": "drafted",
+      "detail": "Redrafted per Gate 2 second revise: confirmed SQLite (structured store), Chroma (vector store), semantic chunking as human-decided facts in Section 13, resolving Open Questions 10-11. Delegated adapter interface-contract detail (Open Questions 12-13) to requirements-agent's own judgment per explicit Gate 2 authorization, tagged as a delegated decision, not silently presented as confirmed fact. Self-verification PASS."
+    },
+    {
+      "timestamp": "2026-09-17T09:38:00.000Z",
+      "actor": "validator-agent",
+      "phase": "requirements_review",
+      "event": "validated",
+      "detail": "Re-review of PRD v1.2 after second revise cycle: 1 issue found (medium). Confirmed Section 13's SQLite/Chroma/semantic-chunking facts are correctly tagged as Gate 2-resolved and distinct from the still-open embedding-model/re-embedding-trigger items, which remain [INFERRED -- needs confirmation] everywhere and are never conflated with the resolved chunking decision. Confirmed Section 14.1a's four-adapter interface contract is consistently tagged as a delegated decision, and the email adapter's read-only scoping is reasoned against F-1..F-7's actual needs rather than merely asserted. V-P4 (medium): the v1.2 revision note (Section 1) and self_verification.note both fail to disclose that Section 12 changed in this revision (an existing line's wording changed and a new v1.1-superseded line was added) -- the same defect class as the previously-fixed V-P2, recurring against the same section in the very next revision cycle."
+    },
+    {
+      "timestamp": "2026-09-17T09:30:10.567Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "In-place correction of PRD v1.2 per validator finding V-P4 (medium): the Section 1 revision note again undercounted its own diff (omitted Section 12's new superseded-by line), a recurrence of the V-P2 defect class from v1.1. Reworded to name Section 12. Carve-out applies: v1.2 has no gate approval yet."
+    },
+    {
+      "timestamp": "2026-09-17T09:30:10.614Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "requirements_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.2 recorded: 1 finding(s) (1 medium). The prior review of v1.1 moved to validation_history. Gate manifest pinned to docs/requirements/PRD-conversational-crm-v1.2.md@3bf1db0a8791. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T09:32:41.371Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "gate-reply",
+      "detail": "Gate 2 reply: publish. PRD v1.2 approved (validator issues_found: 1 medium, V-P4, revision-note wording gap, already corrected in place before this gate reply; standing self-check added to requirements-agent.md to prevent recurrence)."
+    },
+    {
+      "timestamp": "2026-09-17T09:40:51.194Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "published",
+      "detail": "confluence -- https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5883166742/Conversational+CRM+PRD+v1.2 (approval comment 5883691066). Published directly by the orchestrator, same reason as discovery-stage publish. Caught and self-corrected an accidental full-page overwrite during a targeted fix attempt -- verified restored content via token-level diff against the intended source before considering publish complete."
+    },
+    {
+      "timestamp": "2026-09-17T10:06:22.896Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "revise",
+      "detail": "EXCEPTIONAL reopening of an already-approved-and-published gate (v1.2), triggered by a human-requested cross-verification against the full canonical idea document (Idea 5) that surfaced a real, traceable content gap missed at every upstream step because project.idea_input itself (now corrected) was an incomplete paraphrase. Gate 2 reply: revise: PRD v1.2 (already approved and published) is missing an explicit component: the Brief-Me-on-Customer feature (F-5) must also synthesize where the opportunity/deal stands, per the full canonical idea document (Idea 5), not just history/commitments/stakeholders. Add this to F-5's description, acceptance criteria, and reconcile with the Data Architecture (Section 13.1) structured-store entities as needed. Workflow phase will move back to \"requirements\" temporarily to permit the redraft, then forward again once re-gated."
+    },
+    {
+      "timestamp": "2026-09-17T10:15:34.731Z",
+      "actor": "requirements-agent",
+      "phase": "requirements",
+      "event": "drafted",
+      "detail": "Redrafted per an exceptional post-publish revise (Gate 2 reopened on the already-approved v1.2): added opportunity/deal status as F-5's fourth synthesized component, per the corrected project.idea_input canonical source. Self-verification PASS."
+    },
+    {
+      "timestamp": "2026-09-17T10:38:00.000Z",
+      "actor": "validator-agent",
+      "phase": "requirements_review",
+      "event": "validated",
+      "detail": "Exceptional re-review of PRD v1.3 (reopened, already-published Gate 2): 3 issues found (1 high, 1 medium, 1 low). V-P5 (high): the document's own Section 1 revision note falsely states 'Section 13.2 itself is unchanged,' but Section 13.2's F-5 bullet was in fact edited to add the opportunity/deal-status component -- requirements.json's own self_verification.note correctly discloses this, so the document's reader-facing revision note is again the less accurate of the two (recurrence of the V-P2/V-P4 defect class, now as a false claim rather than an omission). V-P6 (medium): both notes describe the F-5 AC change as 'a new AC4' without disclosing that AC1 and AC2's existing text were also edited in place. V-P7 (low): a byte-identical duplicate entry found in validation_history for the v1.1 review, unrelated to this revision's content."
+    },
+    {
+      "timestamp": "2026-09-17T10:28:42.933Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "Removed a duplicate entry from validation_history (validator finding V-P7, low): the v1.2 review appeared both as the current `validation` field AND as validation_history[2], byte-identical, before v1.3 had even been recorded -- v1.2 had not yet been superseded, so it should not have been in history at all. The true, single record of the v1.2 review is preserved intact in the (still current, pending this v1.3 recording) `validation` field; only the redundant duplicate copy in validation_history was removed. validation_history now correctly holds [v1.0, v1.1] -- 2 prior reviews, not 3."
+    },
+    {
+      "timestamp": "2026-09-17T10:29:24.176Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "In-place correction of PRD v1.3 per validator findings V-P5 (high) and V-P6 (medium): the revision note falsely claimed Section 13.2 was unchanged (it edited the F-5 bullet) -- corrected to disclose that edit; and undercounted the AC change as only \"a new AC4\" without disclosing AC1 (extended) and AC2 (re-counted three->four) were also edited -- corrected to name all three. Verified against the actual mechanical `diff -u` output between v1.2 and v1.3, not from memory. self_verification.note updated to match. Carve-out applies: v1.3 has no gate approval yet (this is the redraft stage of an exceptional reopened revise)."
+    },
+    {
+      "timestamp": "2026-09-17T10:29:29.308Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "requirements_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.3 recorded: 3 finding(s) (1 high, 1 medium, 1 low). The prior review of v1.2 moved to validation_history. Gate manifest pinned to docs/requirements/PRD-conversational-crm-v1.3.md@91c6b1497459. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T10:41:13.509Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "revise",
+      "detail": "Gate 2 reply on v1.3: revise: Generalize the terminology used throughout the PRD from \"meeting\" to a broader term (e.g., \"interaction\") since a capture can represent a real meeting, a phone call, or an email exchange, not only an in-person/scheduled meeting. Apply consistently: F-1's name and description/ACs, the Section 13.1 structured-store entity currently named \"Meetings\", the flowchart, and the User Journey narrative/step list."
+    },
+    {
+      "timestamp": "2026-09-17T10:50:13.000Z",
+      "actor": "requirements-agent",
+      "phase": "requirements",
+      "event": "drafted",
+      "detail": "Redrafted PRD v1.3 -> v1.4 per Gate 2's fourth revise reply: terminology generalization renaming the capture concept from 'meeting' to 'interaction' throughout (F-1's name/Description/ACs, F-2/F-3/F-5's ACs, Section 7/9's entity lists, Section 10/11's rows, Section 13.1's entity name, Section 13.2's chunking bullet, the flowchart and the User Journey), while explicitly leaving every genuine scheduled-calendar-meeting reference unchanged (Sections 3/4/5/6's 'pre-meeting'/'next meeting' phrasing, the Calendar adapter's 'upcoming meeting(s)' in Section 14.1a, and the MOM/'minutes of meeting' acronym in Sections 7/8/9/13.2, which names a distinct seeded content type). No feature's scope, AC behavior, or priority changed. Self-verification PASS, verified against an actual `diff -u` v1.3->v1.4 before writing the revision note."
+    },
+    {
+      "timestamp": "2026-09-17T11:02:34.140Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "revise",
+      "detail": "Gate 2 reply on v1.4: revise: Close two gaps identified in analysis of F-1/F-2/F-3 and the Section 13 data architecture: (1) F-1's typed one-line-summary path (the primary, confirmed capture method) must explicitly require extracting attendee name(s) as a zero-to-many structured field, the same way business-card scanning already names specific fields (name/company/role) -- this is needed because F-3 AC3 already promises answering \"who attended from their side?\" from captured attendee names, but F-1 never actually commits to capturing them from typed text, only from the optional/INFERRED business-card path. (2) Section 13.1 (structured store) needs an explicit field-level shape, not just entity names: Interactions (one per capture: id, customer thread, timestamp, raw text, source type, match status), a zero-to-many Interaction-Attendees list per interaction (name, optionally company/role), and the existing Commitments entity confirmed as zero-to-many per interaction with a nullable due date. Explicitly state that generic discussion points do NOT get their own structured table -- they are retrieved via the vector store's semantic search (Section 13.2), not via structured rows, consistent with how F-3's \"what did we discuss\" query is already designed to work. Tag the exact free-text name-extraction/disambiguation mechanism as [INFERRED -- needs confirmation] since it was never discussed in the interview -- only the capability (attendee names must be captured from typed text, not only from business cards) is being confirmed now, not the mechanism."
+    },
+    {
+      "timestamp": "2026-09-17T11:09:52.192Z",
+      "actor": "requirements-agent",
+      "phase": "requirements",
+      "event": "drafted",
+      "detail": "Redrafted PRD v1.4 -> v1.5 per Gate 2's fifth revise reply (design-discussion findings, not a validator review): added F-1 AC5 requiring attendee-name extraction from typed free text (Description and Source extended accordingly), and gave Section 13.1 explicit field-level shape for Interactions and Commitments plus a new Interaction-attendees child entity, with an explicit no-structured-entity statement for generic discussion points and a confirmatory relational-schema note. Added Assumption 14 and Open Question 15 for the still-open name-extraction/disambiguation mechanism. Self-verification PASS, verified against an actual diff -u v1.4->v1.5 before writing the revision note."
+    },
+    {
+      "timestamp": "2026-09-17T11:34:18.657Z",
+      "actor": "validator-agent",
+      "phase": "requirements_review",
+      "event": "validated",
+      "detail": "Re-review of PRD v1.5, covering both the v1.3->v1.4 terminology rename (never independently validated before this cycle) and the v1.4->v1.5 content additions. 2 issues found (both medium). Confirmed the meeting->interaction rename is complete and correctly scoped, with all legitimate exceptions preserved and no missed or over-applied instance. Confirmed F-1 AC5's dual success/failure branches, F-3 AC3's dependency framing, the new Interaction-attendees entity's consistency with AC5, and the discussion-points-no-entity reasoning are all sound. V-P8 (medium): F-1 AC5's own leading [INFERRED -- needs confirmation] tag covers the whole AC including the capability assertion, contradicting AC5's own trailing text and every other place this revision treats the capability as confirmed (Description, Source, Assumption 14, Open Question 15), unlike F-5's precedent which used a distinct [Confirmed] tag for exactly this split. V-P9 (medium): Section 13.3's actual diff is 1 new bullet plus 2 edited existing bullets, but the document's revision note says 'a new cross-reference bullet' (singular) and requirements.json's self_verification.note says 'two new cross-reference bullets' -- neither matches, the fifth recurrence of this PRD's 'revision note/self-check misdescribes its own diff' defect class (after V-P2, V-P4, V-P5, V-P6)."
+    },
+    {
+      "timestamp": "2026-09-17T11:24:04.390Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "corrected",
+      "detail": "In-place correction of PRD v1.5 per validator findings V-P8 (medium) and V-P9 (medium): F-1 AC5's leading tag covered the whole AC as [INFERRED], contradicting every other place this revision treats the underlying capability as confirmed -- split into a leading [Confirmed -- capability...] tag plus a separate [INFERRED -- needs confirmation] tag scoped only to the mechanism sentence, matching F-5's established capability-vs-mechanism tagging pattern. Also: the revision note and self_verification.note both undercounted Section 13.3's actual diff (one wholly new bullet plus two pre-existing bullets edited in place = three changed items), described as \"a new cross-reference bullet\" (singular) and \"two new cross-reference bullets\" respectively -- both corrected to state three changed items, only one wholly new. Carve-out applies: v1.5 has no gate approval yet."
+    },
+    {
+      "timestamp": "2026-09-17T11:24:18.335Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "requirements_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.5 recorded: 2 finding(s) (2 medium). The prior review of v1.3 moved to validation_history. Gate manifest pinned to docs/requirements/PRD-conversational-crm-v1.5.md@e5da9f8da576. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T11:26:09.915Z",
+      "actor": "human",
+      "phase": "requirements_review",
+      "event": "gate-reply",
+      "detail": "Gate 2 reply: publish. PRD v1.5 approved (validator issues_found: 2 medium -- V-P8 AC5 tag-scope error, V-P9 Section 13.3 change-count undercounting -- both corrected in place before this gate reply)."
+    }
+  ],
+  "owner_role": null,
+  "note": "Owned by this stage's agent. Single writer -- never edit another role's file.",
+  "artifacts": [
+    {
+      "role": "requirements",
+      "path": "docs/requirements/PRD-conversational-crm-v1.5.md",
+      "version": "1.5",
+      "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5"
+    }
+  ],
+  "validation_history": [
+    {
+      "result": "issues_found",
+      "version_reviewed": "1.0",
+      "summary": "PRD v1.0 correctly and explicitly reconciles all 11 Discovery Brief Section 9 items plus the stretch goal (each disposed as adopted-with-rationale, explicitly-deferred, or flagged) with no silent drop or silent adopt, has a valid Mermaid flowchart, and its spot-checked acceptance criteria all state both a success and a failure/alternate branch. One real internal-consistency defect found: the Success Metrics target text only covers F-1 through F-6, silently excluding the Must-priority F-7, while Assumption 3 in the same document explicitly states the seed dataset must exercise 'every feature in this PRD (F-1-F-7).'",
+      "independence": "Read the full PRD document and requirements.json state fields directly, then cross-read the full Discovery Brief v1.1 (docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md) independently rather than trusting the PRD's own source citations, paying specific attention to Section 9's 11 carried-forward items and the stretch goal, and to whether each feature's `source` field ties adoption to an actually-confirmed Sections 1-8 goal/capability rather than merely to the original idea text. Also read discovery.json's gate/validation history to confirm which Brief version (v1.1) was actually approved and is the one the PRD cites.",
+      "fix_verification": {},
+      "findings": [
+        {
+          "id": "V-P1",
+          "severity": "medium",
+          "finding": "The PRD's stated primary Success Metric target only requires F-1 through F-6's acceptance criteria to execute successfully, silently excluding F-7 (Shared Customer Thread Access), which is itself priority 'Must' in the Scope table. This contradicts the PRD's own Assumption #3 (Section 10), which states 'End-to-end on seeded data requires the seed dataset to exercise every feature in this PRD (F-1-F-7)'. The same F-1-F-6 text is duplicated verbatim in requirements.json's `success_metrics[0].target`, so the gap is not a one-off typo in the prose but is carried into the structured state a human/QA would read as the definition of 'done'.",
+          "evidence": "PRD Section 8 (Success Metrics): 'Every feature F-1 through F-6's defined acceptance criteria executes successfully against the seeded demo dataset'. PRD Section 10, Assumption 3: '\"End-to-end on seeded data\" requires the seed dataset to exercise every feature in this PRD (F-1-F-7).' requirements.json `success_metrics[0].target`: 'Every feature F-1 through F-6's defined acceptance criteria executes successfully against the seeded demo dataset' (identical wording, same omission).",
+          "suggested_fix": "Change the Success Metrics target (both in the PRD document, Section 8, and in requirements.json's success_metrics[0].target) to read 'F-1 through F-7' so the primary success metric covers every Must/Should feature actually in scope, consistent with Assumption 3 and the Scope table's own Must priority for F-7."
+        }
+      ],
+      "checked": [
+        "self_verification.result present and PASS (no missing/FAIL finding needed)",
+        "requirements.json now has non-empty top-level `version` (\"1.0\") and `artifacts` array (path/version matching `document`/`prd.document` exactly) -- confirmed the discovery-stage V-D1-class fix (missing version/artifacts blocking record-validation) actually landed on this role file too, not just claimed in requirements-agent.md's instructions",
+        "project.phase (\"requirements_review\") matches the invocation's stated phase and roles/requirements.json's own gate.status (\"pending\")",
+        "Every feature F-1..F-7 has a non-empty `source` field",
+        "Each feature's source cross-checked against the actual text of Discovery Brief v1.1 Sections 1-8 (goals, target users, scope) -- not just against the PRD's own claim -- including confirming Section 3's actual four goals and Section 2's actual single-persona/shared-login wording match what each F-n source field cites",
+        "Each feature's source cross-checked specifically against Discovery Brief Section 9 (\"Carried Forward From Original Idea\") to confirm the cited Section 9 item genuinely exists there verbatim and is not invented",
+        "All 11 Section 9 items (Capture Agent, Extraction Agent, Memory/Q&A Agent, Commitment Tracking Agent, Brief-Me-on-Customer Agent, business-card scanning, the three NL query examples, due-soon/overdue list, customer profile view, shared view, voice-note capture) plus the enterprise-access-control stretch goal individually traced to an explicit PRD disposition (adopted-in-scope-with-rationale / explicitly-deferred / flagged), per the human's Gate 1 revise reply -- confirmed none were silently dropped and none were silently adopted as already-confirmed fact without an [INFERRED] tag or a stated rationale tying to a Sections 1-8 confirmed goal/capability",
+        "User Journey section (Section 5) contains a syntactically valid Mermaid `flowchart TD` block covering capture through all four downstream agents",
+        "Spot-checked acceptance criteria for F-1 (AC1-4), F-2 (AC1-4), F-3 (AC1-4), F-4 (AC1-4), F-5 (AC1-3), F-6 (AC1-2), F-7 (AC1-2) -- every one states both a success/primary behavior and a distinct failure or alternate branch, not a failure-only or success-only condition",
+        "Full PRD document text scanned for API key/token/credential patterns and real-looking personal-data combinations (name+address/phone/email) -- none found; example contact names (Priya, Arjun / Acme) read as synthetic demo data already present in project.idea_input, not real people",
+        "Placeholder check across full PRD text -- no bare 'TBD' or 'Coming soon' anywhere; only legitimate `[INFERRED -- needs confirmation]` tags used",
+        "Spot-checked several confident-sounding statements (e.g. F-7's 'every user signed in via the single shared login must see the same customer threads', the NFR table's access-control/integration rows) against Discovery Brief Sections 2/4/5/7 to confirm they are genuinely interview-confirmed fact and correctly left untagged, rather than inference dressed as fact",
+        "requirements.json `returned_findings` field checked -- absent/not applicable, since this is the PRD's first draft with no prior validator findings to have declined or returned",
+        "requirements.json cost_log/audit_trail entries checked for presence and consistency with the drafted_at timestamp and self_verification claims"
+      ],
+      "not_checked": [
+        "No SHA-256 hash comparison was run by me; I read the PRD file and requirements.json directly rather than computing/comparing hashes. The coordinator should perform the actual hash comparison via record-validation.cjs before the gate.",
+        "Whether the 8 concrete self_verification.fixed_before_handoff claims (AC rewrites) reflect a real prior draft this agent revised from -- I only reviewed the final v1.0 text handed off, not an earlier in-progress version, so I cannot independently confirm those were genuine before/after fixes versus already-correct text; the resulting v1.0 ACs themselves were checked directly and do state both branches in every spot-checked case.",
+        "Whether the 11+1 Section 9 item count itself is exhaustive against `project.idea_input` -- I relied on the Discovery Brief's own Section 9 text (already independently validated against project.idea_input by validator-agent's prior discovery-stage review, V-D2/v1.1 re-check) rather than re-deriving the item list from project.idea_input myself a second time.",
+        "Downstream User Stories do not exist yet, so no check of whether user-story-agent will actually honor every PRD feature/AC was possible."
+      ],
+      "checked_at": "2026-09-17T07:57:42.640Z"
+    },
+    {
+      "result": "issues_found",
+      "version_reviewed": "1.1",
+      "summary": "V-P1's fix (Success Metrics covering F-1 through F-7) carried over unchanged and correctly into v1.1, in both the PRD document and requirements.json. New Section 13 (Data Architecture) and Section 14 (Integration Approach) faithfully implement the Gate 2 revise feedback: two distinct stores each tied to specific features, all four named adapters (CRM/calendar/SharePoint/email) each framed with an interface contract, and the explicit vendor/stakeholder disclosure line the feedback demanded. Illustrative technical details are consistently tagged [INFERRED -- needs confirmation]. Sections 1-6 and 8 are byte-identical to v1.0; Sections 7, 9, 10, 11 changed only as additive/cross-referencing edits, consistent with the drafting agent's claim. Two lower-severity issues found: the PRD's own Section 1 revision note undercounts its own diff (omits that Section 12 gained a new line, and that Section 7 gained a wholly new NFR row, not just two edited ones), and a pre-existing timestamp-ordering oddity in the audit trail/cost_log from the prior review cycle.",
+      "independence": "Read requirements.json directly, then read both PRD-conversational-crm-v1.0.md and PRD-conversational-crm-v1.1.md in full and diffed them section-by-section myself (not trusting the drafting agent's own revision-note or self_verification claims about what changed), cross-checking every changed/added line in Sections 7, 9, 10, 11, 12, 13, 14 against the verbatim Gate 2 revise feedback recorded in audit_trail, and cross-checking requirements.json's structured nfrs/dependencies/assumptions/open_questions/success_metrics arrays against the corresponding document prose for drift.",
+      "fix_verification": {
+        "V-P1": "Fixed and durably carried over. PRD v1.1 Section 8 and requirements.json success_metrics[0].target both still read 'Every feature F-1 through F-7's defined acceptance criteria executes successfully...' -- unchanged from the in-place v1.0 correction, and not reverted or re-truncated by the v1.1 redraft."
+      },
+      "findings": [
+        {
+          "id": "V-P2",
+          "severity": "medium",
+          "finding": "The PRD's own Section 1 'Revision note' -- the reader-facing summary of what changed between v1.0 and v1.1, which is exactly what a human at the gate is likely to trust instead of independently diffing two ~500-line documents -- understates its own diff in two places. (1) It says Sections 1-12 are unchanged 'except for two NFR rows (Section 7)', but Section 7 actually gained a third, wholly new NFR row ('Data Architecture') in addition to the two rows (Security/Privacy, Integration) that were edited -- the note never says a new row was added, only that two existing rows were touched. (2) The note lists Sections 7, 9, 10 and 11 as the only sections carrying edits beyond the new Sections 13-14, but Section 12 (Related Pages) also changed: v1.1 adds a new line pointing to the superseded v1.0 document that does not exist in v1.0's Section 12 at all. Both changes are themselves benign and consistent with the revise request, and requirements.json's self_verification.note (the internal check) *does* correctly include Section 12 in its 'Sections 7, 9-12 confirmed as additive/cross-referencing edits' statement -- so the underlying self-check was more accurate than the document's own front-matter summary of itself. The defect is that the two disagree: the document's own revision note is the one place most likely to be read at the gate, and it is the less accurate of the two.",
+          "evidence": "PRD v1.1 Section 1, 'Revision note': 'Sections 1-12 are unchanged from v1.0 except for two NFR rows (Section 7) and one dependency row plus two new dependency rows (Section 9)... and additions to Assumptions/Open Questions (Sections 10-11)...' -- no mention of Section 12 or of a new (not merely edited) NFR row. PRD v1.1 Section 7 table has 5 rows (Security/Privacy, Access Control, Integration, Concurrency, Data Architecture) vs. v1.0's 4 rows -- Data Architecture is new, not an edit to an existing row. PRD v1.1 Section 12: 'Discovery Brief: ...' plus a second line 'PRD v1.0 (superseded by this document): docs/requirements/PRD-conversational-crm-v1.0.md' -- PRD v1.0 Section 12 has only the first line. requirements.json self_verification.note: 'Sections 7, 9-12 confirmed as additive/cross-referencing edits only' (correctly includes 12).",
+          "suggested_fix": "Update the Section 1 revision note to state accurately: 'one new NFR row (Data Architecture) added to Section 7, in addition to two existing rows edited' and add Section 12 to the list of sections carrying an additive cross-reference (the new superseded-by line)."
+        },
+        {
+          "id": "V-P3",
+          "severity": "low",
+          "finding": "requirements.json's audit_trail (and the matching cost_log entry) records the v1.0 validator's 'validated' event with timestamp 2026-09-17T08:15:00.000Z, but this entry appears in the array *before* the 'corrected' (07:57:37) and 'validation_recorded' (07:57:42) entries that logically preceded it, and validation.checked_at for that same review is 07:57:42 -- roughly 17 minutes earlier than the 'validated' audit entry's own timestamp. This predates the v1.0->v1.1 revision under review here and does not affect any v1.1 content, but it is worth a human sanity-check on whether 08:15:00 reflects a genuine (if oddly ordered) wall-clock event or a copy/paste timestamp error, since CLAUDE.md describes this audit trail as 'a single chronological log'.",
+          "evidence": "requirements.json audit_trail: entry 2 (event 'validated', timestamp 08:15:00.000Z) precedes entry 3 (event 'corrected', timestamp 07:57:37.240Z) and entry 4 (event 'validation_recorded', timestamp 07:57:42.640Z) in array order, while validation.checked_at = '2026-09-17T07:57:42.640Z'.",
+          "suggested_fix": "No action needed against v1.1 itself; flagging for awareness only. If this recurs, confirm whether the validator's own audit/cost_log timestamp should be set at analysis time (matching checked_at) rather than at final-turn-completion time."
+        }
+      ],
+      "checked": [
+        "self_verification.result present and PASS on requirements.json (no missing/FAIL finding needed)",
+        "Diffed PRD-conversational-crm-v1.0.md against PRD-conversational-crm-v1.1.md section by section: Sections 2, 3, 4, 5, 6 (all of F-1 through F-7 including source/description/AC text), and 8 (Success Metrics) confirmed byte-for-byte identical",
+        "V-P1's fix (Success Metrics F-1 through F-7) confirmed present and unchanged in both the PRD document Section 8 and requirements.json success_metrics[0].target",
+        "Section 7 (NFRs): confirmed Security/Privacy and Integration rows were extended additively (cross-referencing new Sections 13/14) without altering their original normative text, and confirmed the new Data Architecture row is consistent with Section 13's content and with requirements.json's nfrs array",
+        "Section 9 (Dependencies): confirmed the pre-existing adapter-simulation row was updated to name all four adapters (CRM/calendar/SharePoint/email) and reconciled explicitly in Section 14.3 as an elaboration, not a contradiction or duplicate, of that same row; confirmed the two new TIGHT rows (structured store, vector store) match requirements.json's dependencies array verbatim",
+        "Section 10 (Assumptions) and Section 11 (Open Questions): confirmed the 8 (assumptions) / 9 (open questions) original v1.0 items are unchanged, and the 4 new items added to each are reflected verbatim in requirements.json's assumptions/open_questions arrays",
+        "Section 13 (Data Architecture): confirmed it describes two distinct stores (13.1 structured, 13.2 vector) rather than a generic 'a database', and ties 13.1 to F-1/F-2/F-4/F-6/F-7 and 13.2 to F-3/F-5 by name with specific field-level justification for each tie",
+        "Section 14 (Integration Approach): confirmed all four adapters (CRM, calendar, SharePoint, email) are named, each under an interface-contract framing (14.1), and confirmed the explicit vendor/stakeholder disclosure sentence required by the Gate 2 feedback is present verbatim in bold (14.2)",
+        "Confirmed illustrative technical details -- specific DB/vector-DB technology (13.1/13.2), embedding/chunking strategy (13.2), and the two illustrative method names getUpcomingEvents()/fetchDocument() (14.1) -- are all tagged [INFERRED -- needs confirmation] and carried to Assumptions 9-12 / Open Questions 10-13, not stated as confirmed fact",
+        "Confirmed Section 14's treatment of the pre-existing Section 9 adapter-simulation dependency row reconciles with (elaborates, does not duplicate or contradict) that row, per Section 14.3's own cross-reference statement, verified directly against the actual Section 9 table text in both versions",
+        "Cross-checked requirements.json's nfrs, dependencies, assumptions, open_questions and success_metrics arrays against the corresponding v1.1 document sections -- no prose/state drift found in any of the five",
+        "Re-ran universal security/PII scan across the full v1.1 document -- no credential-like strings, no real-looking personal data (example names/companies read as synthetic demo data)",
+        "Re-ran inference-honesty spot-check across v1.1's new Sections 13-14 and the modified rows in 7/9/10/11 -- no confident factual claim found that should have been tagged [INFERRED] but wasn't",
+        "Re-ran placeholder check across the full v1.1 document -- no bare 'TBD' or 'Coming soon'; only legitimate [INFERRED -- needs confirmation] tags",
+        "Re-confirmed every feature F-1..F-7 still has a non-empty source field (unchanged from v1.0, already validated)",
+        "Re-confirmed the Mermaid flowchart TD block in Section 5 is still present and unchanged",
+        "Re-spot-checked acceptance criteria for F-1, F-3, F-5, F-7 -- each still states both a success/primary behavior and a distinct failure or alternate branch (unchanged text from the already-validated v1.0)",
+        "Checked requirements.json for returned_findings -- absent/not applicable, no declined findings to trace this cycle",
+        "Checked gate.artifact_manifest -- still pins v1.0's path/hash as expected for a not-yet-recorded review; this is pending state, not a finding, and should be refreshed to v1.1 by the record-validation tool run"
+      ],
+      "not_checked": [
+        "No SHA-256 hash comparison was run by me; I read PRD-conversational-crm-v1.0.md and v1.1.md directly via the Read tool rather than computing/comparing hashes. The coordinator should perform the actual hash comparison via record-validation.cjs before the gate.",
+        "Did not re-derive Discovery Brief Section 9's 11-item disposition from scratch again this cycle -- Sections 1-6 and 8 (where that disposition lives) are confirmed byte-identical to the already-independently-validated v1.0, so I relied on the prior review's independent cross-check of that material rather than repeating it.",
+        "Did not re-fetch or re-read the Discovery Brief document itself this cycle, since no feature source field changed between v1.0 and v1.1 and those citations were already independently verified against the Brief in the prior (v1.0) review.",
+        "Downstream User Stories do not exist yet, so no check of whether user-story-agent will honor the new Section 13/14 content (e.g., whether any future story implies real adapter auth/sync contradicting the adapter-only NFR) was possible.",
+        "Did not independently verify wall-clock plausibility of the audit_trail/cost_log timestamp ordering noted in V-P3 beyond what is stated in the finding -- flagged for human awareness rather than investigated further, since it predates this revision cycle."
+      ],
+      "checked_at": "2026-09-17T09:07:39.132Z"
+    },
+    {
+      "result": "issues_found",
+      "version_reviewed": "1.2",
+      "summary": "PRD v1.2 correctly implements Gate 2's second revise reply: Section 13 states SQLite, Chroma and semantic chunking as human-decided facts tagged `[RESOLVED — Gate 2 decision, 2026-09-17]`, distinct from a silently-removed inference tag, and correctly leaves the embedding model and re-embedding trigger strategy tagged `[INFERRED — needs confirmation]` everywhere they appear (Section 13.2, and the Section 7/9 cross-references), with no conflation between 'chunking strategy decided' and 'embedding approach decided' anywhere in the document. Section 14.1a proposes a concrete interface contract for all four adapters, consistently tagged `[DELEGATED DECISION — human authorized requirements-agent to choose at Gate 2]`, and the email adapter's read-only scoping states a reason tied to F-1 through F-7's actual needs (no feature requires composing/sending email) rather than being merely asserted. Open Questions 10-13 and Assumptions rows 9-12 match the document and requirements.json exactly, with correct resolved/partially-resolved/delegated status and nothing silently deleted. Sections 1-6 and 8 (features, personas, scope, user journey, success metrics) are byte-identical to v1.1. One medium finding: the document's own Section 1 revision note (the exact place a gate reviewer is most likely to trust instead of independently diffing two ~500-line documents) and requirements.json's self_verification.note both omit that Section 12 changed in this revision -- a recurrence of the identical defect class the prior review caught and had fixed as V-P2, this time landing on the same section again.",
+      "independence": "Read requirements.json directly, then read PRD-conversational-crm-v1.1.md and PRD-conversational-crm-v1.2.md in full and diffed them section-by-section myself rather than trusting the drafting agent's revision note or self_verification claims about what changed. Cross-checked every changed line in Sections 7, 9, 10, 11, 13, 14 against the verbatim Gate 2 second revise reply recorded in audit_trail ('DB : SQLite, VectorDB: Chroma, embedding/chunking strategy: semantic chunking, and other adapter related information, you can choose the best method as needed'), specifically testing whether the chunking-strategy decision was ever silently extended to cover the embedding model or re-embedding trigger (it was not, anywhere). Cross-checked requirements.json's assumptions/open_questions arrays against the corresponding v1.2 document prose for drift.",
+      "fix_verification": {
+        "V-P1": "Still fixed and durably carried over into v1.2 unchanged. PRD v1.2 Section 8 and requirements.json success_metrics[0].target both still read 'Every feature F-1 through F-7's defined acceptance criteria executes successfully...'.",
+        "V-P2": "Fixed within v1.1 and that fix held for v1.1's own lifetime. Not directly applicable to v1.2, whose Section 1 revision note was freshly authored for this version rather than inheriting v1.1's corrected text -- and the fresh authoring reintroduced the identical defect class (a revision note undercounting its own diff) against a different section instance. See new finding V-P4.",
+        "V-P3": "Historical/informational only, as scoped by the original finding; predates this revision cycle, unrelated to v1.2's content, and requires no action here."
+      },
+      "findings": [
+        {
+          "id": "V-P4",
+          "severity": "medium",
+          "finding": "PRD v1.2's own Section 1 'Revision note' -- again, the reader-facing summary most likely to be trusted at the gate instead of an independent diff of two ~500-line documents -- omits that Section 12 (Related Pages / Source Documents) changed in this revision. It names Section 7 (one NFR row), Section 9 (three dependency rows), Section 10 (Assumptions 9-12) and Section 11 (Open Questions 10-13) as the sections carrying updates, and states 'No existing feature, persona, scope item, user-journey step, acceptance criterion, or success metric was changed' -- true, but silent on Section 12, which did change in two ways: the existing v1.0 line's wording changed from 'PRD v1.0 (superseded by this document)' to 'PRD v1.0 (superseded)', and a wholly new line was added, 'PRD v1.1 (superseded by this document): docs/requirements/PRD-conversational-crm-v1.1.md'. requirements.json's self_verification.note has the identical gap: it walks through Sections 7, 9, 10, 11, 13 and 14 individually but never mentions Section 12 at all, even though the note explicitly lists 'fixed_before_handoff' items showing the agent did self-check its own diff-counting this cycle (it caught and corrected an undercount in Section 9's row count from two to three) -- and still missed Section 12. This is the same defect class the prior review caught and fixed as V-P2 ('the document's own revision note understates its own diff'), recurring in the very next revision, on the same section, rather than a one-off historical issue.",
+          "evidence": "PRD v1.2 Section 1: 'Section 7 (one NFR row's override reason), Section 9 (three dependency rows' status text -- adapters, structured store, vector store), Section 10 (Assumptions rows 9-12) and Section 11 (Open Questions 10-13) are updated to record these resolutions/delegations without deleting the original items.' -- no mention of Section 12. PRD v1.1 Section 12 (2 lines): 'Discovery Brief: ...' / 'PRD v1.0 (superseded by this document): docs/requirements/PRD-conversational-crm-v1.0.md'. PRD v1.2 Section 12 (3 lines): 'Discovery Brief: ...' / 'PRD v1.0 (superseded): docs/requirements/PRD-conversational-crm-v1.0.md' / 'PRD v1.1 (superseded by this document): docs/requirements/PRD-conversational-crm-v1.1.md'. requirements.json self_verification.note: walks Sections 7, 9, 10, 11, 13, 14 individually, never references Section 12 or its new/changed lines.",
+          "suggested_fix": "Add Section 12 to the Section 1 revision note's list of touched sections (e.g., 'and Section 12 gains a new line pointing to the now-superseded v1.1 document, with the existing v1.0 line's wording adjusted accordingly'), and add the same to requirements.json's self_verification.note. Given the recurrence, it may also be worth a standing checklist item in requirements-agent's own self-check specifically for Section 12/Related-Pages whenever a new version supersedes a prior one, since this is now the second consecutive cycle a document-list section change was the one omitted from an otherwise-accurate revision note."
+        }
+      ],
+      "checked": [
+        "self_verification.result present and 'PASS' on requirements.json (no missing/FAIL finding needed)",
+        "Diffed PRD-conversational-crm-v1.1.md against PRD-conversational-crm-v1.2.md section by section: Sections 2, 3, 4, 5, 6 (all of F-1 through F-7 including source/description/AC text) and 8 (Success Metrics) confirmed byte-for-byte identical",
+        "Section 7 (NFRs): confirmed only the Data Architecture row's override reason text changed (adding the Gate 2 second-reply citation for SQLite/Chroma/semantic chunking); Security/Privacy, Access Control, Integration and Concurrency rows confirmed byte-identical to v1.1",
+        "Section 9 (Dependencies): confirmed exactly three rows' status text changed (adapters, structured store, vector store), each now naming the Gate-2-confirmed technology; the seeded-dataset and NLU-capability rows confirmed unchanged",
+        "Section 10 (Assumptions): confirmed rows 1-8 byte-identical to v1.1; rows 9-12 changed to Resolved/Partially-resolved/Delegated exactly as claimed, with no row added, removed, or renumbered",
+        "Section 11 (Open Questions): confirmed items 1-9 byte-identical to v1.1; items 10-13 marked resolved/partially-resolved/delegated in place with no deletion",
+        "Section 13.1: confirmed the structured-store technology (SQLite) is stated as `[RESOLVED — Gate 2 decision, 2026-09-17]` with an explicit citation of the human's Gate 2 second reply, not silently un-tagged from a prior [INFERRED] with no trace",
+        "Section 13.2: confirmed the vector-store technology (Chroma) and the chunking strategy (semantic chunking) are each independently stated as `[RESOLVED — Gate 2 decision, 2026-09-17]` with the same citation discipline",
+        "Section 13.2: specifically verified the embedding model and re-embedding trigger strategy are NOT folded into the resolved chunking-strategy claim -- the paragraph immediately following the chunking-strategy explanation explicitly states '`[INFERRED — needs confirmation]` What remains unconfirmed, and is not resolved by the Gate 2 decision above: the specific embedding model... and the re-embedding trigger strategy... Both are still left to the Architecture stage' -- checked this distinction is also preserved consistently in Section 7's Data Architecture NFR row and Section 9's vector-store dependency row (both name only technology + chunking as confirmed, never the embedding model)",
+        "Section 14.1/14.1a: confirmed a concrete proposed interface contract exists for all four adapters (CRM: fetchAccounts/fetchContacts; Calendar: getUpcomingEvents; SharePoint: listDocuments/fetchDocument; Email: fetchMessages), and confirmed the `[DELEGATED DECISION — human authorized requirements-agent to choose at Gate 2]` tag is used consistently at the top of 14.1a and does not appear misapplied to a plain inference or presented as a human-confirmed fact anywhere in Section 14",
+        "Confirmed the one place Section 14.1 still uses `[INFERRED — needs confirmation]` (the illustrative-method-names paragraph) is scoped correctly to the illustrative-names-not-being-final claim, not to the delegated contract itself, and that it correctly points forward to 14.1a's distinct tag rather than blurring the two",
+        "Email adapter: confirmed the read-only (fetch only, no send) scoping states a reason tied to F-1 through F-7's actual needs ('no feature in F-1 through F-7 requires composing or sending email') and independently verified against the actual F-1..F-7 feature list that none of the seven features requires sending or composing email",
+        "Cross-checked requirements.json's assumptions[8..11] (rows 9-12) and open_questions[9..12] (items 10-13) against the corresponding PRD v1.2 Section 10/11 prose -- verbatim match, nothing silently deleted, resolved/partially-resolved/delegated status consistent in both places",
+        "Cross-checked requirements.json's nfrs and dependencies arrays against Section 7 and Section 9 -- consistent, no drift",
+        "Re-ran universal security/PII scan across the full v1.2 document -- no credential-like strings found; the Confluence space-ID/page-ID string in Section 12's published link is a pre-existing URL identifier (unchanged since v1.0/v1.1, already an unflagged part of a real published reference), not a secret or credential pattern; no real-looking personal data (persona/example names read as synthetic demo data)",
+        "Re-ran inference-honesty spot-check across the new/changed Section 13, 14.1a and the modified rows in 7/9/10/11 -- no confident factual claim found that should have been tagged [RESOLVED]/[DELEGATED DECISION]/[INFERRED] but was left untagged or mistagged",
+        "Re-ran placeholder check across the full v1.2 document -- no bare 'TBD' or 'Coming soon'; only the three legitimate tag types are used",
+        "Re-confirmed every feature F-1..F-7 still has a non-empty, unchanged source field (already independently validated in the v1.0 and v1.1 reviews; no source field touched this cycle)",
+        "Re-confirmed the Mermaid `flowchart TD` block in Section 5 is present and unchanged",
+        "Re-spot-checked acceptance criteria for F-1, F-4, F-5, F-7 -- each still states both a success/primary behavior and a distinct failure or alternate branch (unchanged text)",
+        "Checked requirements.json for `returned_findings` -- absent/not applicable; no declined findings to trace this cycle",
+        "Checked audit_trail/cost_log ordering for entries added since the last review (human revise at 09:14:34.519Z, requirements-agent drafted at 09:21:34.537Z) -- correctly chronological, no new timestamp anomaly introduced this cycle"
+      ],
+      "not_checked": [
+        "No SHA-256 hash comparison was run by me; I read PRD-conversational-crm-v1.1.md and v1.2.md directly via the Read tool rather than computing/comparing hashes. The coordinator should perform the actual hash comparison via record-validation.cjs before the gate.",
+        "Did not re-fetch or re-read the Discovery Brief document itself this cycle, since no feature source field changed between v1.1 and v1.2 and those citations were already independently verified against the Brief in the v1.0 review.",
+        "Did not re-derive Discovery Brief Section 9's 11-item disposition from scratch again -- Sections 1-6 and 8 are confirmed byte-identical to the already-independently-validated v1.1/v1.0, so I relied on the prior reviews' independent cross-checks rather than repeating them.",
+        "Did not independently assess whether SQLite/Chroma/semantic-chunking are technically sound choices for this system's scale or requirements -- that is an Architecture-stage judgment call outside a Requirements-stage validator's scope; I checked only that the PRD accurately and honestly records what was decided versus what remains open.",
+        "Downstream User Stories do not exist yet, so no check of whether user-story-agent will honor the new Section 13/14.1a content was possible.",
+        "Did not independently investigate the pre-existing V-P3 timestamp-ordering anomaly further; it is unchanged from the prior review and out of scope for this cycle's content."
+      ],
+      "checked_at": "2026-09-17T09:38:00.000Z"
+    },
+    {
+      "result": "issues_found",
+      "version_reviewed": "1.3",
+      "summary": "Exceptional re-review of PRD v1.3, which reopens an already-approved-and-published Gate 2 (v1.2) to add a fourth Brief-Me-on-Customer (F-5) component -- opportunity/deal status -- per a corrected canonical idea document. The substantive fix itself is sound: F-5's Description, Source note and a new AC4 add the component, worded verbatim against project.idea_input's actual pitch text ('history, open commitments, key stakeholders, and where the opportunity stands'); the capability-vs-mechanism distinction is maintained correctly throughout (a new '[Confirmed -- canonical idea document, Idea 5]' tag for the now-source-confirmed capability, kept clearly distinct from the still-'[INFERRED -- needs confirmation]' representation mechanism in Description, AC4, Section 13.1, Assumption 13 and Open Question 14); Section 13.1's reasoned decision not to add a new structured entity/field is sound and does not contradict F-5's actual acceptance criteria (narrative synthesis is exactly what AC4 requires); and Sections 7 and 9 are genuinely byte-identical to v1.2 by direct diff, consistent with the claim that those NFR/dependency rows already generically cover the new component. However, three issues were found. Most significantly (V-P5, high): the document's own Section 1 revision note flatly states 'Section 13.2 itself is unchanged,' but Section 13.2's F-5 bullet was in fact edited in this revision (it now names the opportunity/deal-status component alongside 'recent history,' where v1.2 named only 'recent history') -- requirements.json's own self_verification.note correctly discloses this same change ('Section 13.2 is unchanged except that its existing F-5 bullet now also names the opportunity/deal-status component'), so the document's reader-facing revision note -- the exact place a gate reviewer is likely to trust instead of independently diffing two ~500-line documents -- is again the less accurate of the two. This is the third recurrence of the same defect class this PRD has now produced across three separate revision cycles (V-P2 on v1.1, V-P4 on v1.2, this finding on v1.3), and for the first time it is an outright false 'unchanged' claim rather than merely an omission from a list of touched sections. A secondary finding (V-P6, medium): both the revision note and self_verification.note describe F-5's acceptance-criteria change as 'a new AC4,' without disclosing that AC1 and AC2's existing text were also edited in place (AC1's enumeration gained the fourth component; AC2's 'three summary components' became 'four'). A third, unrelated finding surfaced while reading the full role file (V-P7, low): validation_history contains two byte-identical entries for the v1.1 review (identical checked_at timestamp, identical findings and text) -- a data-integrity duplicate rather than two independent reviews, which record-validation.cjs is specifically designed to prevent.",
+      "independence": "Read requirements.json and workflow.json directly, then read PRD-conversational-crm-v1.2.md and PRD-conversational-crm-v1.3.md in full and diffed them section-by-section myself, line by line, rather than trusting the drafting agent's Section 1 revision note or requirements.json's self_verification.note about what changed. Cross-checked F-5's Source note, Description, and every acceptance criterion (AC1-AC4) against project.idea_input's actual verbatim pitch text (read directly from workflow.json, not from the PRD's own quotation of it) to confirm the fourth-component wording is not invented or drifted. Specifically tested, rather than assumed, the claim that only Sections 1, 4, 5, 6/F-5, 10, 11, 12, 13.1, 13.2 (bullet only), 13.3 changed and that Sections 7, 8, 9, 14 are byte-identical -- found one of those claims (Section 13.2 'unchanged') to be false on direct diff. Cross-checked requirements.json's assumptions row 13, open_questions row 14, and F-5's acceptance_criteria array against the document's corresponding text for verbatim drift.",
+      "fix_verification": {
+        "V-P1": "Still fixed and durably carried into v1.3 unchanged. PRD v1.3 Section 8 and requirements.json success_metrics[0].target both still read 'Every feature F-1 through F-7's defined acceptance criteria executes successfully...'.",
+        "V-P4": "Fixed and durably carried into v1.3: Section 12's two changes this cycle (new v1.2-superseded line; reworded v1.1 line) are correctly and completely disclosed in both this revision's Section 1 note and requirements.json's self_verification.note.",
+        "GATE2_EXCEPTIONAL_REVISE": "The human's reopened-gate request (F-5 must also synthesize opportunity/deal status, per Idea 5's canonical text) is substantively fixed and well-reasoned: the fourth component is added to F-5's Description, Source, and a new AC4, worded verbatim against the canonical idea text; Section 13.1 records a sound, non-contradictory reasoning for not adding a new structured entity. However, see V-P5 and V-P6: the revision's own self-reporting of what changed is itself defective in the same recurring way already found at V-P2 and V-P4, and this time worse in kind (a false 'unchanged' claim, not just an omission)."
+      },
+      "findings": [
+        {
+          "id": "V-P5",
+          "severity": "high",
+          "finding": "PRD v1.3's own Section 1 'Revision note' states 'Section 13.2 itself is unchanged,' but Section 13.2's F-5 bullet was in fact edited in this revision: v1.2 named only the 'recent history' component drawing on semantically-relevant embedded content, while v1.3 names both 'recent history' and 'opportunity/deal status' components. requirements.json's own self_verification.note correctly discloses this exact change ('Section 13.2 is unchanged except that its existing F-5 bullet now also names the opportunity/deal-status component drawing on the same embedded content') -- so the internal self-check caught what the document's own reader-facing summary flatly denies. This is the third recurrence of the identical defect class this PRD has produced across three consecutive revision cycles: V-P2 (v1.1's revision note omitted a new NFR row and a Section 12 change), V-P4 (v1.2's revision note omitted a Section 12 change), and now this -- and unlike the prior two, this is not merely an omission from a list of touched sections but an active, false claim of 'unchanged' about a section that demonstrably changed, in the exact section (the revision note) a gate reviewer is most likely to trust instead of independently diffing two ~500-line documents.",
+          "evidence": "PRD v1.3 Section 1: '...The opportunity/deal status component is synthesized narratively from existing Meetings/Commitments content together with the vector store's semantic retrieval (Section 13.2) instead... Section 13.2 itself is unchanged.' PRD v1.2 Section 13.2's F-5 bullet: '- **F-5** — the Brief-Me-on-Customer summary's \"recent history\" component (per F-5's existing description) must be able to draw on semantically-relevant embedded content...'. PRD v1.3 Section 13.2's F-5 bullet (same location): '- **F-5** — the Brief-Me-on-Customer summary's \"recent history\" and \"opportunity/deal status\" components (per F-5's description) must be able to draw on semantically-relevant embedded content...'. requirements.json self_verification.note: 'Section 13.2 is unchanged except that its existing F-5 bullet now also names the opportunity/deal-status component drawing on the same embedded content.'",
+          "suggested_fix": "Correct Section 1's revision note to state that Section 13.2's existing F-5 bullet was updated to also name the opportunity/deal-status component (matching what self_verification.note already correctly says), rather than flatly claiming Section 13.2 is unchanged. Given this is the third consecutive-cycle recurrence of the same defect class, it is worth adding a standing self-check step to requirements-agent's own process that specifically re-verifies every 'X is unchanged' claim in its own revision note against an actual diff before handoff -- not just checking that changed sections are named, but checking that sections claimed unchanged really are."
+        },
+        {
+          "id": "V-P6",
+          "severity": "medium",
+          "finding": "Both the document's Section 1 revision note ('Its Description and Acceptance Criteria (a new AC4) are updated accordingly') and requirements.json's self_verification.note ('F-5's Source note, Description and Acceptance Criteria (new AC4) updated to add opportunity/deal status as a fourth synthesized component') describe F-5's acceptance-criteria change in a way that names only AC4 as changed, without disclosing that AC1 and AC2's existing text were also edited in place. AC1's enumeration of summary components changed from 'recent discussion history, open commitments and stakeholder/contact names' to '...and where the opportunity/deal stands' appended. AC2's parenthetical changed from 'one of the three summary components (history, commitments, stakeholders)' to 'one of the four summary components (history, commitments, stakeholders, opportunity/deal status).' Only AC3 is genuinely untouched and AC4 is genuinely new; AC1 and AC2 were also substantively edited, which neither note states.",
+          "evidence": "PRD v1.2 F-5 AC1: 'System must generate a summary containing recent discussion history, open commitments and stakeholder/contact names for a named customer...'. PRD v1.3 F-5 AC1: 'System must generate a summary containing recent discussion history, open commitments, stakeholder/contact names, and where the opportunity/deal stands for a named customer...'. PRD v1.2 F-5 AC2: '...when data for one of the three summary components (history, commitments, stakeholders) is missing...'. PRD v1.3 F-5 AC2: '...when data for one of the four summary components (history, commitments, stakeholders, opportunity/deal status) is missing...'.",
+          "suggested_fix": "Revise both the Section 1 revision note and self_verification.note to state that AC1 and AC2 were edited in place (to extend their enumeration to the fourth component) in addition to AC4 being newly added, rather than phrasing the change as if only AC4 were touched."
+        },
+        {
+          "id": "V-P7",
+          "severity": "low",
+          "finding": "requirements.json's validation_history array contains two byte-identical entries for the v1.1 review: same summary, same independence text, same fix_verification, same findings (V-P2, V-P3) with identical evidence text, same checked/not_checked arrays, and the identical checked_at timestamp ('2026-09-17T09:07:39.132Z') recorded twice. This is a duplicate record, not two independent reviews, and is unrelated to v1.3's content -- but it is exactly the kind of drift record-validation.cjs is specifically designed to prevent ('the tool refuses... a second review of a version already reviewed'), so its presence suggests either a tooling bug or a hand-edit that bypassed the tool at some point in this role file's history.",
+          "evidence": "requirements.json validation_history[1] and validation_history[2] (both entries for version_reviewed '1.1') are identical in every field, including checked_at '2026-09-17T09:07:39.132Z' in both.",
+          "suggested_fix": "Investigate how the duplicate arose (tooling bug in record-validation.cjs, or a hand-edit) and remove the duplicate through the proper tool rather than by hand-editing validation_history directly, per CLAUDE.md's rule that these fields must not be hand-edited."
+        }
+      ],
+      "checked": [
+        "self_verification.result present and 'PASS' on requirements.json for v1.3 (no missing/FAIL finding needed)",
+        "Read the full corrected project.idea_input (Idea 5's canonical pitch text) directly from workflow.json and confirmed the exact phrase 'history, open commitments, key stakeholders, and where the opportunity stands' is quoted verbatim (not paraphrased or drifted) in F-5's Source note in both the PRD document and requirements.json",
+        "Diffed PRD-conversational-crm-v1.2.md against PRD-conversational-crm-v1.3.md section by section, line by line: Sections 2 and 3 confirmed byte-identical",
+        "Section 4: confirmed only the F-5 row's description cell changed (added 'and where the opportunity/deal stands'); F-1-F-4, F-6, F-7 rows and the Out-of-scope list confirmed byte-identical",
+        "Section 5: confirmed only step 8's text changed (same three added words); narrative, steps 1-7, the Mermaid flowchart block, and the Alternate flows list confirmed byte-identical",
+        "Section 6: confirmed F-1, F-2, F-3, F-4, F-6, F-7 (Source/Description/every AC) are byte-identical to v1.2; confirmed F-5's Source note, Description, AC1, AC2 and AC4 all changed (AC3 unchanged) -- see V-P6 for the discrepancy between what changed and what the notes disclose",
+        "Verified the capability-vs-mechanism distinction is maintained correctly: F-5's Source note explicitly separates the now-canonical-source-confirmed CAPABILITY from the still-unconfirmed representation MECHANISM using a new, distinct '[Confirmed — canonical idea document, Idea 5 — added v1.3]' tag (not conflated with '[INFERRED]' or presented as a full human-confirmed decision); the mechanism itself remains tagged '[INFERRED — needs confirmation]' consistently in the Description, AC4, Section 13.1's new paragraph, Assumption 13 and Open Question 14",
+        "Verified Section 13.1's new no-new-structured-entity reasoning (no feature in F-1 through F-7 provides a mechanism to capture/set a discrete deal-stage value) against the actual, unchanged text of F-1 and F-2's Descriptions -- confirmed accurate and sound, and confirmed it does not contradict F-5's actual AC4, which requires narrative synthesis rather than a structured field read",
+        "Directly diffed Section 7 (NFRs, 5 rows) and Section 9 (Dependencies, 5 rows) between v1.2 and v1.3 -- confirmed genuinely byte-identical, not merely claimed",
+        "Found Section 13.2's F-5 bullet was NOT byte-identical despite the revision note's claim (V-P5)",
+        "Section 8 (Success Metrics) and Section 14 (Integration Approach, all subsections 14.1/14.1a/14.2/14.3) confirmed byte-identical to v1.2",
+        "Section 10: confirmed rows 1-12 byte-identical to v1.2; row 13 is new and matches requirements.json's assumptions[12] verbatim",
+        "Section 11: confirmed items 1-13 byte-identical to v1.2; item 14 is new and matches requirements.json's open_questions[13] verbatim (accounting for markdown bold vs. plain-text rendering only)",
+        "Section 12: confirmed the exact two changes claimed -- existing v1.1 line's wording changed from '(superseded by this document)' to '(superseded)', and a new v1.2-superseded line added",
+        "Section 13.3: confirmed exactly one new cross-reference bullet added (Sections 7/9 needed no new row), and confirmed this specific claim is true given the direct Section 7/9 diff above",
+        "Cross-checked requirements.json's F-5 acceptance_criteria array against the document's F-5 AC1-AC4 text -- verbatim match",
+        "Re-ran universal security/PII scan across the full v1.3 document -- no credential-like strings found; example names (Priya, Arjun/Acme) read as synthetic demo data drawn directly from project.idea_input, consistent with every prior review's finding; the Confluence page-ID string in Section 12 is a pre-existing URL identifier, not a secret",
+        "Re-ran placeholder check across the full v1.3 document -- no bare 'TBD' or 'Coming soon'; only the established tag vocabulary ([INFERRED], [RESOLVED — Gate 2 decision], [DELEGATED DECISION], and the new [Confirmed — canonical idea document]) is used",
+        "Re-ran inference-honesty spot-check on the new/changed text in Section 6/F-5 and Section 13.1's new paragraph -- no confident factual claim found that should have been tagged but wasn't",
+        "Confirmed every feature F-1 through F-7 still has a non-empty, accurate source field",
+        "Confirmed the Mermaid flowchart TD block in Section 5 is present and unchanged; no new node was needed for the opportunity/deal-status addition since node M's text is already generic",
+        "Checked requirements.json for returned_findings -- absent/not applicable, no declined findings to trace this cycle",
+        "Read the full validation_history array while reviewing requirements.json and noticed the duplicate v1.1 entry (V-P7), unrelated to the v1.3 diff itself",
+        "Checked audit_trail/cost_log entries for this exceptional revise cycle for chronological consistency -- the human's revise entry (10:06:22.896Z) precedes the drafting agent's drafted entry (10:15:34.731Z), correctly ordered"
+      ],
+      "not_checked": [
+        "No SHA-256 hash comparison was run by me; I read PRD-conversational-crm-v1.2.md and v1.3.md directly via the Read tool rather than computing/comparing hashes. The coordinator should perform the actual hash comparison via record-validation.cjs before any gate action.",
+        "Did not re-fetch or re-read the Discovery Brief document itself this cycle, since no F-1..F-4/F-6/F-7 source field changed between v1.2 and v1.3 and those citations were already independently verified against the Brief in earlier review cycles.",
+        "Did not re-derive Discovery Brief Section 9's 11-item disposition from scratch again -- Sections 1-6 (other than F-5) and 8 are confirmed byte-identical to the already-independently-validated v1.2/v1.1/v1.0, so I relied on the prior reviews' independent cross-checks rather than repeating them.",
+        "Did not independently assess whether narrative synthesis versus a structured deal-stage field is the 'right' product/architecture decision for representing opportunity/deal status -- that is a product-owner/architecture-stage judgment call outside a Requirements-stage validator's scope; I checked only that the PRD accurately and honestly records what was decided (a design inference, not a human-confirmed fact) versus what remains genuinely open (Assumption 13, Open Question 14).",
+        "Downstream User Stories do not exist yet, so no check of whether user-story-agent will honor F-5's new AC4 was possible.",
+        "Did not investigate or attempt to resolve the root cause of the V-P7 duplicate validation_history entry beyond flagging it -- validation_history must not be hand-edited by an agent, and determining whether it was a tooling bug or a manual edit is outside what reading the state file alone can establish.",
+        "Did not independently re-verify the pre-existing V-P3 timestamp-ordering anomaly (from the v1.0 review cycle); it is historical, unchanged, and out of scope for this cycle's content."
+      ],
+      "checked_at": "2026-09-17T10:29:29.307Z"
+    }
+  ],
+  "validation": {
+    "result": "issues_found",
+    "version_reviewed": "1.5",
+    "summary": "Re-review covering both the v1.3->v1.4 terminology rename (never independently validated before now) and the v1.4->v1.5 content additions (F-1 AC5 attendee-name extraction; Section 13.1 field-level structured-store shape). The v1.3->v1.4 rename is complete and correctly scoped: every 'meeting' instance naming the capture concept was renamed to 'interaction', and all three legitimate exceptions (pre-meeting/next-meeting scheduling phrasing, the Calendar adapter's 'upcoming meeting(s)', and the MOM/'minutes of meeting' acronym) were correctly left untouched, with no missed instance and no incorrect over-application found. The v1.5 substantive additions are sound: F-1 AC5 states both a success branch (extract each distinct attendee name as a separate item) and a failure/empty branch (record zero attendee items, not fabricated, when none named); F-3 AC3's dependency on attendee-name capture is accurately characterized (AC3 has always been agnostic to capture source -- 'when attendee names were captured' -- which is exactly why the typed-text gap existed, since only the business-card path populated that data before v1.5); the new Interaction-attendees entity in 13.1 matches AC5's cardinality (zero-to-many) and field treatment (name required, company/role nullable) and cross-references F-1 AC5/F-3 AC3 correctly in 13.3; and the 'discussion points get no structured entity' reasoning is sound and matches how F-3 AC1 is already designed to be answered via Section 13.2's semantic retrieval over raw text, not a structured table. Two issues found, both medium, both in the same recurring defect class this PRD has now produced five times across five revision cycles (V-P2, V-P4, V-P5, V-P6, and now these): a revision's own self-reporting of what changed does not match what actually changed. V-P8: F-1 AC5's own leading `[INFERRED -- needs confirmation]` tag covers the entire AC5 sentence, including the capability assertion itself, contradicting AC5's own trailing text, F-1's Description, F-1's Source note, Assumption 14 and Open Question 15 -- all of which state the underlying capability (attendee names must be extracted from typed text) is CONFIRMED by this revision, with only the extraction/disambiguation mechanism left inferred. F-5's earlier, analogous capability-vs-mechanism split used a distinct `[Confirmed -- canonical idea document...]` tag instead of leading with `[INFERRED]`; F-1 AC5 does not follow that same discipline, so a reader skimming ACs by their leading tag would misread AC5 as no more settled than AC2's still-fully-open business-card capability. V-P9: Section 13.3's actual v1.4->v1.5 diff is one wholly new bullet plus edits to two pre-existing bullets (the Section 10 and Section 11 cross-reference bullets each gained a clause about the new row/question), a total of three changed items -- but the document's own Section 1 revision note describes this as only 'a new cross-reference bullet' (singular), and requirements.json's self_verification.note describes it as 'two new cross-reference bullets' (also wrong -- only one bullet is wholly new). Neither matches the actual 1-new-plus-2-edited reality.",
+    "independence": "Read requirements.json directly, then read the full text of PRD-conversational-crm-v1.3.md, -v1.4.md and -v1.5.md and diffed them section-by-section, line-by-line, myself -- not trusting the drafting agent's revision notes or requirements.json's self_verification claims about what changed. No Bash/shell tool was available in this session, so the diff was performed by direct side-by-side reading rather than a mechanical `diff -u`; this is how the Section 13.3 undercount and the AC5 tag-placement inconsistency were found -- neither would surface from trusting the revision note's own section list. Cross-checked F-1 AC5's wording, F-3 AC3's actual text (confirmed byte-identical since v1.3), Section 13.1's new Interaction-attendees entity, and Assumption 14/Open Question 15 directly against each other rather than against the drafting agent's own characterization of their consistency.",
+    "fix_verification": {
+      "V-P1": "Still fixed and durably carried into v1.5 unchanged -- Section 8 and requirements.json success_metrics[0].target both still read 'Every feature F-1 through F-7...'.",
+      "V-P4": "Still held -- both v1.4's and v1.5's Section 1 revision notes correctly name Section 12 among the sections touched, with an accurate description of the supersession-chain edits.",
+      "V-P5": "The specific defect (a revision note falsely claiming a section is 'unchanged' when it was edited) did not recur against Section 13.2 in this cycle -- Section 13.2 is genuinely byte-identical between v1.4 and v1.5 and is correctly claimed as unchanged. However the same underlying defect class (the revision note/self-verification misdescribing what actually changed) recurred in a new form, in Section 13.3 -- see new finding V-P9.",
+      "V-P6": "Not directly applicable this cycle -- no existing acceptance criterion was edited in place; F-1 AC5 is a pure addition after AC1-AC4, and is correctly described as such in both the revision note and self_verification.note.",
+      "V-P7": "Fixed and durable -- requirements.json's validation_history currently holds exactly 3 entries (v1.0, v1.1, v1.2), no duplicate found."
+    },
+    "findings": [
+      {
+        "id": "V-P8",
+        "severity": "medium",
+        "finding": "F-1's new AC5 opens with `[Added v1.5]` `[INFERRED -- needs confirmation]` covering the ENTIRE acceptance criterion, including the capability assertion itself ('System must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item...'). This contradicts every other place this revision states the capability-vs-mechanism split: AC5's own trailing sentence ('only the underlying capability... is confirmed by this revision'), F-1's Description (the new attendee-extraction sentence carries only an `[Added v1.5]` tag, no `[INFERRED]`), F-1's Source note (same, no `[INFERRED]` tag on the provenance sentence), Assumption 14 ('is confirmed by this revision (F-1 AC5)') and Open Question 15 ('F-1 AC5 confirms the capability... but not the mechanism'). F-5's earlier, structurally identical capability-vs-mechanism situation (Section 6, added v1.3) used a distinct tag -- `[Confirmed -- canonical idea document, Idea 5 -- added v1.3]` -- specifically so the confirmed-capability claim would not be conflated with an ordinary open inference. AC5 does not follow that precedent: its leading tag is the same `[INFERRED -- needs confirmation]` used everywhere else in this PRD for a genuinely unconfirmed guess (e.g. AC2's business-card scanning, which really is still fully open). A reader who scans acceptance criteria by their leading tag -- which is exactly how every other `[INFERRED]`/`[RESOLVED]`/`[DELEGATED DECISION]` tag in this document is meant to be read at a glance -- would conclude AC5's capability is no more settled than AC2's, which is the opposite of what this revision's own prose, Assumption 14 and Open Question 15 all assert.",
+        "evidence": "PRD v1.5 F-1 AC5: '`[Added v1.5]` `[INFERRED — needs confirmation]` System must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item...'. Compare F-1 Description: '`[Added v1.5]` The Capture Agent must also extract every attendee name mentioned in that typed entry as a separate structured item...' (no [INFERRED] tag). Compare Assumption 14 (Section 10, row 14): '...Only the underlying capability... is confirmed by this revision (F-1 AC5); the mechanism itself remains open.' Compare F-5's precedent (Section 6, F-5 Source): '`[Confirmed — canonical idea document, Idea 5 — added v1.3]` Idea 5's own pitch text states...This directly confirms the capability... it is no longer merely inferred from composition.'",
+        "suggested_fix": "Move the `[INFERRED — needs confirmation]` tag in AC5 so it scopes only the mechanism clause (the sentence describing name-recognition/disambiguation), not the whole AC -- for example, tag the capability sentence with something analogous to F-5's `[Confirmed]` pattern (or leave it untagged, consistent with the Description/Source treatment), and keep `[INFERRED — needs confirmation]` attached only to the mechanism sentence that already discusses Assumption 14/Open Question 15."
+      },
+      {
+        "id": "V-P9",
+        "severity": "medium",
+        "finding": "Section 13.3's actual diff between v1.4 and v1.5 consists of three changes: (1) a wholly new bullet ('Added in v1.5 — Sections 7 and 9 likewise needed no new row for the new Interaction attendees entity...'); (2) the existing Section 10 cross-reference bullet was edited in place to append a clause about the new row 14; and (3) the existing Section 11 cross-reference bullet was edited in place to append a clause about the new question 15. That is 1 new bullet plus 2 edited bullets. But the PRD's own Section 1 revision note describes this as only 'a new cross-reference bullet naming this revision's Section 13.1 additions' (singular, no mention that two pre-existing bullets were also edited), and requirements.json's self_verification.note describes it as 'Section 13.3 (two new cross-reference bullets naming the v1.5 additions)' -- which is also inaccurate, since only one bullet is actually new; the other two changes are edits to bullets that already existed in v1.4. This is the same 'revision note/self-check undercounts or miscounts its own diff' defect class already found and fixed four times previously in this PRD's history (V-P2 on v1.1, V-P4 on v1.2, V-P5 and V-P6 on v1.3) -- recurring for a fifth time, now as a bullet-count discrepancy in Section 13.3, and notably the two self-reporting mechanisms (the document's own revision note and requirements.json's self_verification.note) disagree with each other as well as with the actual diff.",
+        "evidence": "PRD v1.4 Section 13.3, third bullet: '**Section 10 (Assumptions):** row 9 is now marked Resolved... row 10 is marked partially resolved...' PRD v1.5 Section 13.3, third bullet (same position): '...row 10 is marked partially resolved...; row 14 (`[Added v1.5]`) records the still-open attendee-name-extraction mechanism.' -- an edit, not a new bullet. PRD v1.4 fourth bullet: '**Section 11 (Open Questions):** questions 10 and 11 are marked resolved/partially resolved, referencing this Gate 2 decision (2026-09-17), rather than deleted.' PRD v1.5 fourth bullet (same position): '...rather than deleted; question 15 (`[Added v1.5]`) carries the attendee-extraction mechanism forward.' -- also an edit, not a new bullet. PRD v1.5's only wholly new bullet is the sixth ('Added in v1.5 — Sections 7 and 9 likewise needed no new row...'). PRD v1.5 Section 1 revision note: '...and **13.3** (new cross-reference bullet naming this revision's Section 13.1 additions).' requirements.json self_verification.note: '...and Section 13.3 (two new cross-reference bullets naming the v1.5 additions).'",
+        "suggested_fix": "Correct both the Section 1 revision note and requirements.json's self_verification.note to state accurately: one wholly new cross-reference bullet was added, and the existing Section 10 and Section 11 cross-reference bullets were each edited in place to name the new Assumption 14 row and Open Question 15 respectively. Given this is the fifth recurrence of the same defect class in this document's history, it may be worth adding a standing self-check step that specifically re-counts 'new vs. edited' items in any list/bullet section before writing the revision note, not just naming which sections were touched."
+      }
+    ],
+    "checked": [
+      "self_verification.result present and 'PASS' on requirements.json for v1.5 (no missing/FAIL finding needed)",
+      "Read the full text of PRD-conversational-crm-v1.3.md, PRD-conversational-crm-v1.4.md and PRD-conversational-crm-v1.5.md and diffed them section-by-section, line-by-line myself",
+      "v1.3->v1.4 terminology rename: confirmed every instance of 'meeting' naming the capture concept was renamed to 'interaction' across Sections 2, 3, 4, 5, 6 (F-1, F-2, F-3, F-5), 7, 9, 10, 11, 13.1, 13.2, with F-4/F-6/F-7 correctly untouched (no occurrence of the word in either version)",
+      "Confirmed all three legitimate 'meeting' exceptions were correctly left unrenamed and are not missed instances: (a) pre-meeting/next-meeting scheduling phrasing in Sections 3, 4, 5 and F-5's Source note; (b) the Calendar adapter's 'upcoming meeting(s)'/'next-scheduled-meeting detail' in Section 14.1a; (c) the MOM/'minutes of meeting' acronym naming a pre-existing seeded content type in Sections 7, 8, 9, 13.2",
+      "Found zero missed-rename instances (every 'meeting' left in v1.4 falls into one of the three legitimate-exception categories above) and zero incorrect over-application (no genuine scheduled-meeting reference was accidentally renamed to 'interaction')",
+      "Confirmed F-1 AC5 states both a success branch (extract each distinct attendee name as a separate structured item when the entry names at least one identifiable person) and a failure/empty branch (record zero attendee items -- not fabricated -- when the entry names no one)",
+      "Confirmed F-3 AC3 is byte-identical to its v1.3 wording and its dependency on captured attendee-name data (framed by F-1's Source note and AC5) is accurately characterized: AC3 has always been agnostic to capture source ('when attendee names were captured'), which is exactly why the typed-text gap this revision closes existed",
+      "Confirmed the new Interaction-attendees entity (Section 13.1) matches AC5's cardinality (zero-to-many, not a fixed slot count) and field treatment (name required, company/role optional/nullable), and cross-references F-1 AC5 and F-3 AC3 correctly in Section 13.3's new bullet",
+      "Verified the 'generic discussion points get no structured entity' reasoning (Section 13.1) directly against F-3 AC1's actual text and Section 13.2's pre-existing F-3 cross-reference bullet -- confirmed sound and consistent with how F-3's 'what did we discuss' retrieval is already designed to work (semantic retrieval over raw/embedded text, not a structured discussion-points table)",
+      "Confirmed Assumption 14 and Open Question 15 are present, cross-reference F-1 AC5/Section 13.1 correctly, and consistently frame the capability as confirmed / mechanism as open -- consistent with F-1's Description and Source note, but inconsistent with AC5's own leading tag (see V-P8)",
+      "Diffed v1.4 against v1.5 section by section: Sections 2, 3, 4, 5, 7, 8, 9 confirmed byte-identical; within Section 6, F-2, F-3, F-4, F-5, F-6, F-7 confirmed byte-identical (only F-1 changed, as claimed)",
+      "Confirmed Section 13.2 is genuinely byte-identical between v1.4 and v1.5 and is correctly claimed as unchanged -- no recurrence of the V-P5-style false 'unchanged' claim here",
+      "Found Section 13.3's actual diff (1 new bullet + 2 edited bullets) does not match either the document's revision note ('a new cross-reference bullet', singular) or requirements.json's self_verification.note ('two new cross-reference bullets') -- see V-P9",
+      "Confirmed Section 10 gained exactly one new row (14) and Section 11 gained exactly one new item (15), both matching requirements.json's assumptions/open_questions arrays verbatim",
+      "Confirmed Section 12's supersession-chain edit (v1.3 line reworded, new v1.4-superseded line added) matches both revision notes' claims",
+      "Confirmed no existing acceptance criterion's wording changed in this cycle -- AC1-AC4 of F-1 are byte-identical between v1.4 and v1.5; AC5 is a pure addition",
+      "Re-ran universal security/PII scan across the full v1.5 document -- no credential-like strings found; example names (Priya, Arjun/Acme) read as synthetic demo data, consistent with every prior review",
+      "Re-ran placeholder check across the full v1.5 document -- no bare 'TBD' or 'Coming soon'; only the established tag vocabulary ([INFERRED], [RESOLVED], [DELEGATED DECISION], [Confirmed], [Added v1.5], [Restated with fields, v1.5], [New entity, v1.5]) is used",
+      "Confirmed the Mermaid `flowchart TD` block in Section 5 is present, syntactically valid, and unchanged; node D's generic 'Capture Agent extracts contact details from text' phrasing already covers attendee-name extraction without needing a new node",
+      "Confirmed every feature F-1 through F-7 still has a non-empty, accurate source field",
+      "Re-confirmed V-P1's fix (Success Metrics F-1 through F-7) still holds unchanged in v1.5, in both the document and requirements.json",
+      "Re-confirmed V-P4's fix (Section 12 disclosure discipline) held in both v1.4's and v1.5's revision notes",
+      "Confirmed V-P7's duplicate validation_history entry does not recur -- validation_history currently holds exactly 3 entries (v1.0, v1.1, v1.2), no duplicate",
+      "Checked requirements.json for `returned_findings` -- absent/not applicable, no declined findings to trace this cycle",
+      "Checked audit_trail/cost_log entries across the v1.4 and v1.5 revise cycles for chronological consistency -- correctly ordered"
+    ],
+    "not_checked": [
+      "No SHA-256 hash comparison was run by me; I read PRD-conversational-crm-v1.3.md, -v1.4.md and -v1.5.md directly via the Read tool rather than computing/comparing hashes. The coordinator should perform the actual hash comparison via record-validation.cjs before any gate action.",
+      "No Bash/shell tool was available in this session, so I could not run an actual mechanical `diff -u` myself -- the diff was performed by direct side-by-side reading of the full text of all three versions, section by section. I cannot independently confirm the literal '9 hunks' figure self_verification.note claims for the v1.4->v1.5 diff; what I can and did confirm is which sections actually changed vs. were claimed unchanged (all accurate at the section level) and, within Section 13.3, exactly which individual bullets were new vs. edited (where the count is wrong -- see V-P9).",
+      "Did not re-derive Discovery Brief Section 9's 11-item disposition from scratch again this cycle -- relied on prior reviews' independent cross-checks, since no feature's disposition against the Discovery Brief changed in v1.4 or v1.5 beyond the terminology rename, which I independently re-verified this cycle.",
+      "Did not independently assess whether SQLite/Chroma/semantic-chunking or the proposed adapter interface contracts are technically sound, nor whether the new Interaction-attendees child-table design is the 'right' schema choice -- that is Architecture-stage judgment, outside a Requirements-stage validator's scope. I checked only that the PRD accurately and honestly records what is confirmed versus what remains open.",
+      "Downstream User Stories do not exist yet, so no check of whether user-story-agent will honor F-1 AC5 or Section 13.1's new entity was possible.",
+      "Did not independently re-verify the pre-existing V-P3 timestamp-ordering anomaly (from the v1.0 review cycle); historical, unchanged, out of scope for this cycle's content."
+    ],
+    "checked_at": "2026-09-17T11:34:18.657Z"
+  },
+  "checks": [
+    {
+      "name": "Independent validation of v1.5",
+      "required": true,
+      "result": "fail",
+      "summary": "Ran. A separate agent reviewed v1.5 and raised 2 finding(s): 2 medium. Worst severity: medium."
+    }
+  ]
+}

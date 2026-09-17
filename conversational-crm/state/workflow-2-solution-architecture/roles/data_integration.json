@@ -1,0 +1,39 @@
+{
+  "role": "data_integration",
+  "field": "data_integration",
+  "document": null,
+  "version": null,
+  "api_contract": null,
+  "data_model": null,
+  "status": "not_started",
+  "summary": null,
+  "drafted_at": null,
+  "readiness": null,
+  "source_references": [],
+  "artifacts": [],
+  "decisions": [],
+  "traceability": [],
+  "open_items": [],
+  "checks": [],
+  "self_verification": {
+    "result": null,
+    "checked_at": null
+  },
+  "report_sha256": null,
+  "validation": null,
+  "validation_history": [],
+  "published": null,
+  "gate": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "reply": null,
+    "artifact_manifest": [],
+    "owner_role": "architect",
+    "answered_by": null
+  },
+  "cost_log": [],
+  "audit_trail": [],
+  "owner_role": null,
+  "note": "Owned by this stage's agent. Single writer -- never edit another role's file. The ER model and the API contract, reviewed together because a contract approved apart from the data model it implies is an approval of nothing. Owns the three-artifact bundle. Source disciplines: data-arch, integration-arch."
+}

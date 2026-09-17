@@ -1,0 +1,35 @@
+{
+  "role": "observability",
+  "field": "observability",
+  "document": null,
+  "version": null,
+  "status": "not_started",
+  "summary": null,
+  "drafted_at": null,
+  "source_references": [],
+  "artifacts": [],
+  "traceability": [],
+  "checks": [],
+  "open_items": [],
+  "self_verification": {
+    "result": null,
+    "checked_at": null
+  },
+  "implementation_status": null,
+  "report_sha256": null,
+  "validation": null,
+  "security_review": null,
+  "gate": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "reply": null,
+    "artifact_manifest": [],
+    "owner_role": "devops",
+    "answered_by": null
+  },
+  "cost_log": [],
+  "audit_trail": [],
+  "owner_role": null,
+  "note": "Owned by this stage's agent. Single writer -- never edit another role's file."
+}

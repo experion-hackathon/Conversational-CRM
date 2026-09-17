@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "conversational-crm",
+    "name_source": null,
+    "phase": "baseline",
+    "created_at": null
+  },
+  "workflow": {
+    "name": "workflow-5-operate",
+    "status": "not_started",
+    "locked_at": null
+  },
+  "stack": {
+    "components": [],
+    "components_note": "Inherited from the locked upstream. Operate does not choose a stack; it watches what Workflow 4 released.",
+    "observability": null,
+    "decision_source": null
+  },
+  "constraints": {
+    "budget_usd": null,
+    "budget_currency": "USD",
+    "source": null,
+    "synthetic_data_only": true,
+    "autonomy_note": "The tier an agent may act at is a human decision recorded in bands, never a default. See WORKFLOW.md."
+  },
+  "inputs": {
+    "product": {
+      "workflow": "workflow-1-discovery-to-stories"
+    },
+    "architecture": {
+      "workflow": "workflow-2-solution-architecture"
+    },
+    "development": {
+      "workflow": "workflow-3-design-to-development"
+    },
+    "delivery": {
+      "workflow": "workflow-4-delivery",
+      "release_report": null,
+      "observability_report": null,
+      "source_references": [],
+      "population_note": "Populated only from the locked Workflow 4 state. Never hand-filled."
+    },
+    "task": {
+      "id": null,
+      "scope_name": null
+    },
+    "incident": {
+      "id": null,
+      "detected_at": null,
+      "tier": null,
+      "signal": null,
+      "band": null,
+      "detected_by": null,
+      "population_note": "Written by the deterministic watcher, never by an agent. A breach an agent decided had happened is not a breach."
+    }
+  },
+  "publish_targets": {
+    "confluence_parent_page": null
+  },
+  "layout": "per-role",
+  "roles": [
+    "baseline",
+    "diagnosis",
+    "remediation",
+    "learning"
+  ],
+  "gates": {
+    "workflow_signoff": {
+      "status": "pending",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "reply": null,
+      "artifact_manifest": [],
+      "owner_role": null,
+      "owner_note": "Sign-off is cross-cutting and belongs to whoever drives the workflow, not to one specialist.",
+      "answered_by": null
+    }
+  },
+  "note": "Workflow-level facts. Stage state lives in roles/. Never store stage output here."
+}

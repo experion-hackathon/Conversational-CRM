@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "conversational-crm",
+    "name_source": null,
+    "phase": "infrastructure",
+    "created_at": null
+  },
+  "workflow": {
+    "name": "workflow-4-delivery",
+    "status": "not_started",
+    "locked_at": null
+  },
+  "stack": {
+    "components": [],
+    "components_note": "One entry per part of the product that gets built. `kind` is free text -- frontend, backend, desktop-app, cli, service, library, mobile-app, pipeline. `implemented_by` names the Workflow 3 role that builds it.",
+    "cloud": null,
+    "iac": null,
+    "ci": null,
+    "runtime": null,
+    "observability": null,
+    "versioning": null,
+    "decision_source": null
+  },
+  "constraints": {
+    "budget_usd": null,
+    "budget_currency": "USD",
+    "source": null,
+    "synthetic_data_only": true
+  },
+  "inputs": {
+    "product": {
+      "workflow": "workflow-1-discovery-to-stories"
+    },
+    "architecture": {
+      "workflow": "workflow-2-solution-architecture",
+      "document": null,
+      "version": null,
+      "approval_reference": null,
+      "source_references": [],
+      "population_note": "Populated only from the locked Workflow 2 state. Never hand-filled."
+    },
+    "development": {
+      "workflow": "workflow-3-design-to-development",
+      "backend_report": null,
+      "frontend_report": null,
+      "test_report": null,
+      "source_references": [],
+      "population_note": "Populated only from the locked Workflow 3 state. Never hand-filled."
+    },
+    "task": {
+      "id": null,
+      "scope_name": null
+    },
+    "target": {
+      "root": null,
+      "root_resolution": null,
+      "infrastructure_root": null
+    }
+  },
+  "publish_targets": {
+    "confluence_parent_page": null
+  },
+  "layout": "per-role",
+  "roles": [
+    "infrastructure",
+    "container",
+    "cicd",
+    "observability",
+    "release"
+  ],
+  "gates": {
+    "workflow_signoff": {
+      "status": "pending",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "reply": null,
+      "artifact_manifest": [],
+      "owner_role": null,
+      "owner_note": "Sign-off is cross-cutting and belongs to whoever drives the workflow, not to one specialist.",
+      "answered_by": null
+    }
+  },
+  "note": "Workflow-level facts. Stage state lives in roles/. Never store stage output here."
+}
