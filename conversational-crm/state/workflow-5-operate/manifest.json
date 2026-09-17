@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-17T13:32:42.558Z",
+  "generated_from": "../output/conversational-crm/state/workflow-5-operate",
+  "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
+  "owner": "gayathry",
+  "project": {
+    "name": "conversational-crm",
+    "phase": "baseline"
+  },
+  "workflow": {
+    "name": "workflow-5-operate",
+    "status": "not_started",
+    "locked_at": null
+  },
+  "signoff": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "stages": [
+    {
+      "name": "baseline",
+      "field": "baseline",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "diagnosis",
+      "field": "diagnosis",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "remediation",
+      "field": "remediation",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "learning",
+      "field": "learning",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    }
+  ],
+  "counts": {
+    "audit_entries": 0,
+    "cost_entries": 0
+  }
+}

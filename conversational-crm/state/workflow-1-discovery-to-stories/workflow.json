@@ -3,17 +3,17 @@
   "project": {
     "name": "conversational-crm",
     "idea_input": "Idea 5: Enterprise Sales — Conversational CRM / Relationship Memory Assistant (B2B)\nPitch: A CRM that's updated by talking to it instead of filling forms. After a meeting, a sales rep scans a business card or drops a one-line summary (\"met Priya and Arjun from Acme, discussed renewal pricing, they want a demo of module X by Friday\"), and the agent extracts the contacts, logs the meeting, tags key discussion points and commitments, and files it into a running conversational thread for that customer. Instead of dashboards, reps ask questions — \"what did we discuss last time?\", \"what did I commit to?\", \"who attended from their side?\" — and get an instant answer pulled straight from that relationship's history. The assistant doesn't just wait to be asked: it keeps an eye on open commitments and proactively nudges the rep when one is coming due (\"you told Acme you'd send pricing by Friday — that's tomorrow\"). And before the next meeting, a single request — \"brief me on Acme\" — has it synthesize a pre-meeting briefing from the whole thread: history, open commitments, key stakeholders, and where the opportunity stands.\nRelevance: Conversational/agentic CRM that updates itself is a major 2025–26 enterprise sales-tech theme — Salesforce Agentforce, HubSpot Breeze, and a wave of \"CRM that fills itself in\" startups are all chasing this, because sales rep adoption and data quality have always been traditional CRM's biggest failure point. Proactive commitment-tracking and AI-generated meeting-prep briefings are the natural next layer on top of that, and map directly onto how Experion's own client-facing teams already work relationships across multiple stakeholders and touchpoints.\nScope: Seed few customer accounts with a handful of contacts and a short prior interaction history → capture agent takes a business-card photo or a typed one-line meeting summary and extracts contact details, structuring them into a meeting note → extraction agent pulls out key discussion points, commitments/follow-ups, and next steps (with a due date where one was mentioned) and tags them to the right customer thread → memory/Q&A agent answers natural-language questions over that thread (\"what did we discuss last time?\", \"what did I commit to?\") → a lightweight commitment-tracking agent surfaces a \"due soon / overdue\" list of open commitments across accounts → a \"brief me on [customer]\" agent synthesizes a short pre-meeting summary from the thread (recent history, open items, stakeholders) → a simple shared view so a second team member (e.g. an account manager) can see and add to the same customer thread → a customer profile view showing the running conversational history.\nTreat enterprise-grade access control/governance as a stretch (a single shared team view is enough for the demo), and treat voice-note capture as optional — a typed one-liner is an acceptable substitute for \"quick capture\" if speech-to-text eats into build time. Keep commitment tracking to a simple due-soon list with no real notification/calendar integration, and keep the pre-meeting briefing to a short generated summary rather than a polished report.",
-    "phase": "stories",
+    "phase": "workflow_signoff",
     "created_at": "2026-09-17"
   },
   "workflow": {
     "name": "workflow-1-discovery-to-stories",
-    "status": "not_started",
+    "status": "in_progress",
     "locked_at": null
   },
   "publish_targets": {
     "confluence_parent_page": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/overview",
-    "jira_project_key": null
+    "jira_project_key": "RPOC"
   },
   "layout": "per-role",
   "roles": [

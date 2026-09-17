@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-17T13:32:42.362Z",
+  "generated_from": "../output/conversational-crm/state/workflow-4-delivery",
+  "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
+  "owner": "gayathry",
+  "project": {
+    "name": "conversational-crm",
+    "phase": "infrastructure"
+  },
+  "workflow": {
+    "name": "workflow-4-delivery",
+    "status": "not_started",
+    "locked_at": null
+  },
+  "signoff": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "stages": [
+    {
+      "name": "infrastructure",
+      "field": "infrastructure",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "container",
+      "field": "container",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "cicd",
+      "field": "cicd",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "observability",
+      "field": "observability",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "release",
+      "field": "release",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    }
+  ],
+  "counts": {
+    "audit_entries": 0,
+    "cost_entries": 0
+  }
+}

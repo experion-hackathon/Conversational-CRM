@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-17T13:32:41.763Z",
+  "generated_from": "../output/conversational-crm/state/workflow-1-discovery-to-stories",
+  "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
+  "owner": "gayathry",
+  "project": {
+    "name": "conversational-crm",
+    "phase": "workflow_signoff"
+  },
+  "workflow": {
+    "name": "workflow-1-discovery-to-stories",
+    "status": "in_progress",
+    "locked_at": null
+  },
+  "signoff": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "stages": [
+    {
+      "name": "discovery",
+      "field": "discovery",
+      "status": "drafted",
+      "gate": {
+        "status": "approved",
+        "reviewed_by": "Harikrishnan M",
+        "reviewed_at": "2026-09-17T07:17:18.610Z"
+      },
+      "artifacts": [
+        {
+          "role": "discovery",
+          "path": "docs/discovery/DISCOVERY-BRIEF-conversational-crm-v1.1.md",
+          "version": "1.1",
+          "sha256": "04d6a1eb48dca2dfb8746da49630d014cc61f63b8c02a685f4e88facfb6332ff",
+          "sha256_lf": "04d6a1eb48dca2dfb8746da49630d014cc61f63b8c02a685f4e88facfb6332ff",
+          "sha256_crlf": "509df1d62302be25d814679dcd01409fcb28e679ef3c5f564b5d037ac0b2baf9"
+        }
+      ],
+      "consumed": [],
+      "open_items": 1
+    },
+    {
+      "name": "requirements",
+      "field": "prd",
+      "status": "drafted",
+      "gate": {
+        "status": "approved",
+        "reviewed_by": "Harikrishnan M",
+        "reviewed_at": "2026-09-17T11:26:09.915Z"
+      },
+      "artifacts": [
+        {
+          "role": "requirements",
+          "path": "docs/requirements/PRD-conversational-crm-v1.5.md",
+          "version": "1.5",
+          "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5",
+          "sha256_lf": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5",
+          "sha256_crlf": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64"
+        }
+      ],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "stories",
+      "field": "user_stories",
+      "status": "drafted",
+      "gate": {
+        "status": "approved",
+        "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+        "reviewed_at": "2026-09-17T13:15:00Z"
+      },
+      "artifacts": [
+        {
+          "role": "stories",
+          "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+          "version": "1.0",
+          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+          "sha256_lf": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+          "sha256_crlf": "40cf591ca4c0cc32fd4a963d5f6c2e9b38cb7855ad3910f1734ba68d96099b0f"
+        }
+      ],
+      "consumed": [],
+      "open_items": 0
+    }
+  ],
+  "counts": {
+    "audit_entries": 53,
+    "cost_entries": 20
+  }
+}

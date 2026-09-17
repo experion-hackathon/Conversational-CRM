@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-17T13:32:42.152Z",
+  "generated_from": "../output/conversational-crm/state/workflow-3-design-to-development",
+  "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
+  "owner": "gayathry",
+  "project": {
+    "name": "conversational-crm",
+    "phase": "ui_ux"
+  },
+  "workflow": {
+    "name": "workflow-3-design-to-development",
+    "status": "not_started",
+    "locked_at": null
+  },
+  "signoff": {
+    "status": "pending",
+    "reviewed_by": null,
+    "reviewed_at": null
+  },
+  "stages": [
+    {
+      "name": "ui_ux",
+      "field": "ui_ux",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "application",
+      "field": "application",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "frontend",
+      "field": "frontend",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "backend",
+      "field": "backend",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    },
+    {
+      "name": "test",
+      "field": "test",
+      "status": "not_started",
+      "gate": {
+        "status": "pending",
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      "artifacts": [],
+      "consumed": [],
+      "open_items": 0
+    }
+  ],
+  "counts": {
+    "audit_entries": 0,
+    "cost_entries": 0
+  }
+}
