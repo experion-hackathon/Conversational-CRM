@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-17T13:39:39.264Z",
-  "generated_from": "../output/conversational-crm/state/workflow-2-solution-architecture",
+  "generated_at": "2026-09-17T20:25:25.141Z",
+  "generated_from": "../sparc-output/conversational-crm/state/workflow-2-solution-architecture",
   "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
-  "owner": "gayathry",
+  "owner": "Harikrishnan M",
   "project": {
     "name": "conversational-crm",
     "phase": "solution"

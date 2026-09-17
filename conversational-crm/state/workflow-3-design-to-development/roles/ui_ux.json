@@ -1,7 +1,190 @@
 {
   "role": "ui_ux",
   "field": "ui_ux",
+  "completed_tasks": [
+    {
+      "task_id": "TASK-CAPTURE-PROFILE",
+      "scope_name": "Interaction capture (typed + business card, unmatched resolution) and customer profile history view",
+      "feature_ids": [
+        "F-1",
+        "F-6"
+      ],
+      "story_ids": [
+        "US-1",
+        "US-2",
+        "US-3",
+        "US-4",
+        "US-18",
+        "US-19"
+      ],
+      "document": {
+        "path": "docs/design/UI-UX-conversational-crm-TASK-CAPTURE-PROFILE-v1.0.md",
+        "path_base": "workflow_root",
+        "version": "1.0",
+        "status": "published",
+        "summary": "Design for TASK-CAPTURE-PROFILE: typed and business-card interaction capture (F-1, US-1-US-4) including the unmatched-customer flag/resolve path, and the customer profile chronological history view (F-6, US-18/US-19) including its empty state and automatic new-note appearance. Five screens (SCR-CAPTURE-TEXT, SCR-CAPTURE-CARD, SCR-CAPTURE-RESULT, SCR-RESOLVE-UNMATCHED, SCR-PROFILE) with full state inventories, a proposed token/component set (none existed to reuse), responsive/accessibility notes, and an engineering handoff that marks every backend-dependent action unresolved for the architecture owner (Workflow 2 is not_started). US-5 and F-2/F-3/F-4/F-5/F-7 are explicitly out of this run's scope per inputs.task.",
+        "drafted_at": "2026-09-17T00:00:00Z"
+      },
+      "published": {
+        "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5885591698/Conversational+CRM+UI+UX+Design+Capture+Profile+v1.0",
+        "published_at": "2026-09-17T14:27:40.001Z"
+      },
+      "design_canvas": {
+        "url": "https://claude.ai/artifact/8q6gsdCCoaXV51xouBNHa3",
+        "note": "Human-run, not an automated framework step. Originally published as https://claude.ai/artifact/ToAAwRRzt618ESFGnQWPqK under a different claude.ai account. That account signed out mid-run and the canvas became inaccessible under the newly logged-in account (read/list both returned not-found), so all 8 canvas files were republished as a new Artifact on 2026-09-17T16:2x. Content was identical at that point -- a re-host, not a redesign. IMPORTANT: this canvas has since been substantially changed again by later, separate human-directed exploration -- see this role file's top-level `exploratory_concepts[0]`. The screens this note describes no longer exist on that canvas as of 2026-09-17T~18:00; this entry is left unedited as a historical record of what TASK-CAPTURE-PROFILE itself put there, per this file's append-only convention."
+      },
+      "source_references": [
+        {
+          "path": "docs/requirements/PRD-conversational-crm-v1.5.md",
+          "path_base": "workflow-1-discovery-to-stories output root",
+          "version": "1.5",
+          "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5"
+        },
+        {
+          "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+          "path_base": "workflow-1-discovery-to-stories output root",
+          "version": "1.0",
+          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b"
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "docs/design/UI-UX-conversational-crm-TASK-CAPTURE-PROFILE-v1.0.md",
+          "path_base": "workflow_root",
+          "change_kind": "created",
+          "sha256": "ec6e3356ada4dac772528c4aed6a76e14ba82a4881a0161c516432019f9891d3"
+        },
+        {
+          "path": "docs/design/prototype/index.html",
+          "path_base": "workflow_root",
+          "change_kind": "created",
+          "sha256": "7dd88cc0e1950a2380ac1d7cc52aa05a9e0d0149c01468b33f4809b060c61184"
+        },
+        {
+          "path": "docs/design/prototype/styles.css",
+          "path_base": "workflow_root",
+          "change_kind": "created",
+          "sha256": "7dc7da7686597756092c4cd743032c2781ce108479e9e4e657fb83a94a2e4f1a"
+        }
+      ],
+      "self_verification": {
+        "result": "PASS",
+        "checked_at": "2026-09-17T00:00:00Z",
+        "fixed_before_handoff": []
+      },
+      "implementation_status": "design_only",
+      "report_sha256": "ec6e3356ada4dac772528c4aed6a76e14ba82a4881a0161c516432019f9891d3",
+      "validation": {
+        "result": "issues_found",
+        "version_reviewed": "1.0",
+        "summary": "UI-UX-conversational-crm-TASK-CAPTURE-PROFILE-v1.0 is a well-scoped, well-hedged first draft: all 6 selected stories map to screens with accurate AC quotes, states are comprehensive, and no architecture-dependent behavior is invented while Workflow 2 sits not_started (independently confirmed). Two low-severity issues found; no security, traceability, or scope-boundary defects identified.",
+        "findings": [
+          { "id": "V-1", "severity": "low", "finding": "Validator could not independently recompute SHA-256 (Read/Write-only tools); resolved by the orchestrator's own independent sha256sum before the gate." },
+          { "id": "V-2", "severity": "low", "finding": "Prototype's error message used role=\"alert\" where the report's Section 6 spec called for aria-live=\"polite\" — a minor spec-vs-demo drift, accepted as cosmetic at the gate." }
+        ]
+      },
+      "gate": {
+        "status": "approved",
+        "reviewed_by": "Harikrishnan M (sparc.team10@experionglobal.com)",
+        "reviewed_at": "2026-09-17T14:19:26Z",
+        "reply": "publish",
+        "artifact_manifest": [
+          { "role": "ui_ux", "path": "docs/design/UI-UX-conversational-crm-TASK-CAPTURE-PROFILE-v1.0.md", "version": "1.0", "sha256": "ec6e3356ada4dac772528c4aed6a76e14ba82a4881a0161c516432019f9891d3" },
+          { "role": "ui_ux", "path": "docs/design/prototype/index.html", "version": "1.0", "sha256": "7dd88cc0e1950a2380ac1d7cc52aa05a9e0d0149c01468b33f4809b060c61184" },
+          { "role": "ui_ux", "path": "docs/design/prototype/styles.css", "version": "1.0", "sha256": "7dc7da7686597756092c4cd743032c2781ce108479e9e4e657fb83a94a2e4f1a" }
+        ],
+        "owner_role": "designer",
+        "answered_by": "Harikrishnan M (sparc.team10@experionglobal.com)"
+      },
+      "open_items_at_close": [
+        "OI-1: US-5 attendee display deferred to a future task.",
+        "OI-2: F-2 commitments display deferred to a future task (reserved empty slot on SCR-PROFILE).",
+        "OI-3: push-vs-poll and Contextual Capture matching behavior unresolved for the architecture owner.",
+        "OI-4: no story defines where a rep finds a previously-unresolved note.",
+        "OI-5: full phone-width optimization not PRD-confirmed.",
+        "OI-6/OI-7: business-card OCR value and attendee-recognition mechanism remain [INFERRED -- needs confirmation] at the PRD level."
+      ],
+      "archived_at": "2026-09-17T15:00:00Z",
+      "archived_reason": "Superseded as the role file's 'current' task by TASK-QA-CHAT (F-3). This task remains approved, published, and locked in place -- nothing here is reopened or invalidated. Snapshotted here (rather than left to be silently overwritten) so workflow_signoff can still present every completed UI/UX task together, not just the most recent."
+    },
+    {
+      "task_id": "TASK-QA-CHAT",
+      "scope_name": "Natural-language Q&A / chat interface over a customer's captured history and commitments",
+      "feature_ids": [
+        "F-3"
+      ],
+      "story_ids": [
+        "US-9",
+        "US-10",
+        "US-11",
+        "US-12"
+      ],
+      "document": {
+        "path": "docs/design/UI-UX-conversational-crm-TASK-QA-CHAT-v1.0.md",
+        "path_base": "workflow_root",
+        "version": "1.0",
+        "status": "published",
+        "summary": "Design for TASK-QA-CHAT: free-form natural-language Q&A/chat interface over a customer's captured history (F-3, US-9-US-12) -- recent-discussion answers, open-commitment listing, attendee-name listing, and the no-clear-customer rejection, each with its empty/no-data branch. One screen (SCR-QA-CHAT) with a full state inventory. Reuses TASK-CAPTURE-PROFILE's approved design tokens and the CustomerPicker/EmptyState/InlineErrorBanner components for visual and interaction consistency across the two tasks; proposes two new chat-bubble tokens and four new chat-specific components. The retrieval mechanism (NLU/intent parsing, structured+vector store lookup per PRD Section 13) is explicitly marked unresolved for the architecture owner (Workflow 2 not_started) rather than invented. F-2/F-4/F-5/F-7 and their stories remain out of this task's scope.",
+        "drafted_at": "2026-09-17T00:00:00Z"
+      },
+      "published": {
+        "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5885329649/Conversational+CRM+UI+UX+Design+Q+A+Chat+v1.0",
+        "published_at": "2026-09-17T16:04:17.002Z"
+      },
+      "design_canvas": {
+        "url": "https://claude.ai/artifact/8q6gsdCCoaXV51xouBNHa3",
+        "note": "Same canvas as TASK-CAPTURE-PROFILE: added the SCR-QA-CHAT artboard plus an 'Ask about Acme Corp' entry-point button on both SCR-PROFILE artboards linking into it. Originally on https://claude.ai/artifact/ToAAwRRzt618ESFGnQWPqK under a prior claude.ai account; republished to this new Artifact on 2026-09-17T16:2x after that account's canvas became inaccessible (see completed_tasks[0]'s note for detail). Human-run, not an automated framework step. IMPORTANT: this canvas has since been substantially changed again -- see `exploratory_concepts[0]`; the SCR-QA-CHAT screen this note describes no longer exists on that canvas as of 2026-09-17T~18:00. Left unedited as a historical record."
+      },
+      "source_references": [
+        { "path": "docs/requirements/PRD-conversational-crm-v1.5.md", "path_base": "workflow-1-discovery-to-stories output root", "version": "1.5", "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5" },
+        { "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md", "path_base": "workflow-1-discovery-to-stories output root", "version": "1.0", "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b" }
+      ],
+      "artifacts": [
+        { "path": "docs/design/UI-UX-conversational-crm-TASK-QA-CHAT-v1.0.md", "path_base": "workflow_root", "change_kind": "created", "sha256": "3bfed7f5903b2f9765c530e648f6691ba1f9564f02a061d442998910691a0a7b" },
+        { "path": "docs/design/prototype-qa-chat/index.html", "path_base": "workflow_root", "change_kind": "created", "sha256": "440ce53c7e627e4bd29ccb1b06d715d15daa15397af2eb6b5616918232684615" },
+        { "path": "docs/design/prototype-qa-chat/styles.css", "path_base": "workflow_root", "change_kind": "created", "sha256": "38e1328b992deff0dc091693fa1167aff8216a1f1a6ea0275cd1334830856b59" }
+      ],
+      "self_verification": { "result": "PASS", "checked_at": "2026-09-17T00:00:00Z", "fixed_before_handoff": [] },
+      "implementation_status": "design_only",
+      "report_sha256": "3bfed7f5903b2f9765c530e648f6691ba1f9564f02a061d442998910691a0a7b",
+      "validation": {
+        "result": "issues_found",
+        "version_reviewed": "1.0",
+        "summary": "Well-scoped, accurately-cited draft with genuine reuse of TASK-CAPTURE-PROFILE's tokens/components (independently verified token-by-token). Two medium verification-honesty findings (CHK-2 false picker claim, CHK-6 inconsistent method description) were corrected pre-gate by the orchestrator; two low findings (hash-recompute limitation, resolved; EmptyState variant omitting primary action, accepted as cosmetic) remain as historical record.",
+        "findings": [
+          { "id": "V-1", "severity": "medium", "finding": "CHK-2 falsely claimed a CustomerPicker was tabbed through; no picker exists in this prototype. Corrected pre-gate." },
+          { "id": "V-2", "severity": "medium", "finding": "CHK-6 described two incompatible ways (automated vs manual). Resolved pre-gate by actually running the automated check." },
+          { "id": "V-3", "severity": "low", "finding": "Validator could not independently recompute SHA-256 (Read/Write/SubagentHandback-only tools); resolved by the orchestrator's own independent sha256sum before the gate." },
+          { "id": "V-4", "severity": "low", "finding": "New EmptyState 'no-conversation' variant omits the primary-action half of that component's defined shape -- accepted as cosmetic, same class as TASK-CAPTURE-PROFILE's V-2." }
+        ]
+      },
+      "gate": {
+        "status": "approved",
+        "reviewed_by": "Harikrishnan M (sparc.team10@experionglobal.com)",
+        "reviewed_at": "2026-09-17T16:01:21Z",
+        "reply": "publish",
+        "artifact_manifest": [
+          { "role": "ui_ux", "path": "docs/design/UI-UX-conversational-crm-TASK-QA-CHAT-v1.0.md", "version": "1.0", "sha256": "3bfed7f5903b2f9765c530e648f6691ba1f9564f02a061d442998910691a0a7b" },
+          { "role": "ui_ux", "path": "docs/design/prototype-qa-chat/index.html", "version": "1.0", "sha256": "440ce53c7e627e4bd29ccb1b06d715d15daa15397af2eb6b5616918232684615" },
+          { "role": "ui_ux", "path": "docs/design/prototype-qa-chat/styles.css", "version": "1.0", "sha256": "38e1328b992deff0dc091693fa1167aff8216a1f1a6ea0275cd1334830856b59" }
+        ],
+        "owner_role": "designer",
+        "answered_by": "Harikrishnan M (sparc.team10@experionglobal.com)"
+      },
+      "open_items_at_close": [
+        "OI-1: Q&A intent set scoped to F-3 only; F-4/F-5-style questions not routed.",
+        "OI-2: whether Contextual Ask requires naming the customer every turn is unresolved for the architecture owner.",
+        "OI-3: whether the Q&A conversation itself is persisted (and F-7 shared-thread implications) is a genuine PRD gap, treated as ephemeral by default.",
+        "OI-4: recent-discussion answer format (quote/paraphrase/citation) is a retrieval-mechanism decision left to the architecture owner.",
+        "OI-5/OI-6/OI-7: carried forward from PRD/prior task, not re-decided here."
+      ],
+      "archived_at": "2026-09-17T16:19:26Z",
+      "archived_reason": "Superseded as the role file's 'current' task by TASK-COMMITMENTS (F-4). This task remains approved, published, and locked in place -- nothing here is reopened or invalidated. Snapshotted here so workflow_signoff can present every completed UI/UX task together."
+    }
+  ],
   "document": null,
+  "published": null,
+  "design_canvas": null,
   "version": null,
   "status": "not_started",
   "summary": null,
@@ -27,8 +210,226 @@
     "owner_role": "designer",
     "answered_by": null
   },
-  "cost_log": [],
-  "audit_trail": [],
+  "cost_log": [
+    {
+      "stage": "ui_ux",
+      "agent": "ui-ux",
+      "model": "claude-sonnet-5",
+      "calls": 1,
+      "approx_tokens": 55000,
+      "estimate": true,
+      "timestamp": "2026-09-17T00:00:00Z",
+      "note": "TASK-CAPTURE-PROFILE. Self-estimate for this single agent turn. Not a measurement; see CLAUDE.md Cost section."
+    },
+    {
+      "stage": "ui_ux-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 45000,
+      "estimate": true,
+      "timestamp": "2026-09-17T00:00:00Z",
+      "note": "TASK-CAPTURE-PROFILE. Self-estimate for independent review. Not a measurement."
+    },
+    {
+      "stage": "ui_ux-publish",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 8000,
+      "estimate": true,
+      "timestamp": "2026-09-17T14:27:40.001Z",
+      "note": "TASK-CAPTURE-PROFILE. Published directly in the orchestrator's own turn (Atlassian access limitation for spawned subagents)."
+    },
+    {
+      "stage": "ui_ux",
+      "agent": "ui-ux",
+      "model": "claude-sonnet-5",
+      "calls": 1,
+      "approx_tokens": 62000,
+      "estimate": true,
+      "timestamp": "2026-09-17T00:00:00Z",
+      "note": "TASK-QA-CHAT. Self-estimate for this single agent turn. Not a measurement."
+    },
+    {
+      "stage": "ui_ux-validation",
+      "agent": "validator-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 60000,
+      "estimate": true,
+      "timestamp": "2026-09-17T15:10:00Z",
+      "note": "TASK-QA-CHAT. Self-estimate for independent review. Not a measurement."
+    },
+    {
+      "stage": "ui_ux-publish",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 9000,
+      "estimate": true,
+      "timestamp": "2026-09-17T16:04:17.002Z",
+      "note": "TASK-QA-CHAT. Published directly in the orchestrator's own turn, after correcting two verification-honesty findings pre-gate."
+    },
+    {
+      "stage": "ui_ux-design-canvas",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 12000,
+      "estimate": true,
+      "timestamp": "2026-09-17T16:18:00Z",
+      "note": "TASK-QA-CHAT. Human-run canvas update: added SCR-QA-CHAT artboard and the SCR-PROFILE entry-point connection (under the then-active claude.ai account)."
+    },
+    {
+      "stage": "ui_ux-design-canvas-rehost",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 6000,
+      "estimate": true,
+      "timestamp": "2026-09-17T16:28:51Z",
+      "note": "The signed-in claude.ai account changed mid-run (user ran /login). The prior canvas Artifact (https://claude.ai/artifact/ToAAwRRzt618ESFGnQWPqK) became inaccessible under the new account -- confirmed via list_projects (empty) and a direct read (not found) before acting, not assumed. Republished all 8 local canvas files (canvas.json + 7 .dc.html artboards, unchanged content) as a new Artifact (https://claude.ai/artifact/8q6gsdCCoaXV51xouBNHa3) under the new account, per the human's explicit request to push all UX screens to the new account."
+    },
+    {
+      "stage": "ui_ux-exploratory-home",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 35000,
+      "estimate": true,
+      "timestamp": "2026-09-17T18:00:00Z",
+      "note": "Human-directed exploratory canvas work (not a gated ui_ux task): built a unified home-page concept (to-do list + single chat, no customer pre-selection, new-contact categorization prompt, multi-modal input) across several rounds of human feedback, culminating in the human supplying a reference user-journey flowchart image which the final iteration was rebuilt against. All prior feature-siloed screens (capture/business-card/result/resolve/profile/Q&A) were then deleted from the canvas at the human's explicit instruction, leaving one artboard (Main.dc.html). Recorded in exploratory_concepts[0]. This work directly motivated workflow-1's PRD v1.6 reopening."
+    }
+  ],
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-17T00:00:00Z",
+      "actor": "ui-ux",
+      "phase": "ui_ux",
+      "event": "drafted",
+      "detail": "TASK-CAPTURE-PROFILE: Drafted UI-UX-conversational-crm-TASK-CAPTURE-PROFILE-v1.0.md covering F-1 (US-1-US-4) and F-6 (US-18/US-19). Five screens, full state inventories, proposed tokens/components. self_verification: PASS; implementation_status: design_only."
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00Z",
+      "actor": "validator-agent",
+      "phase": "ui_ux_review",
+      "event": "validated",
+      "detail": "TASK-CAPTURE-PROFILE: issues_found -- 2 low findings. No security/traceability/architecture-boundary defects."
+    },
+    {
+      "timestamp": "2026-09-17T14:11:50.248Z",
+      "actor": "validator",
+      "phase": "ui_ux_review",
+      "event": "validation_recorded",
+      "detail": "TASK-CAPTURE-PROFILE: independent validation of v1.0 recorded: 2 finding(s) (2 low)."
+    },
+    {
+      "timestamp": "2026-09-17T14:19:26Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "TASK-CAPTURE-PROFILE: in-place status-line correction before publishing; report_sha256 recomputed (ec6e3356...)."
+    },
+    {
+      "timestamp": "2026-09-17T14:19:26Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "gate-reply",
+      "detail": "TASK-CAPTURE-PROFILE: human (Harikrishnan M) replied 'publish' after review of open items/findings/cost."
+    },
+    {
+      "timestamp": "2026-09-17T14:27:40.001Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "published",
+      "detail": "TASK-CAPTURE-PROFILE: published to Confluence, page id 5885591698."
+    },
+    {
+      "timestamp": "2026-09-17T15:00:00Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "TASK-CAPTURE-PROFILE archived into completed_tasks[0]; current-task fields reset for TASK-QA-CHAT (F-3)."
+    },
+    {
+      "timestamp": "2026-09-17T00:00:00Z",
+      "actor": "ui-ux",
+      "phase": "ui_ux",
+      "event": "drafted",
+      "detail": "TASK-QA-CHAT: Drafted UI-UX-conversational-crm-TASK-QA-CHAT-v1.0.md covering F-3 (US-9-US-12). One screen (SCR-QA-CHAT), reused TASK-CAPTURE-PROFILE's tokens/3 components, proposed 2 new tokens + 4 new components. NLU/retrieval mechanism marked unresolved for the architecture owner. self_verification: PASS; implementation_status: design_only."
+    },
+    {
+      "timestamp": "2026-09-17T15:10:00Z",
+      "actor": "validator-agent",
+      "phase": "ui_ux_review",
+      "event": "validated",
+      "detail": "TASK-QA-CHAT: issues_found -- 4 findings (2 medium verification-honesty issues, 2 low). No security/traceability/scope-boundary defects; reuse claim independently verified genuine."
+    },
+    {
+      "timestamp": "2026-09-17T15:41:15.665Z",
+      "actor": "validator",
+      "phase": "ui_ux_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.0 recorded: 4 finding(s) (2 medium, 2 low)."
+    },
+    {
+      "timestamp": "2026-09-17T16:01:21Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "TASK-QA-CHAT: fixed CHK-2 (false picker claim) and CHK-6 (inconsistent method description) pre-gate; report_sha256 recomputed (3bfed7f5...)."
+    },
+    {
+      "timestamp": "2026-09-17T16:01:21Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "gate-reply",
+      "detail": "TASK-QA-CHAT: human (Harikrishnan M) replied 'publish' after review of corrections/open items/cost."
+    },
+    {
+      "timestamp": "2026-09-17T16:04:17.002Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "published",
+      "detail": "TASK-QA-CHAT: published to Confluence, page id 5885329649."
+    },
+    {
+      "timestamp": "2026-09-17T16:18:00Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "TASK-QA-CHAT: added SCR-QA-CHAT artboard and SCR-PROFILE entry-point connection to the shared Claude Design canvas (then https://claude.ai/artifact/ToAAwRRzt618ESFGnQWPqK)."
+    },
+    {
+      "timestamp": "2026-09-17T16:19:26Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "TASK-QA-CHAT archived into completed_tasks[1]; current-task fields reset for TASK-COMMITMENTS (F-4), per the human's instruction to continue with the remaining stories."
+    },
+    {
+      "timestamp": "2026-09-17T16:28:51Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "Signed-in claude.ai account changed (user ran /login). Confirmed the prior canvas Artifact (https://claude.ai/artifact/ToAAwRRzt618ESFGnQWPqK) was genuinely inaccessible under the new account (list_projects returned none owned; a direct read returned not-found) before acting -- not assumed from the account switch alone. Republished all 8 canvas files (unchanged content) as a new Artifact, https://claude.ai/artifact/8q6gsdCCoaXV51xouBNHa3, under the new account. Both completed_tasks[0] and [1]'s design_canvas.url fields updated to the new Artifact; nothing about either task's design content, gate, or publication to Confluence was touched or reopened by this re-host."
+    },
+    {
+      "timestamp": "2026-09-17T18:18:45Z",
+      "actor": "orchestrator",
+      "phase": "ui_ux_review",
+      "event": "corrected",
+      "detail": "Added exploratory_concepts[0] (EXPLORE-UNIFIED-HOME) recording the human-directed, ungated canvas exploration that produced the unified home-page concept -- to-do list + single chat, no customer pre-selection, new-contact Prospect/Lead/Qualified-Lead categorization prompt, multi-modal (photo/voice/notepad) input -- and that ultimately replaced every screen from TASK-CAPTURE-PROFILE and TASK-QA-CHAT on the shared canvas with one unified artboard, per the human's explicit instruction to delete the unwanted screens. Added directly in response to the shared Validator's V-P10 finding (high, traceability) against workflow-1's PRD v1.6: the PRD cited this UI concept as its trigger, but nothing in this workflow's tracked state corroborated the citation, because the concept was deliberately never run through this role's own draft/validate/gate cycle (no locked requirement existed yet to trace it to). This entry does not retroactively claim the concept was validated or gated -- see exploratory_concepts[0].why_not_gated -- it only makes the citation traceable to something real in tracked state, which is the specific gap the Validator flagged. completed_tasks[0] and [1]'s design_canvas notes were left unedited (append-only) and annotated in place to point here rather than rewritten, since their own screens genuinely did exist on the canvas at the time those tasks were gated."
+    }
+  ],
   "owner_role": null,
-  "note": "Owned by this stage's agent. Single writer -- never edit another role's file."
+  "note": "Owned by this stage's agent. Single writer -- never edit another role's file. `completed_tasks[]` holds prior tasks' full approved records, appended only, never edited; the top-level document/version/status/gate/etc. fields always describe whichever task is currently being drafted or reviewed. `exploratory_concepts[]` holds pre-requirements UI exploration that intentionally never went through this role's own gate -- see each entry's `why_not_gated`.",
+  "validation_history": [],
+  "exploratory_concepts": [
+    {
+      "id": "EXPLORE-UNIFIED-HOME",
+      "created_at": "2026-09-17T16:40:00Z",
+      "status": "exploratory -- never run through this workflow's draft/validate/gate cycle, deliberately",
+      "why_not_gated": "Built and iterated directly on a claude.ai Design canvas at the human's explicit request ('go with UI change first, look into previous workflows later'), before any locked PRD/story described this behavior. Recording it as a validated, gated ui_ux task would have misrepresented it as backed by requirements it was not backed by at the time.",
+      "canvas_url": "https://claude.ai/artifact/8q6gsdCCoaXV51xouBNHa3",
+      "canvas_note": "The canvas evolved through several human-directed rounds on this single artboard (originally named HomePage.dc.html, then consolidated as the canvas's sole Main.dc.html once the human asked to delete the prior feature-siloed screens): (1) two-panel to-do list + chat concept; (2) merged duplicate input boxes into one bottom composer with suggestion chips, added a business-card camera button, added a 'Welcome, John Doe' header; (3) centered/enlarged the welcome header, removed the chat panel's own heading block; (4) rebuilt around a human-supplied user-journey flowchart image: login -> assistant greets the rep and shows a top-5 to-do list with a More button -> clicking a to-do expands that task into the chat -> a fresh message at the bottom (e.g. 'I met with a new customer today named Gayathri from Acme') triggers the assistant to ask follow-up questions to categorize the new contact as a Prospect, Lead, or Qualified Lead, accepting photo/voice-note/notepad input -- at which point every other screen (old separate capture/business-card/result/resolve/profile/Q&A screens) was deleted from the canvas as no longer representative of the intended product.",
+      "reviewed_by_human": true,
+      "motivated": "This exploratory concept, reviewed and iterated on directly by the human across multiple rounds, is the concrete trigger cited in workflow-1's workflow.json 'reopened' audit entry (2026-09-17T17:48:25Z) and in PRD v1.6's Section 1 / F-8 / F-9 sources. It has no gate, no validation record, and no artifact_manifest entry in this role file by design -- this array exists solely so that citation has something real and inspectable to point at in tracked framework state, closing a traceability gap the shared Validator correctly flagged (V-P10) when reviewing PRD v1.6.",
+      "not_yet_done": "No formal ui_ux task (e.g. a future TASK-HOME) has been drafted, validated, or gated against this concept. That is expected to follow once PRD v1.6 (or its corrected revision) and matching user stories are themselves gated -- UI/UX design work should trace to locked requirements, not the other way around, and this concept is the reverse of that (UI drove the requirements change) precisely because it was exploratory."
+    }
+  ]
 }

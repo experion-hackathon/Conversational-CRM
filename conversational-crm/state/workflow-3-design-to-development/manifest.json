@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-17T13:39:39.457Z",
-  "generated_from": "../output/conversational-crm/state/workflow-3-design-to-development",
+  "generated_at": "2026-09-17T20:25:25.142Z",
+  "generated_from": "../sparc-output/conversational-crm/state/workflow-3-design-to-development",
   "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
-  "owner": "gayathry",
+  "owner": "Harikrishnan M",
   "project": {
     "name": "conversational-crm",
     "phase": "ui_ux"
   },
   "workflow": {
     "name": "workflow-3-design-to-development",
-    "status": "not_started",
+    "status": "in_progress",
     "locked_at": null
   },
   "signoff": {
@@ -86,7 +86,7 @@
     }
   ],
   "counts": {
-    "audit_entries": 0,
-    "cost_entries": 0
+    "audit_entries": 17,
+    "cost_entries": 9
   }
 }

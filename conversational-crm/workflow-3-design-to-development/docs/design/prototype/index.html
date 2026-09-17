@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversational CRM — TASK-CAPTURE-PROFILE prototype (SIMULATED)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="simulated-banner">
+  SIMULATED LOCAL PROTOTYPE — synthetic data only. No real login, no real save, no network calls.
+  Not an implementation; see UI-UX-conversational-crm-TASK-CAPTURE-PROFILE-v1.0.md Section 10.
+</div>
+
+<div class="app-shell">
+
+  <nav class="nav-links" aria-label="Prototype screen switcher (simulated navigation only)">
+    <button type="button" data-goto="scr-capture-text">SCR-CAPTURE-TEXT</button>
+    <button type="button" data-goto="scr-capture-result">SCR-CAPTURE-RESULT (unmatched)</button>
+    <button type="button" data-goto="scr-resolve-unmatched">SCR-RESOLVE-UNMATCHED</button>
+    <button type="button" data-goto="scr-profile-empty">SCR-PROFILE (empty)</button>
+    <button type="button" data-goto="scr-profile-populated">SCR-PROFILE (populated)</button>
+  </nav>
+
+  <!-- SCR-CAPTURE-TEXT -->
+  <section id="scr-capture-text" class="screen is-visible" aria-labelledby="h-capture-text">
+    <span class="screen-id">SCR-CAPTURE-TEXT</span>
+    <h1 id="h-capture-text">Capture an interaction</h1>
+
+    <div class="mode-toggle" role="tablist" aria-label="Capture method">
+      <button type="button" role="tab" aria-pressed="true" aria-selected="true">Type it</button>
+      <button type="button" role="tab" aria-pressed="false" aria-selected="false"
+              title="SCR-CAPTURE-CARD is specified in the report, Section 4.2 — not built into this static prototype pass">
+        Scan a business card
+      </button>
+    </div>
+
+    <form id="capture-form" novalidate>
+      <div class="field-group">
+        <label for="entry-text">What happened?</label>
+        <textarea id="entry-text" name="entry_text"
+          placeholder='e.g. &quot;Met Priya and Arjun from Acme, discussed renewal pricing, they want a demo of module X by Friday&quot; (illustrative synthetic example only)'
+          aria-describedby="entry-text-error"></textarea>
+        <p id="entry-text-error" class="error-text" role="alert" hidden>Cannot save an empty note.</p>
+        <p class="help-text">Demonstrates US-2 AC1: submit with the field empty to see the required validation message.</p>
+      </div>
+
+      <div class="actions">
+        <button type="submit" id="save-btn" class="btn btn-primary">Save interaction</button>
+        <button type="button" class="btn btn-secondary">Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- SCR-CAPTURE-RESULT (unmatched variant) -->
+  <section id="scr-capture-result" class="screen" aria-labelledby="h-capture-result">
+    <span class="screen-id">SCR-CAPTURE-RESULT — unmatched variant</span>
+    <h1 id="h-capture-result">Saved — one thing to fix</h1>
+
+    <div class="result-banner attention" role="status">
+      <span class="icon" aria-hidden="true">&#9888;</span>
+      <div>
+        <strong>We couldn't match this note to one customer.</strong>
+        <p style="margin:4px 0 0;">Pick the right one to file it.</p>
+      </div>
+    </div>
+
+    <p class="note-preview">"Talked pricing again, they want the demo pushed to next week." (synthetic example — text that does not unambiguously name a seeded account)</p>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" data-goto="scr-resolve-unmatched">Choose customer</button>
+      <button type="button" class="btn btn-secondary">Capture another</button>
+    </div>
+  </section>
+
+  <!-- SCR-RESOLVE-UNMATCHED -->
+  <section id="scr-resolve-unmatched" class="screen" aria-labelledby="h-resolve">
+    <span class="screen-id">SCR-RESOLVE-UNMATCHED</span>
+    <h1 id="h-resolve">Choose the right customer</h1>
+
+    <p class="help-text">Flagged note:</p>
+    <p class="note-preview">"Talked pricing again, they want the demo pushed to next week." (synthetic example)</p>
+
+    <div class="field-group">
+      <label for="customer-search">Search seeded customers</label>
+      <input type="search" id="customer-search" placeholder="Type a customer name...">
+    </div>
+
+    <ul class="customer-list" role="listbox" aria-label="Seeded customer accounts (synthetic demo data)">
+      <li><label><input type="radio" name="customer" value="acme"> Acme Manufacturing (synthetic)</label></li>
+      <li><label><input type="radio" name="customer" value="globex"> Globex Retail Group (synthetic)</label></li>
+      <li><label><input type="radio" name="customer" value="initech"> Initech Solutions (synthetic)</label></li>
+    </ul>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" disabled>Attach to this customer</button>
+      <button type="button" class="btn btn-secondary">Leave unresolved for now</button>
+    </div>
+    <p class="help-text">"Attach" is disabled here until exactly one account is selected (per US-3 AC1/AC2's own two exit paths).</p>
+  </section>
+
+  <!-- SCR-PROFILE (empty) -->
+  <section id="scr-profile-empty" class="screen" aria-labelledby="h-profile-empty">
+    <span class="screen-id">SCR-PROFILE — empty state</span>
+    <h1 id="h-profile-empty">Globex Retail Group (synthetic)</h1>
+    <div class="empty-state">
+      <h2>No history yet for Globex Retail Group.</h2>
+      <p>Capture the first interaction to start this customer's thread.</p>
+      <div class="actions" style="justify-content:center;">
+        <button type="button" class="btn btn-primary" data-goto="scr-capture-text">Capture the first interaction</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCR-PROFILE (populated) -->
+  <section id="scr-profile-populated" class="screen" aria-labelledby="h-profile-populated">
+    <span class="screen-id">SCR-PROFILE — populated, with a newly-arrived note</span>
+    <h1 id="h-profile-populated">Acme Manufacturing (synthetic)</h1>
+
+    <div class="actions" style="margin-top:0; margin-bottom: var(--space-6);">
+      <button type="button" class="btn btn-secondary" data-goto="scr-capture-text">Capture for this customer</button>
+    </div>
+
+    <ul class="timeline">
+      <li class="interaction-card is-new">
+        <div class="meta">
+          <span>Today, 2:14 PM</span>
+          <span class="badge badge-source">Typed</span>
+          <span class="badge badge-filed">Filed</span>
+          <span aria-hidden="true">&#9679; just added</span>
+        </div>
+        <p>"Met Priya and Arjun from Acme, discussed renewal pricing, they want a demo of module X by Friday." (synthetic example)</p>
+        <p class="reserved-slot">Attendees: Not captured in this view yet (US-5 — out of this run's scope; see Open Item OI-1).</p>
+        <p class="reserved-slot">Commitments / next steps: Not captured in this view yet (F-2 — out of this run's scope; see Open Item OI-2).</p>
+      </li>
+      <li class="interaction-card">
+        <div class="meta">
+          <span>Sep 3, 10:02 AM</span>
+          <span class="badge badge-source">Business card</span>
+          <span class="badge badge-filed">Filed</span>
+        </div>
+        <p>Contact captured: Arjun Mehta, Acme Manufacturing, Procurement Lead. (synthetic example)</p>
+        <p class="reserved-slot">Attendees: Not captured in this view yet (US-5 — out of this run's scope; see Open Item OI-1).</p>
+        <p class="reserved-slot">Commitments / next steps: Not captured in this view yet (F-2 — out of this run's scope; see Open Item OI-2).</p>
+      </li>
+    </ul>
+
+    <p class="open-item-note">
+      This screen demonstrates US-19 AC1: the highlighted card above simulates a note that "just appeared"
+      automatically. The actual transport (push vs. polling) is unresolved — see Open Item OI-3 in the report.
+    </p>
+  </section>
+
+  <p class="help-text" style="margin-top: var(--space-8);">
+    This is a static, self-contained prototype. Use the buttons above to move between screens; nothing here
+    calls a real service. See the accompanying report for every screen's full state inventory.
+  </p>
+
+</div>
+
+<script>
+  // SIMULATED navigation only — swaps which screen section is visible.
+  // No network calls, no persistence, no real backend of any kind.
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function (el) {
+      el.classList.toggle('is-visible', el.id === id);
+    });
+    var target = document.getElementById(id);
+    if (target) {
+      var heading = target.querySelector('h1');
+      if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
+    }
+  }
+
+  document.querySelectorAll('[data-goto]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showScreen(btn.getAttribute('data-goto'));
+    });
+  });
+
+  // Simulated empty-note validation (US-2 AC1) — client-side demonstration only.
+  var form = document.getElementById('capture-form');
+  var entryText = document.getElementById('entry-text');
+  var entryError = document.getElementById('entry-text-error');
+  var saveBtn = document.getElementById('save-btn');
+
+  function isBlank(value) {
+    return value.trim().length === 0;
+  }
+
+  function updateSaveState() {
+    saveBtn.disabled = isBlank(entryText.value);
+  }
+
+  entryText.addEventListener('input', function () {
+    updateSaveState();
+    if (!isBlank(entryText.value)) {
+      entryError.hidden = true;
+    }
+  });
+
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    if (isBlank(entryText.value)) {
+      entryError.hidden = false;
+      entryText.focus();
+      return;
+    }
+    // SIMULATED matching outcome — this static prototype always routes to the
+    // unmatched-variant result screen so that branch is reviewable; a real
+    // implementation's matching decision is a backend concern (see report Section 7).
+    showScreen('scr-capture-result');
+  });
+
+  updateSaveState();
+</script>
+
+</body>
+</html>

@@ -1,8 +1,8 @@
 {
   "role": "stories",
   "field": "user_stories",
-  "document": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
-  "version": "1.0",
+  "document": "docs/stories/USER-STORIES-conversational-crm-v2.2.md",
+  "version": "2.2",
   "ac_format": "imperative",
   "stories": [
     {
@@ -10,297 +10,190 @@
       "feature_id": "F-1",
       "persona": "Sales Rep",
       "title": "Capture a typed interaction note against a matched customer",
-      "story": "As a Sales Rep, I want to record what happened in a customer interaction as a single typed note that automatically ties to the right customer, so that logging an interaction takes one line of typing instead of stopping to fill out a CRM form.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must create a structured interaction note and associate it with the correct customer thread when the rep's typed entry unambiguously matches exactly one seeded customer account.",
-        "The system must save the entry as a new interaction note when the entry contains at least one non-whitespace character."
-      ]
+      "type": "happy_path"
     },
     {
       "id": "US-2",
       "feature_id": "F-1",
       "persona": "Sales Rep",
       "title": "Reject invalid capture input and flag unmatched customers",
-      "story": "As a Sales Rep, I want the system to tell me clearly when a note can't be saved or matched, so that I never lose an interaction record or have it silently attached to the wrong customer.",
-      "type": "validation",
-      "acceptance_criteria": [
-        "The system must reject the submission with an explicit 'cannot save an empty note' message, and must not create any note record, when the rep submits an empty or whitespace-only entry.",
-        "The system must flag the note as 'unmatched — needs customer selection' — rather than attaching it to a default or incorrect account — when no seeded customer account can be unambiguously identified from the entry text."
-      ]
+      "type": "validation"
     },
     {
       "id": "US-3",
       "feature_id": "F-1",
       "persona": "Sales Rep",
       "title": "Resolve an unmatched note to the correct customer",
-      "story": "As a Sales Rep, I want to manually pick the right customer for a note the system couldn't match automatically, so that no interaction detail is lost or misfiled while I haven't yet confirmed the account.",
-      "type": "edge_case",
-      "acceptance_criteria": [
-        "The system must attach a previously flagged 'unmatched' note to the customer thread the rep selects when the rep manually resolves the flag.",
-        "The system must leave the note in the unmatched/needs-selection state — rather than guessing an account — when the rep has not yet resolved it."
-      ]
+      "type": "edge_case"
     },
     {
       "id": "US-4",
       "feature_id": "F-1",
       "persona": "Sales Rep",
       "title": "Capture an interaction via a scanned business card",
-      "story": "As a Sales Rep, I want to capture a contact's details by scanning their business card instead of typing them, so that I can log a new contact from a meeting without manual data entry.",
-      "type": "edge_case",
-      "acceptance_criteria": [
-        "[INFERRED — needs confirmation] The system must extract the contact's name, company and role from a scanned business-card image into the structured interaction note when the image is legible and contains recognizable contact fields. The OCR mechanism was never discussed in discovery (PRD Assumption 5, Open Question 5); whether this is worth building for the demo at all is still open.",
-        "[INFERRED — needs confirmation] The system must inform the rep that manual entry is required — without fabricating contact details — when the image cannot be read or no contact fields are recognized."
-      ]
+      "type": "edge_case"
     },
     {
       "id": "US-5",
       "feature_id": "F-1",
       "persona": "Sales Rep",
       "title": "Extract attendee names from a typed interaction note",
-      "story": "As a Sales Rep, I want the system to automatically pick out everyone I mention meeting with in my typed note, so that I can later ask \"who attended from their side?\" and get a real answer instead of nothing.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item — recording one item per distinct person named (e.g., 'met Priya and Arjun from Acme...' must yield two attendee items, not one merged string) — when the entry text names at least one identifiable person.",
-        "The system must record zero attendee items for that interaction — rather than fabricating a name — when the entry text names no one.",
-        "[INFERRED — needs confirmation] The exact name-recognition/disambiguation mechanism was never discussed in discovery (PRD Assumption 14, Open Question 15); only the underlying capability (AC1/AC2) is treated as confirmed."
-      ]
+      "type": "happy_path"
     },
     {
       "id": "US-6",
-      "feature_id": "F-2",
+      "feature_id": "F-1",
       "persona": "Sales Rep",
-      "title": "Extract commitments and next steps from a captured note",
-      "story": "As a Sales Rep, I want the system to automatically pull out commitments and next steps from my captured note, so that I don't have to separately remember or re-type what I promised.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must extract each distinct commitment, follow-up or next step mentioned in a captured note's text as a separate tracked item when the note contains one or more of them.",
-        "The system must record no commitment items when the note describes discussion only, with no forward-looking commitment."
-      ]
+      "title": "Capture from the home conversational input without selecting a customer first",
+      "type": "happy_path"
     },
     {
       "id": "US-7",
       "feature_id": "F-2",
       "persona": "Sales Rep",
-      "title": "Resolve a due date for an extracted commitment",
-      "story": "As a Sales Rep, I want the system to work out a commitment's due date from what I actually typed, so that vague wording never gets turned into a fabricated deadline.",
-      "type": "edge_case",
-      "acceptance_criteria": [
-        "The system must record a due date on an extracted commitment when the captured text states a concrete date or an unambiguous relative date term resolvable against the interaction's timestamp (e.g., 'by Friday').",
-        "The system must mark the commitment's due date as unspecified — rather than guessing a date — when the text uses a vague temporal reference (e.g., 'soon,' 'sometime') or gives no date information at all."
-      ]
+      "title": "Extract commitments and next steps from a captured note",
+      "type": "happy_path"
     },
     {
       "id": "US-8",
       "feature_id": "F-2",
       "persona": "Sales Rep",
-      "title": "Tag extracted items to the correct customer thread",
-      "story": "As a Sales Rep, I want every discussion point and commitment pulled from my note to land on the right customer's thread, so that I never see — or act on — another customer's commitments.",
-      "type": "validation",
-      "acceptance_criteria": [
-        "The system must tag every extracted discussion point and commitment to the same customer thread as its source interaction note when that note is matched to a thread.",
-        "The system must flag an extracted item for manual thread assignment — rather than tagging it to an incorrect thread — when the source note itself is unmatched to a customer thread (per F-1)."
-      ]
+      "title": "Resolve a due date for an extracted commitment",
+      "type": "edge_case"
     },
     {
       "id": "US-9",
-      "feature_id": "F-3",
+      "feature_id": "F-2",
       "persona": "Sales Rep",
-      "title": "Ask what was discussed last time",
-      "story": "As a Sales Rep, I want to ask \"what did we discuss last time?\" about a customer and get an answer pulled from that customer's actual history, so that I can walk into a follow-up without hunting through old notes.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must answer a natural-language question about a customer's most recent discussion by returning content drawn from that customer's most recent interaction note(s) when the thread has at least one captured note.",
-        "The system must respond that no history exists yet for that customer when the thread is empty."
-      ]
+      "title": "Tag extracted items to the correct customer thread",
+      "type": "validation"
     },
     {
       "id": "US-10",
       "feature_id": "F-3",
       "persona": "Sales Rep",
-      "title": "Ask what I committed to for a customer",
-      "story": "As a Sales Rep, I want to ask \"what did I commit to?\" for a customer and get a list of my open commitments for them, so that I never walk into a meeting having forgotten a promise I made.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must answer a natural-language question about the rep's own open commitments for a customer by listing the commitments extracted and tagged to that thread when any exist.",
-        "The system must state that there are no open commitments for that customer when none exist."
-      ]
+      "title": "Ask what was discussed last time",
+      "type": "happy_path"
     },
     {
       "id": "US-11",
       "feature_id": "F-3",
       "persona": "Sales Rep",
-      "title": "Ask who attended from the customer's side",
-      "story": "As a Sales Rep, I want to ask \"who attended from their side?\" for a customer and get back the names that were actually captured, so that I can quickly recall stakeholders without re-reading the whole thread.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must answer a natural-language question about interaction attendees by returning the contact names extracted from that thread's interaction notes when attendee names were captured.",
-        "The system must state that no attendee information was captured when none was extracted."
-      ]
+      "title": "Ask what I committed to for a customer",
+      "type": "happy_path"
     },
     {
       "id": "US-12",
       "feature_id": "F-3",
       "persona": "Sales Rep",
-      "title": "Reject a Q&A request naming no clear customer",
-      "story": "As a Sales Rep, I want the system to tell me plainly when it can't tell which customer I mean, so that I never mistake someone else's history for the account I actually asked about.",
-      "type": "validation",
-      "acceptance_criteria": [
-        "The system must resolve and answer against the correct customer thread when a query names exactly one customer that matches a seeded account.",
-        "The system must respond that it could not identify the customer — rather than guessing or returning another customer's data — when the query names no customer or an unrecognized one."
-      ]
+      "title": "Ask who attended from the customer's side",
+      "type": "happy_path"
     },
     {
       "id": "US-13",
-      "feature_id": "F-4",
+      "feature_id": "F-3",
       "persona": "Sales Rep",
-      "title": "View overdue and due-soon commitments across accounts",
-      "story": "As a Sales Rep, I want a single list of commitments that are overdue or coming due soon across all my accounts, so that I can act before I miss a promise instead of finding out after the fact.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must list every open commitment whose due date has passed as 'overdue' when the current date is past that due date, and must exclude a commitment from this list once it is marked complete.",
-        "[INFERRED — needs confirmation] The system must list every open commitment whose due date falls within the next 7 days as 'due soon,' and must reclassify it as 'overdue' instead once its due date has passed. The 7-day window is a carried-over illustrative placeholder from the PRD, not a confirmed value (PRD Open Question 6).",
-        "The system must list a commitment with an unspecified due date (per F-2) separately from the due-soon/overdue list — rather than omitting it entirely or treating it as overdue — when no due date was captured."
-      ]
+      "title": "Reject a Q&A request naming no clear customer",
+      "type": "validation"
     },
     {
       "id": "US-14",
-      "feature_id": "F-4",
+      "feature_id": "F-3",
       "persona": "Sales Rep",
-      "title": "See an explicit empty state when nothing is due soon or overdue",
-      "story": "As a Sales Rep, I want the commitment list to say plainly when nothing is due or overdue, so that I know the list is genuinely empty rather than wondering if it failed to load.",
-      "type": "edge_case",
-      "acceptance_criteria": [
-        "The system must state explicitly that there are no due-soon or overdue commitments — rather than showing an empty list with no explanation — when none exist."
-      ]
+      "title": "Ask a question from the home conversational input without selecting a customer first",
+      "type": "happy_path"
     },
     {
       "id": "US-15",
-      "feature_id": "F-5",
+      "feature_id": "F-4",
       "persona": "Sales Rep",
-      "title": "Get a pre-meeting brief on a customer",
-      "story": "As a Sales Rep, I want to ask \"brief me on [customer]\" and get a short summary of their recent history, open commitments and known stakeholders, so that I can walk into the next meeting prepared without re-reading the entire thread myself.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must generate a summary containing recent discussion history, open commitments and stakeholder/contact names for a named customer when that customer has at least one captured note, and must state that no history exists yet for that customer — rather than generating a summary with fabricated content — when the thread is empty.",
-        "[INFERRED — needs confirmation] The system must return a bounded, short-form summary (a few sentences or bullets, not a multi-page document) under normal conditions, and must still return whatever partial content is available, rather than failing the whole request, when data for one of the summary components is missing (PRD Open Question 7)."
-      ]
+      "title": "View overdue and due-soon commitments across accounts",
+      "type": "happy_path"
     },
     {
       "id": "US-16",
-      "feature_id": "F-5",
+      "feature_id": "F-4",
       "persona": "Sales Rep",
-      "title": "Include opportunity/deal status in the customer brief",
-      "story": "As a Sales Rep, I want the brief to also tell me where the opportunity or deal stands with a customer, so that I can gauge deal momentum going into a meeting without piecing it together myself from old notes.",
-      "type": "edge_case",
-      "acceptance_criteria": [
-        "[INFERRED — needs confirmation] The system must synthesize the opportunity/deal-status component narratively from that customer's recorded interaction notes and commitments — since no discrete deal-stage field exists in the structured store — when the thread contains content indicating where the deal/opportunity stands (PRD Assumption 13, Open Question 14).",
-        "The system must state that no opportunity/deal-status information has been captured yet for that customer — rather than fabricating a stage or outcome — when the thread contains no such content."
-      ]
+      "title": "See an explicit empty state when nothing is due soon or overdue",
+      "type": "edge_case"
     },
     {
       "id": "US-17",
       "feature_id": "F-5",
       "persona": "Sales Rep",
-      "title": "Reject a brief request naming no clear customer",
-      "story": "As a Sales Rep, I want the system to tell me plainly when it can't identify which customer I want a brief on, so that I never receive a brief that's actually about the wrong account.",
-      "type": "validation",
-      "acceptance_criteria": [
-        "The system must generate the summary for a named customer when the request unambiguously identifies exactly one seeded customer account.",
-        "The system must respond that it could not identify the requested customer — rather than guessing — when the request names an unrecognized or ambiguous customer."
-      ]
+      "title": "Get a pre-meeting brief on a customer",
+      "type": "happy_path"
     },
     {
       "id": "US-18",
-      "feature_id": "F-6",
+      "feature_id": "F-5",
       "persona": "Sales Rep",
-      "title": "View a customer's running history on their profile",
-      "story": "As a Sales Rep, I want to open a customer's profile and see their captured notes and extracted items in order, so that I get the full relationship picture at a glance instead of reconstructing it from separate notes.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must display a customer's captured notes and extracted items in chronological order on that customer's profile view when at least one note exists.",
-        "The system must display an explicit 'no history yet' state when none exists."
-      ]
+      "title": "Include relationship status in the customer brief",
+      "type": "edge_case"
     },
     {
       "id": "US-19",
-      "feature_id": "F-6",
+      "feature_id": "F-5",
       "persona": "Sales Rep",
-      "title": "See a new capture appear on the correct profile automatically",
-      "story": "As a Sales Rep, I want a note I just captured to show up on the right customer's profile immediately without extra steps, so that my profile view is always current the moment I finish capturing.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must display a newly captured note and its extracted items on the correct customer's profile view automatically, without requiring the rep to take further action, when the note is tagged to that customer's thread.",
-        "The system must not display that note or its items on any other customer's profile view when it is not tagged to that customer."
-      ]
+      "title": "Reject a brief request naming no clear customer",
+      "type": "validation"
     },
     {
       "id": "US-20",
-      "feature_id": "F-7",
+      "feature_id": "F-8",
       "persona": "Sales Rep",
-      "title": "See identical thread content across shared-login sessions",
-      "story": "As a Sales Rep, I want every session signed in with the shared login to see the exact same customer thread, so that a teammate and I are always working from the same information regardless of who is logged in.",
-      "type": "happy_path",
-      "acceptance_criteria": [
-        "The system must show the same customer thread content to every session authenticated via the shared login when two sessions view the same customer.",
-        "The system must not partition data by which physical person is at the keyboard, since no per-rep identity exists in this version."
-      ]
+      "title": "See my prioritized to-do list on login",
+      "type": "happy_path"
     },
     {
       "id": "US-21",
-      "feature_id": "F-7",
+      "feature_id": "F-8",
       "persona": "Sales Rep",
-      "title": "Preserve concurrent additions to the same customer thread",
-      "story": "As a Sales Rep, I want a note I add at the same moment a teammate adds theirs to preserve both, so that neither of us silently loses what we just captured.",
-      "type": "edge_case",
-      "acceptance_criteria": [
-        "[INFERRED — needs confirmation] The system must persist a note added from one session so that it is immediately visible to another concurrent session viewing the same customer thread. The conflict-handling mechanism was never discussed in discovery (PRD Open Question 9).",
-        "[INFERRED — needs confirmation] The system must not silently lose one session's addition when another session adds to the same thread at nearly the same time."
-      ]
+      "title": "See only the top items with a way to see more",
+      "type": "edge_case"
+    },
+    {
+      "id": "US-22",
+      "feature_id": "F-8",
+      "persona": "Sales Rep",
+      "title": "Continue the conversation about a selected to-do item",
+      "type": "happy_path"
+    },
+    {
+      "id": "US-23",
+      "feature_id": "F-8",
+      "persona": "Sales Rep",
+      "title": "See an explicit \"nothing to show yet\" state on first login",
+      "type": "edge_case"
     }
   ],
   "blocked_features": [],
   "self_verification": {
     "result": "PASS",
-    "checked_at": "2026-09-17T12:30:00.000Z",
-    "fixed_before_handoff": [],
-    "note": "21 stories across all 7 PRD features (F-1..F-7), 0 blocked. Every feature produced at least one testable story; where a PRD AC's mechanism was unconfirmed (business-card OCR, attendee-name disambiguation, the due-soon window, the brief's length bound, deal-status synthesis, concurrent-edit conflict handling), the story was written against the confirmed underlying capability with the mechanism flagged inline as [INFERRED — needs confirmation] rather than the feature being dropped. Verified: every persona is 'Sales Rep' (the PRD's only named persona, never generic 'user'); every story has one goal (multi-branch PRD ACs were split across separate stories where they represented distinct goals, e.g. F-4 into US-13/US-14, F-5 into US-15/US-16/US-17); happy path, validation failure and empty state are each covered somewhere per feature; no PRD NFR (Security/Privacy, Access Control, Integration, Concurrency, Data Architecture) was duplicated as its own story -- US-21 implements F-7's own AC2, not a standalone NFR restatement; every story is tagged with its exact PRD feature ID."
+    "checked_at": "2026-09-17T20:12:32Z",
+    "fixed_before_handoff": [
+      "V-S1 (high, validator finding on v2.0): added US-6 AC3 stating F-1 AC6's actual active-prompt failure behavior, and narrowed AC2 so it no longer implies that failure path matches US-1/US-2's passive flag mechanism.",
+      "V-S2 (low, validator finding on v2.0): removed US-23 AC1's unsupported 'implies some interaction history exists' inference about US-20 AC2, replacing it with the actual PRD-grounded distinction.",
+      "V-S3 (medium, validator finding on v2.1): US-6 AC3's invented, unflagged rationale for how the active-prompt mechanism coexists with US-1/US-2's passive-flag mechanism was removed and replaced with an honest [INFERRED -- needs confirmation] tag naming the actual open question (the PRD itself does not reconcile F-1 AC6's text against Section 5's Alternate Flows), added as Open Item 7."
+    ],
+    "note": "Full redraft of User Stories v1.0 -> v2.0 against PRD v1.8 (the PRD had advanced through v1.6/v1.7/v1.8 -- adding F-8, F-9, F-1 AC6, F-3 AC5, then cutting F-9/F-1 AC7/F-6/F-7 and reframing F-5's vocabulary -- entirely after v1.0 stories were gated and published against v1.5). Read the full PRD v1.8 document and requirements.json's structured `features`/`nfrs` fields directly rather than trusting v1.0's own citations. Removed US-18 through US-21 (old F-6/F-7 stories) entirely, since both features were cut from the PRD as standalone features in v1.8 -- the underlying single-shared-login NFR they partly rested on (F-7 AC1) is unchanged and remains an NFR, correctly not re-storied. Added US-6 and US-14, one each for F-1 AC6 and F-3 AC5 (accepting capture/Q&A through the single conversational input with no precondition customer-selection step) -- both are genuinely new user-facing behavior, not restatements of AC1/AC4, so each got its own story per the one-goal-per-story rule. Added US-20 through US-23 for F-8 (Unified Home / Conversational Entry Surface), a feature that did not exist when v1.0 was drafted -- covering greet+list (US-20), top-N/see-more (US-21, INFERRED N value per PRD Open Question 16), continue-conversation-on-select with a removed-item failure branch (US-22), and the true first-login empty state distinct from the due-soon-empty state (US-23). Reworded US-18 (old US-16) from opportunity/deal-status language to relationship-status language, matching the PRD's own v1.8 vocabulary shift (Section 7's new Data Ownership NFR: this product owns no CRM pipeline data) -- both branches (has content / no content) and the underlying capability are unchanged, wording only. F-1 AC1-AC5, F-2 (all), F-3 AC1-AC4, F-4 (all), and F-5 AC1-AC3's happy-path/partial-summary/reject-ambiguous behavior are carried forward unchanged from v1.0, since none of those PRD ACs changed in v1.6-v1.8. Story IDs renumbered from scratch (US-1..US-23, no gaps) since this is a full redraft, not an incremental patch -- old ID-to-new-ID correspondence is documented in the markdown doc's 'What changed since v1.0' section rather than preserved as literal IDs. Ran the full self-verification checklist fresh against all 23 stories: every persona is 'Sales Rep', every story has exactly one goal, every AC is testable, happy path/validation/empty state each covered per feature, no PRD NFR duplicated as its own story, every story tagged with its exact PRD feature ID. Did not touch roles/discovery.json or roles/requirements.json. Did not publish to Jira -- that is this stage's own gate/publish step, not yet reached. [v2.1 update] Independent validation of v2.0 found 1 high (V-S1) and 1 low (V-S2) finding, both fixed directly in v2.1 (v2.0 kept on disk unedited as the exact bytes that review covered). V-S1 was judged severe enough (a real missing failure-branch behavior, not a cosmetic gap) to warrant a fresh independent re-validation pass rather than a self-judged skip, unlike this project's precedent for low/medium findings -- see cost_log/audit_trail for that second pass. [v2.2 update] Independent re-validation of v2.1 found 1 medium finding (V-S3): the V-S1 fix's own justification text made an unsupported claim not backed by the PRD. Fixed directly (removed the invented rationale, replaced with an honest [INFERRED] tag and a new Open Item 7) without a third independent re-validation round -- judged proportionate for a medium-severity, purely textual fix that adds an honest flag rather than new functional behavior, consistent with this project's established practice for medium/low post-review findings (distinct from V-S1 itself, which was high severity and did get a fresh independent pass). Disclosed plainly here and at the gate."
   },
-  "drafted_at": "2026-09-17T12:30:00.000Z",
+  "drafted_at": "2026-09-17T19:57:27Z",
   "gate": {
     "status": "approved",
-    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
-    "reviewed_at": "2026-09-17T13:15:00Z",
+    "reviewed_by": "Harikrishnan M (sparc.team_10@experionglobal.com)",
+    "reviewed_at": "2026-09-17T20:14:59Z",
     "reply": "publish",
     "artifact_manifest": [
       {
         "role": "stories",
-        "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
-        "version": "1.0",
-        "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b"
+        "path": "docs/stories/USER-STORIES-conversational-crm-v2.2.md",
+        "version": "2.2",
+        "sha256": "8671abc2dc22f4106e536e58a00a3b0bc3a884ae14d37a1435142ada71afb94c"
       }
     ],
     "owner_role": "business-analyst",
-    "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
-  },
-  "published": {
-    "target": "jira",
-    "project_key": "RPOC",
-    "published_at": "2026-09-17T13:15:00Z",
-    "note": "Jira project id 17069, key RPOC -- the same project previously named 'Ride-Pool Office Commute' (an earlier, unrelated project run under this framework), renamed to 'Conversational-CRM' and repurposed for this project per explicit human confirmation. Its prior RPOC-1..RPOC-22 issues were confirmed deleted (project held 0 issues) before these were created.",
-    "issues": [
-      { "story_id": "US-1", "jira_key": "RPOC-23" }, { "story_id": "US-2", "jira_key": "RPOC-24" },
-      { "story_id": "US-3", "jira_key": "RPOC-25" }, { "story_id": "US-4", "jira_key": "RPOC-26" },
-      { "story_id": "US-5", "jira_key": "RPOC-27" }, { "story_id": "US-6", "jira_key": "RPOC-28" },
-      { "story_id": "US-7", "jira_key": "RPOC-29" }, { "story_id": "US-8", "jira_key": "RPOC-30" },
-      { "story_id": "US-9", "jira_key": "RPOC-31" }, { "story_id": "US-10", "jira_key": "RPOC-32" },
-      { "story_id": "US-11", "jira_key": "RPOC-33" }, { "story_id": "US-12", "jira_key": "RPOC-34" },
-      { "story_id": "US-13", "jira_key": "RPOC-35" }, { "story_id": "US-14", "jira_key": "RPOC-36" },
-      { "story_id": "US-15", "jira_key": "RPOC-37" }, { "story_id": "US-16", "jira_key": "RPOC-38" },
-      { "story_id": "US-17", "jira_key": "RPOC-39" }, { "story_id": "US-18", "jira_key": "RPOC-40" },
-      { "story_id": "US-19", "jira_key": "RPOC-41" }, { "story_id": "US-20", "jira_key": "RPOC-42" },
-      { "story_id": "US-21", "jira_key": "RPOC-43" }
-    ]
+    "answered_by": "Harikrishnan M (sparc.team_10@experionglobal.com)"
   },
   "cost_log": [
     {
@@ -309,6 +202,38 @@
       "model": "claude-sonnet-5",
       "approx_tokens": 24000,
       "timestamp": "2026-09-17T12:30:00.000Z"
+    },
+    {
+      "stage": "stories-revise",
+      "agent": "user-story-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 22000,
+      "note": "Full redraft v1.0 -> v2.0 against PRD v1.8, per human instruction to revise the user stories now that the PRD's reopened cycle (Home Page requirement, data-ownership scope clarification) is gated and published. Read PRD v1.8's structured features/nfrs and full document; diffed the PRD's own feature set (F-1..F-5, F-8) against v1.0's story coverage (F-1..F-7) to identify exactly what to remove (F-6/F-7 stories), add (F-8 stories, F-1 AC6, F-3 AC5), and reword (F-5's relationship-status vocabulary). Full self-verification checklist re-run against all 23 resulting stories.",
+      "timestamp": "2026-09-17T19:57:27Z"
+    },
+    {
+      "stage": "stories-revise-2",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 6000,
+      "note": "Fixed the validator's 2 findings on Stories v2.0 (V-S1 high, V-S2 low) directly: added US-6 AC3 (F-1 AC6's distinct active-prompt failure behavior, previously undescribed -- US-6 AC2 had wrongly implied it deferred to US-1/US-2's passive-flag mechanism, which the PRD explicitly says AC6 is not) and reworded US-23 AC1 to drop an unsupported inference about US-20 AC2. v2.0 preserved on disk unedited (hash e5d000fc... unchanged, matching what the validator actually reviewed and what is recorded in validation_history); the fix is v2.1 (hash 4a94f6d0...). Bumped version rather than correcting v2.0 in place because record-validation.cjs already holds a recorded review of v2.0 -- the same versioning discipline established on the PRD (v1.6->v1.7). Unlike this project's precedent of skipping re-validation for low/medium post-review fixes, V-S1's severity (high, a genuine missing failure-branch behavior) warranted a fresh independent re-validation pass before this reaches the human gate.",
+      "timestamp": "2026-09-17T20:06:46Z"
+    },
+    {
+      "stage": "stories-revise-3",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 3500,
+      "note": "Fixed the second validator's 1 finding on Stories v2.1 (V-S3, medium): US-6 AC3's added justification sentence invented an unsupported claim about how the active-prompt mechanism and the passive-flag mechanism coexist -- removed it, replaced with an honest [INFERRED -- needs confirmation] tag, and added Open Item 7 naming the actual PRD-level ambiguity (F-1 AC6's text vs. Section 5's Alternate Flows) this fix surfaced. v2.1 preserved on disk unedited (hash 4a94f6d0... unchanged, matching what the second validator actually reviewed); the fix is v2.2 (hash 8671abc2...). No third independent re-validation round run -- judged disproportionate for this severity and this kind of fix (removing an invented claim, adding an honest flag), unlike V-S1's high-severity fix which did get one.",
+      "timestamp": "2026-09-17T20:12:32Z"
+    },
+    {
+      "stage": "stories-publish",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 15000,
+      "note": "Published Stories v2.2 directly in the orchestrator's own turn (publisher-agent still cannot reach this session's live Atlassian tools from within a spawned subagent context, per this run's standing precedent). Atlassian MCP required re-authentication (dropped mid-session on an earlier account change) -- human ran /mcp to reconnect; identity resolved via atlassianUserInfo: DAI Team3 (sparc.team5@experionglobal.com), same identity used for every prior publish in this run. Verified RPOC held 0 issues (human confirmed the prior 21 were already deleted) before creating 23 new Story issues (RPOC-44..RPOC-66), one per v2.2 story, then verified the count via JQL.",
+      "timestamp": "2026-09-17T20:22:12Z"
     }
   ],
   "audit_trail": [
@@ -354,6 +279,57 @@
       "phase": "stories_review",
       "event": "corrected",
       "detail": "./sparc.sh coherence flagged APPROVED_WITHOUT_HASH: the top-level `artifacts[0]` entry (used by record-validation.cjs) had no `sha256`, though `gate.artifact_manifest[0]` did. Backfilled `artifacts[0].sha256` from the value already pinned in `gate.artifact_manifest` -- no new fact recorded, the hash already existed in this same file, just in a different field (same defect class as the discovery-stage fix on this same run)."
+    },
+    {
+      "timestamp": "2026-09-17T19:57:27Z",
+      "actor": "user-story-agent",
+      "phase": "stories",
+      "event": "drafted",
+      "detail": "User Stories v1.0 -> v2.0, redrafted against PRD v1.8. 23 stories across 6 features (F-1, F-2, F-3, F-4, F-5, F-8), 0 blocked. Removed 4 stories (old F-6/F-7), added 6 (F-1 AC6, F-3 AC5, and 4 for new feature F-8), reworded 1 (F-5 relationship-status vocabulary), 12 carried forward unchanged. self-verification PASS. v1.0's full gate/publish/validation record preserved verbatim under superseded_v1_0 -- not deleted."
+    },
+    {
+      "timestamp": "2026-09-17T20:03:47.092Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "stories_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v2.0 recorded: 2 finding(s) (1 high, 1 low). Gate manifest pinned to docs/stories/USER-STORIES-conversational-crm-v2.0.md@e5d000fc12b3. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T20:06:46Z",
+      "actor": "orchestrator",
+      "phase": "stories_review",
+      "event": "corrected",
+      "detail": "Stories v2.0 -> v2.1: fixed V-S1 (high -- US-6 AC3 added, stating F-1 AC6's real active-prompt failure behavior distinctly from US-1/US-2's passive-flag mechanism) and V-S2 (low -- US-23 AC1's unsupported inference about US-20 AC2 removed). v2.0 kept on disk unedited as the historical record of what was actually reviewed. A fresh independent validator pass on v2.1 follows, given V-S1's severity, rather than treating this as self-verified."
+    },
+    {
+      "timestamp": "2026-09-17T20:12:00.863Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "stories_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v2.1 recorded: 1 finding(s) (1 medium). The prior review of v2.0 moved to validation_history. Gate manifest pinned to docs/stories/USER-STORIES-conversational-crm-v2.1.md@4a94f6d0388d. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T20:12:32Z",
+      "actor": "orchestrator",
+      "phase": "stories_review",
+      "event": "corrected",
+      "detail": "Stories v2.1 -> v2.2: fixed V-S3 (medium -- US-6 AC3's invented coexistence rationale removed, replaced with an honest [INFERRED -- needs confirmation] tag and new Open Item 7 naming the real PRD-level ambiguity). v2.1 kept on disk unedited as the historical record of what the second validator actually reviewed. No further independent re-validation round run for this medium-severity textual fix; disclosed at the gate."
+    },
+    {
+      "timestamp": "2026-09-17T20:14:59Z",
+      "actor": "human",
+      "phase": "stories_review",
+      "event": "gate-reply",
+      "detail": "Reply: publish. User Stories v2.2 approved -- 23 stories across F-1/F-2/F-3/F-4/F-5/F-8, 0 blocked. Gate presented with the full V-S1 (high, fixed in v2.1) / V-S2 (low, fixed in v2.1) / V-S3 (medium, fixed in v2.2, no third re-validation round) history disclosed, and the fact that the last independent validator pass reviewed v2.1 (not the current v2.2) explicitly surfaced per gate-review convention. gate.status set to approved, artifact_manifest already pinned to the v2.2 bytes (sha256 8671abc2...)."
+    },
+    {
+      "timestamp": "2026-09-17T20:22:12Z",
+      "actor": "orchestrator",
+      "phase": "stories_review",
+      "event": "published",
+      "detail": "jira -- created 23 Story issues in project RPOC (RPOC-44 through RPOC-66), one per Stories v2.2 story. Project confirmed empty (0 issues) before creation -- the human had already deleted the prior 21 issues (RPOC-23..RPOC-43, v1.0 against PRD v1.5) directly in Jira. No 1:1 reuse attempted given v2.2's renumbering from scratch; superseded_v1_0 in this file remains the historical record of the original 21."
     }
   ],
   "owner_role": null,
@@ -361,54 +337,627 @@
   "artifacts": [
     {
       "role": "stories",
-      "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
-      "version": "1.0",
-      "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b"
+      "path": "docs/stories/USER-STORIES-conversational-crm-v2.2.md",
+      "version": "2.2",
+      "sha256": "8671abc2dc22f4106e536e58a00a3b0bc3a884ae14d37a1435142ada71afb94c"
     }
   ],
-  "validation_history": [],
+  "validation_history": [
+    {
+      "result": "issues_found",
+      "version_reviewed": "2.0",
+      "summary": "User Stories v2.0 (23 stories, F-1/F-2/F-3/F-4/F-5/F-8, 0 blocked) is a well-constructed redraft against PRD v1.8: feature coverage, persona discipline, NFR non-duplication, and the F-6/F-7/F-9 removal are all clean, and state/document consistency (stories.json's abbreviated array vs. the full markdown, and the two sha256 fields) checks out. One real gap found: F-1 AC6's failure branch -- which the PRD explicitly states is a distinct, active-prompt mechanism, not a restatement of AC1/AC4's passive-flag mechanism -- has no covering story AC; US-6 instead defers the ambiguous case to exactly the mechanism the PRD says is different. One low inference-honesty issue also found in US-23.",
+      "independence": "Read the full v2.0 document (296 lines) and the full PRD v1.8 document (1207 lines) directly, not just the structured JSON blocks. Read roles/stories.json in full including superseded_v1_0 (v1.0's complete prior gate/publish/validation record) and the live document/stories/gate/self_verification/audit_trail fields. Read requirements.json's gate object (confirmed approved for v1.8) and workflow.json (confirmed phase stories_review). Built an independent feature-to-story map from the PRD's own feature list and walked every one of the 27 PRD ACs across F-1 (AC1-AC6), F-2 (AC1-AC4), F-3 (AC1-AC5), F-4 (AC1-AC4), F-5 (AC1-AC4), F-8 (AC1-AC4) against the story set directly, rather than trusting the document's own Traceability table or self-verification note. Read workflow-1's user-story-agent.md directly to check story-quality rules against the actual rulebook. Compared stories.json's abbreviated stories[] array against the full document's headings entry by entry (all 23) -- no mismatch found.",
+      "findings": [
+        {
+          "id": "V-S1",
+          "severity": "high",
+          "finding": "PRD F-1 AC6's failure branch -- which the PRD explicitly states is a distinct, active-prompt mechanism, not a restatement of AC1/AC4's passive-flag mechanism -- is not covered by any story AC. US-6 (the story tagged to F-1 AC6) only has a happy-path AC (AC1) and an AC2 that defers the ambiguous case back to US-1/US-2 -- i.e. to AC1/AC4's original passive-flag mechanism, which the PRD says AC6 is NOT.",
+          "evidence": "PRD F-1 AC6: '...must ask the rep, conversationally, to name the customer -- rather than blocking the submission or guessing an account -- when the entry's content does not unambiguously identify one. This failure branch surfaces the same underlying outcome AC1 and AC4 already define... but through the conversation itself, as an active prompt in the same turn, rather than AC1/AC4's original mechanism of a passive flag resolved via a later, separate step.' US-6 AC2 (as drafted): 'The system must not present a mandatory customer-selection step before an entry can be typed or submitted -- customer identification happens after submission, from the entry's own content (per US-1/US-2), not before.' Contrast with F-3 AC5, which the PRD states IS the same mechanism as AC4 ('This failure branch is the same behavior AC4 already defines... not a second, separate mechanism') -- US-14 correctly defers to US-13 there, which is the right call precisely because the PRD says so for AC5 and says the opposite for AC6.",
+          "suggested_fix": "Add an AC to US-6 stating the active-prompt failure behavior explicitly: the system must ask the rep, conversationally and in the same turn, to name the customer -- rather than blocking the submission, guessing an account, or silently falling back to a passive unmatched-flag -- when the entry's content does not unambiguously identify one."
+        },
+        {
+          "id": "V-S2",
+          "severity": "low",
+          "finding": "US-23 AC1 asserts a factual distinction the PRD does not actually establish, without an [INFERRED -- needs confirmation] tag: it claims US-20 AC2's due-soon-empty state 'implies some interaction history exists,' which is the story author's own inference, not something the PRD's F-8 AC1 states or implies.",
+          "evidence": "US-23 AC1 (as drafted): '...distinct from US-20 AC2's due-soon-empty state, which still implies some interaction history exists -- rather than presenting a blank home surface with no explanation.' PRD F-8 AC1's empty branch: '...must state explicitly that there is nothing due or overdue right now -- consistent with F-4 AC3 -- rather than showing an empty list with no explanation, when none exist.' Nothing in the PRD states or implies that this empty-commitments state presupposes prior interaction history.",
+          "suggested_fix": "Drop the 'implies some interaction history exists' clause (the AND-condition in PRD AC4 already distinguishes the two states on its own) or tag it [INFERRED -- needs confirmation]."
+        }
+      ],
+      "checked": [
+        "Every story's feature_id resolves to an in-scope PRD v1.8 feature (F-1, F-2, F-3, F-4, F-5, F-8 only) -- confirmed for all 23; none traces to F-6/F-7/F-9 or an invented ID",
+        "Every PRD v1.8 in-scope AC (27 total across 6 features) walked individually against the story set -- all covered except the F-1 AC6 gap (V-S1)",
+        "No orphaned live references to F-6/F-7/F-9 anywhere in the document body outside the explicitly historical 'What changed since v1.0' and self-verification framing",
+        "US-18 (F-5 relationship-status) checked word-for-word against PRD F-5 AC4 -- matches almost verbatim, correctly reframed to relationship-status vocabulary, no residual deal-stage/opportunity language presented as live, nothing invented beyond what the PRD states",
+        "INVEST/story-quality rules from user-story-agent.md: persona is 'Sales Rep' throughout (no generic 'user'), one goal per story, no PRD NFR restated as its own story, every story tagged with its exact feature ID, happy/validation/edge splitting present per feature except F-4 and F-8 (no validation-type story -- reasonable, neither feature has user input to reject; same pattern existed in v1.0 and wasn't flagged there either)",
+        "State/document consistency: stories.json's abbreviated stories[] array (id/feature_id/title/type) matches the full markdown document exactly for all 23 stories -- no drift",
+        "gate.artifact_manifest[0].sha256 and top-level artifacts[0].sha256 agree with each other within the state file, and independently recomputed via sha256sum against the actual file on disk: e5d000fc12b3845616c966186bfad756eea2da57218a0fd96be36f88b15943bf -- matches exactly",
+        "superseded_v1_0 preserves v1.0's full gate (approved, reviewed by DAI Team3), publish (Jira RPOC-23..RPOC-43, all 21 issues listed), and validation record (1 low finding, pass) verbatim -- nothing lost or altered",
+        "project.phase (stories_review) and requirements gate status (approved, v1.8) cross-checked -- both consistent with the invocation",
+        "Security/PII scan across the full document -- no credential-like strings; example names (Priya, Arjun, Acme) are the canonical synthetic examples carried from the original idea document, not real data",
+        "Placeholder scan -- no bare 'TBD'/'Coming soon'; all placeholders are the permitted [INFERRED -- needs confirmation] tags",
+        "self_verification.result present and is PASS (a legal value)"
+      ],
+      "not_checked": [
+        "One-developer-in-1-3-days sizing per story (INVEST 'Small') was not independently estimated -- checked the rule exists and stories are appropriately scoped/split, not actual build-time estimates",
+        "The six open mechanism questions the document carries forward (business-card OCR, attendee-name disambiguation, due-soon window, brief length bound, relationship-status synthesis sufficiency, top-N bound) remain genuinely unresolved upstream -- this review confirms they're honestly carried forward as [INFERRED -- needs confirmation], not that they're answered",
+        "Whether Workflow 2 (architecture, not yet drafted per this run's state) will honor these open items -- that artifact doesn't exist yet"
+      ],
+      "checked_at": "2026-09-17T20:03:47.091Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Independent validation of v2.1",
+      "required": true,
+      "result": "fail",
+      "summary": "Ran. A separate agent reviewed v2.1 and raised 1 finding(s): 1 medium. Worst severity: medium."
+    }
+  ],
+  "superseded_v1_0": {
+    "document": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+    "version": "1.0",
+    "stories": [
+      {
+        "id": "US-1",
+        "feature_id": "F-1",
+        "persona": "Sales Rep",
+        "title": "Capture a typed interaction note against a matched customer",
+        "story": "As a Sales Rep, I want to record what happened in a customer interaction as a single typed note that automatically ties to the right customer, so that logging an interaction takes one line of typing instead of stopping to fill out a CRM form.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must create a structured interaction note and associate it with the correct customer thread when the rep's typed entry unambiguously matches exactly one seeded customer account.",
+          "The system must save the entry as a new interaction note when the entry contains at least one non-whitespace character."
+        ]
+      },
+      {
+        "id": "US-2",
+        "feature_id": "F-1",
+        "persona": "Sales Rep",
+        "title": "Reject invalid capture input and flag unmatched customers",
+        "story": "As a Sales Rep, I want the system to tell me clearly when a note can't be saved or matched, so that I never lose an interaction record or have it silently attached to the wrong customer.",
+        "type": "validation",
+        "acceptance_criteria": [
+          "The system must reject the submission with an explicit 'cannot save an empty note' message, and must not create any note record, when the rep submits an empty or whitespace-only entry.",
+          "The system must flag the note as 'unmatched \u2014 needs customer selection' \u2014 rather than attaching it to a default or incorrect account \u2014 when no seeded customer account can be unambiguously identified from the entry text."
+        ]
+      },
+      {
+        "id": "US-3",
+        "feature_id": "F-1",
+        "persona": "Sales Rep",
+        "title": "Resolve an unmatched note to the correct customer",
+        "story": "As a Sales Rep, I want to manually pick the right customer for a note the system couldn't match automatically, so that no interaction detail is lost or misfiled while I haven't yet confirmed the account.",
+        "type": "edge_case",
+        "acceptance_criteria": [
+          "The system must attach a previously flagged 'unmatched' note to the customer thread the rep selects when the rep manually resolves the flag.",
+          "The system must leave the note in the unmatched/needs-selection state \u2014 rather than guessing an account \u2014 when the rep has not yet resolved it."
+        ]
+      },
+      {
+        "id": "US-4",
+        "feature_id": "F-1",
+        "persona": "Sales Rep",
+        "title": "Capture an interaction via a scanned business card",
+        "story": "As a Sales Rep, I want to capture a contact's details by scanning their business card instead of typing them, so that I can log a new contact from a meeting without manual data entry.",
+        "type": "edge_case",
+        "acceptance_criteria": [
+          "[INFERRED \u2014 needs confirmation] The system must extract the contact's name, company and role from a scanned business-card image into the structured interaction note when the image is legible and contains recognizable contact fields. The OCR mechanism was never discussed in discovery (PRD Assumption 5, Open Question 5); whether this is worth building for the demo at all is still open.",
+          "[INFERRED \u2014 needs confirmation] The system must inform the rep that manual entry is required \u2014 without fabricating contact details \u2014 when the image cannot be read or no contact fields are recognized."
+        ]
+      },
+      {
+        "id": "US-5",
+        "feature_id": "F-1",
+        "persona": "Sales Rep",
+        "title": "Extract attendee names from a typed interaction note",
+        "story": "As a Sales Rep, I want the system to automatically pick out everyone I mention meeting with in my typed note, so that I can later ask \"who attended from their side?\" and get a real answer instead of nothing.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item \u2014 recording one item per distinct person named (e.g., 'met Priya and Arjun from Acme...' must yield two attendee items, not one merged string) \u2014 when the entry text names at least one identifiable person.",
+          "The system must record zero attendee items for that interaction \u2014 rather than fabricating a name \u2014 when the entry text names no one.",
+          "[INFERRED \u2014 needs confirmation] The exact name-recognition/disambiguation mechanism was never discussed in discovery (PRD Assumption 14, Open Question 15); only the underlying capability (AC1/AC2) is treated as confirmed."
+        ]
+      },
+      {
+        "id": "US-6",
+        "feature_id": "F-2",
+        "persona": "Sales Rep",
+        "title": "Extract commitments and next steps from a captured note",
+        "story": "As a Sales Rep, I want the system to automatically pull out commitments and next steps from my captured note, so that I don't have to separately remember or re-type what I promised.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must extract each distinct commitment, follow-up or next step mentioned in a captured note's text as a separate tracked item when the note contains one or more of them.",
+          "The system must record no commitment items when the note describes discussion only, with no forward-looking commitment."
+        ]
+      },
+      {
+        "id": "US-7",
+        "feature_id": "F-2",
+        "persona": "Sales Rep",
+        "title": "Resolve a due date for an extracted commitment",
+        "story": "As a Sales Rep, I want the system to work out a commitment's due date from what I actually typed, so that vague wording never gets turned into a fabricated deadline.",
+        "type": "edge_case",
+        "acceptance_criteria": [
+          "The system must record a due date on an extracted commitment when the captured text states a concrete date or an unambiguous relative date term resolvable against the interaction's timestamp (e.g., 'by Friday').",
+          "The system must mark the commitment's due date as unspecified \u2014 rather than guessing a date \u2014 when the text uses a vague temporal reference (e.g., 'soon,' 'sometime') or gives no date information at all."
+        ]
+      },
+      {
+        "id": "US-8",
+        "feature_id": "F-2",
+        "persona": "Sales Rep",
+        "title": "Tag extracted items to the correct customer thread",
+        "story": "As a Sales Rep, I want every discussion point and commitment pulled from my note to land on the right customer's thread, so that I never see \u2014 or act on \u2014 another customer's commitments.",
+        "type": "validation",
+        "acceptance_criteria": [
+          "The system must tag every extracted discussion point and commitment to the same customer thread as its source interaction note when that note is matched to a thread.",
+          "The system must flag an extracted item for manual thread assignment \u2014 rather than tagging it to an incorrect thread \u2014 when the source note itself is unmatched to a customer thread (per F-1)."
+        ]
+      },
+      {
+        "id": "US-9",
+        "feature_id": "F-3",
+        "persona": "Sales Rep",
+        "title": "Ask what was discussed last time",
+        "story": "As a Sales Rep, I want to ask \"what did we discuss last time?\" about a customer and get an answer pulled from that customer's actual history, so that I can walk into a follow-up without hunting through old notes.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must answer a natural-language question about a customer's most recent discussion by returning content drawn from that customer's most recent interaction note(s) when the thread has at least one captured note.",
+          "The system must respond that no history exists yet for that customer when the thread is empty."
+        ]
+      },
+      {
+        "id": "US-10",
+        "feature_id": "F-3",
+        "persona": "Sales Rep",
+        "title": "Ask what I committed to for a customer",
+        "story": "As a Sales Rep, I want to ask \"what did I commit to?\" for a customer and get a list of my open commitments for them, so that I never walk into a meeting having forgotten a promise I made.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must answer a natural-language question about the rep's own open commitments for a customer by listing the commitments extracted and tagged to that thread when any exist.",
+          "The system must state that there are no open commitments for that customer when none exist."
+        ]
+      },
+      {
+        "id": "US-11",
+        "feature_id": "F-3",
+        "persona": "Sales Rep",
+        "title": "Ask who attended from the customer's side",
+        "story": "As a Sales Rep, I want to ask \"who attended from their side?\" for a customer and get back the names that were actually captured, so that I can quickly recall stakeholders without re-reading the whole thread.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must answer a natural-language question about interaction attendees by returning the contact names extracted from that thread's interaction notes when attendee names were captured.",
+          "The system must state that no attendee information was captured when none was extracted."
+        ]
+      },
+      {
+        "id": "US-12",
+        "feature_id": "F-3",
+        "persona": "Sales Rep",
+        "title": "Reject a Q&A request naming no clear customer",
+        "story": "As a Sales Rep, I want the system to tell me plainly when it can't tell which customer I mean, so that I never mistake someone else's history for the account I actually asked about.",
+        "type": "validation",
+        "acceptance_criteria": [
+          "The system must resolve and answer against the correct customer thread when a query names exactly one customer that matches a seeded account.",
+          "The system must respond that it could not identify the customer \u2014 rather than guessing or returning another customer's data \u2014 when the query names no customer or an unrecognized one."
+        ]
+      },
+      {
+        "id": "US-13",
+        "feature_id": "F-4",
+        "persona": "Sales Rep",
+        "title": "View overdue and due-soon commitments across accounts",
+        "story": "As a Sales Rep, I want a single list of commitments that are overdue or coming due soon across all my accounts, so that I can act before I miss a promise instead of finding out after the fact.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must list every open commitment whose due date has passed as 'overdue' when the current date is past that due date, and must exclude a commitment from this list once it is marked complete.",
+          "[INFERRED \u2014 needs confirmation] The system must list every open commitment whose due date falls within the next 7 days as 'due soon,' and must reclassify it as 'overdue' instead once its due date has passed. The 7-day window is a carried-over illustrative placeholder from the PRD, not a confirmed value (PRD Open Question 6).",
+          "The system must list a commitment with an unspecified due date (per F-2) separately from the due-soon/overdue list \u2014 rather than omitting it entirely or treating it as overdue \u2014 when no due date was captured."
+        ]
+      },
+      {
+        "id": "US-14",
+        "feature_id": "F-4",
+        "persona": "Sales Rep",
+        "title": "See an explicit empty state when nothing is due soon or overdue",
+        "story": "As a Sales Rep, I want the commitment list to say plainly when nothing is due or overdue, so that I know the list is genuinely empty rather than wondering if it failed to load.",
+        "type": "edge_case",
+        "acceptance_criteria": [
+          "The system must state explicitly that there are no due-soon or overdue commitments \u2014 rather than showing an empty list with no explanation \u2014 when none exist."
+        ]
+      },
+      {
+        "id": "US-15",
+        "feature_id": "F-5",
+        "persona": "Sales Rep",
+        "title": "Get a pre-meeting brief on a customer",
+        "story": "As a Sales Rep, I want to ask \"brief me on [customer]\" and get a short summary of their recent history, open commitments and known stakeholders, so that I can walk into the next meeting prepared without re-reading the entire thread myself.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must generate a summary containing recent discussion history, open commitments and stakeholder/contact names for a named customer when that customer has at least one captured note, and must state that no history exists yet for that customer \u2014 rather than generating a summary with fabricated content \u2014 when the thread is empty.",
+          "[INFERRED \u2014 needs confirmation] The system must return a bounded, short-form summary (a few sentences or bullets, not a multi-page document) under normal conditions, and must still return whatever partial content is available, rather than failing the whole request, when data for one of the summary components is missing (PRD Open Question 7)."
+        ]
+      },
+      {
+        "id": "US-16",
+        "feature_id": "F-5",
+        "persona": "Sales Rep",
+        "title": "Include opportunity/deal status in the customer brief",
+        "story": "As a Sales Rep, I want the brief to also tell me where the opportunity or deal stands with a customer, so that I can gauge deal momentum going into a meeting without piecing it together myself from old notes.",
+        "type": "edge_case",
+        "acceptance_criteria": [
+          "[INFERRED \u2014 needs confirmation] The system must synthesize the opportunity/deal-status component narratively from that customer's recorded interaction notes and commitments \u2014 since no discrete deal-stage field exists in the structured store \u2014 when the thread contains content indicating where the deal/opportunity stands (PRD Assumption 13, Open Question 14).",
+          "The system must state that no opportunity/deal-status information has been captured yet for that customer \u2014 rather than fabricating a stage or outcome \u2014 when the thread contains no such content."
+        ]
+      },
+      {
+        "id": "US-17",
+        "feature_id": "F-5",
+        "persona": "Sales Rep",
+        "title": "Reject a brief request naming no clear customer",
+        "story": "As a Sales Rep, I want the system to tell me plainly when it can't identify which customer I want a brief on, so that I never receive a brief that's actually about the wrong account.",
+        "type": "validation",
+        "acceptance_criteria": [
+          "The system must generate the summary for a named customer when the request unambiguously identifies exactly one seeded customer account.",
+          "The system must respond that it could not identify the requested customer \u2014 rather than guessing \u2014 when the request names an unrecognized or ambiguous customer."
+        ]
+      },
+      {
+        "id": "US-18",
+        "feature_id": "F-6",
+        "persona": "Sales Rep",
+        "title": "View a customer's running history on their profile",
+        "story": "As a Sales Rep, I want to open a customer's profile and see their captured notes and extracted items in order, so that I get the full relationship picture at a glance instead of reconstructing it from separate notes.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must display a customer's captured notes and extracted items in chronological order on that customer's profile view when at least one note exists.",
+          "The system must display an explicit 'no history yet' state when none exists."
+        ]
+      },
+      {
+        "id": "US-19",
+        "feature_id": "F-6",
+        "persona": "Sales Rep",
+        "title": "See a new capture appear on the correct profile automatically",
+        "story": "As a Sales Rep, I want a note I just captured to show up on the right customer's profile immediately without extra steps, so that my profile view is always current the moment I finish capturing.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must display a newly captured note and its extracted items on the correct customer's profile view automatically, without requiring the rep to take further action, when the note is tagged to that customer's thread.",
+          "The system must not display that note or its items on any other customer's profile view when it is not tagged to that customer."
+        ]
+      },
+      {
+        "id": "US-20",
+        "feature_id": "F-7",
+        "persona": "Sales Rep",
+        "title": "See identical thread content across shared-login sessions",
+        "story": "As a Sales Rep, I want every session signed in with the shared login to see the exact same customer thread, so that a teammate and I are always working from the same information regardless of who is logged in.",
+        "type": "happy_path",
+        "acceptance_criteria": [
+          "The system must show the same customer thread content to every session authenticated via the shared login when two sessions view the same customer.",
+          "The system must not partition data by which physical person is at the keyboard, since no per-rep identity exists in this version."
+        ]
+      },
+      {
+        "id": "US-21",
+        "feature_id": "F-7",
+        "persona": "Sales Rep",
+        "title": "Preserve concurrent additions to the same customer thread",
+        "story": "As a Sales Rep, I want a note I add at the same moment a teammate adds theirs to preserve both, so that neither of us silently loses what we just captured.",
+        "type": "edge_case",
+        "acceptance_criteria": [
+          "[INFERRED \u2014 needs confirmation] The system must persist a note added from one session so that it is immediately visible to another concurrent session viewing the same customer thread. The conflict-handling mechanism was never discussed in discovery (PRD Open Question 9).",
+          "[INFERRED \u2014 needs confirmation] The system must not silently lose one session's addition when another session adds to the same thread at nearly the same time."
+        ]
+      }
+    ],
+    "blocked_features": [],
+    "self_verification": {
+      "result": "PASS",
+      "checked_at": "2026-09-17T12:30:00.000Z",
+      "fixed_before_handoff": [],
+      "note": "21 stories across all 7 PRD features (F-1..F-7), 0 blocked. Every feature produced at least one testable story; where a PRD AC's mechanism was unconfirmed (business-card OCR, attendee-name disambiguation, the due-soon window, the brief's length bound, deal-status synthesis, concurrent-edit conflict handling), the story was written against the confirmed underlying capability with the mechanism flagged inline as [INFERRED \u2014 needs confirmation] rather than the feature being dropped. Verified: every persona is 'Sales Rep' (the PRD's only named persona, never generic 'user'); every story has one goal (multi-branch PRD ACs were split across separate stories where they represented distinct goals, e.g. F-4 into US-13/US-14, F-5 into US-15/US-16/US-17); happy path, validation failure and empty state are each covered somewhere per feature; no PRD NFR (Security/Privacy, Access Control, Integration, Concurrency, Data Architecture) was duplicated as its own story -- US-21 implements F-7's own AC2, not a standalone NFR restatement; every story is tagged with its exact PRD feature ID."
+    },
+    "drafted_at": "2026-09-17T12:30:00.000Z",
+    "gate": {
+      "status": "approved",
+      "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+      "reviewed_at": "2026-09-17T13:15:00Z",
+      "reply": "publish",
+      "artifact_manifest": [
+        {
+          "role": "stories",
+          "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+          "version": "1.0",
+          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b"
+        }
+      ],
+      "owner_role": "business-analyst",
+      "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
+    },
+    "published": {
+      "target": "jira",
+      "project_key": "RPOC",
+      "published_at": "2026-09-17T13:15:00Z",
+      "note": "Jira project id 17069, key RPOC -- the same project previously named 'Ride-Pool Office Commute' (an earlier, unrelated project run under this framework), renamed to 'Conversational-CRM' and repurposed for this project per explicit human confirmation. Its prior RPOC-1..RPOC-22 issues were confirmed deleted (project held 0 issues) before these were created.",
+      "issues": [
+        {
+          "story_id": "US-1",
+          "jira_key": "RPOC-23"
+        },
+        {
+          "story_id": "US-2",
+          "jira_key": "RPOC-24"
+        },
+        {
+          "story_id": "US-3",
+          "jira_key": "RPOC-25"
+        },
+        {
+          "story_id": "US-4",
+          "jira_key": "RPOC-26"
+        },
+        {
+          "story_id": "US-5",
+          "jira_key": "RPOC-27"
+        },
+        {
+          "story_id": "US-6",
+          "jira_key": "RPOC-28"
+        },
+        {
+          "story_id": "US-7",
+          "jira_key": "RPOC-29"
+        },
+        {
+          "story_id": "US-8",
+          "jira_key": "RPOC-30"
+        },
+        {
+          "story_id": "US-9",
+          "jira_key": "RPOC-31"
+        },
+        {
+          "story_id": "US-10",
+          "jira_key": "RPOC-32"
+        },
+        {
+          "story_id": "US-11",
+          "jira_key": "RPOC-33"
+        },
+        {
+          "story_id": "US-12",
+          "jira_key": "RPOC-34"
+        },
+        {
+          "story_id": "US-13",
+          "jira_key": "RPOC-35"
+        },
+        {
+          "story_id": "US-14",
+          "jira_key": "RPOC-36"
+        },
+        {
+          "story_id": "US-15",
+          "jira_key": "RPOC-37"
+        },
+        {
+          "story_id": "US-16",
+          "jira_key": "RPOC-38"
+        },
+        {
+          "story_id": "US-17",
+          "jira_key": "RPOC-39"
+        },
+        {
+          "story_id": "US-18",
+          "jira_key": "RPOC-40"
+        },
+        {
+          "story_id": "US-19",
+          "jira_key": "RPOC-41"
+        },
+        {
+          "story_id": "US-20",
+          "jira_key": "RPOC-42"
+        },
+        {
+          "story_id": "US-21",
+          "jira_key": "RPOC-43"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "role": "stories",
+        "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+        "version": "1.0",
+        "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b"
+      }
+    ],
+    "validation_history": [],
+    "validation": {
+      "result": "pass",
+      "version_reviewed": "1.0",
+      "summary": "User Stories v1.0 (21 stories, F-1..F-7, 0 blocked) hold up under independent cross-check: every story's feature_id resolves against an actual PRD feature, every non-blocked PRD feature has at least one story, no PRD acceptance criterion was dropped, and the self-verification's specific claim (6 distinct unresolved mechanisms carried forward as inline [INFERRED \u2014 needs confirmation] tags rather than dropped) is verified true against the PRD's own citations. One very low-severity quality observation noted below; no security, structural, or traceability defects found.",
+      "independence": "Read the full USER-STORIES document and the full PRD v1.5 document directly (not just the structured state blocks), plus discovery.json and workflow.json for context. Built the actual feature_id -> PRD-feature set myself and checked all 21 stories against it (5+3+4+2+3+2+2 = 21, all resolve to F-1..F-7, none invented). Independently walked every PRD acceptance criterion (F-1 AC1-AC5, F-2 AC1-AC4, F-3 AC1-AC4, F-4 AC1-AC4, F-5 AC1-AC4, F-6 AC1-AC2, F-7 AC1-AC2) against the story set to confirm none was silently dropped and that success/failure branch pairing was preserved or correctly split across sibling stories, rather than trusting the self_verification note's own claim. Individually verified each of the 6 [INFERRED \u2014 needs confirmation] mechanism citations (US-4 AC1/AC2 -> PRD Assumption 5 / Open Question 5; US-5 AC3 -> Assumption 14 / Open Question 15; US-13 AC2 -> Open Question 6; US-15 AC2 -> Open Question 7; US-16 AC1 -> Assumption 13 / Open Question 14, Section 13.1; US-21 AC1/AC2 -> Open Question 9) by reading each cited PRD Assumption/Open Question row directly and confirming it exists and actually matches the topic cited, rather than assuming the citation is accurate. Also confirmed the F-1 AC5 capability-vs-mechanism split (a defect class prior PRD reviews flagged as V-P8) landed correctly both in the published PRD text and in how US-5 AC1/AC2 (untagged, capability) vs. AC3 (tagged, mechanism) reflect that same split.",
+      "findings": [
+        {
+          "id": "V-S1",
+          "severity": "low",
+          "finding": "Minor precision loss versus the PRD's own citations: US-8 AC2 cites the dependency generically as \"(per F-1)\" where the PRD's equivalent AC (F-2 AC3) cites it specifically as \"(per F-1 AC4)\"; similarly US-13 AC3 cites \"(per F-2)\" where the PRD's equivalent AC (F-4 AC4) cites \"(per F-2 AC2/AC4)\". Neither instance is inaccurate \u2014 F-1 and F-2 as a whole do cover the cited behavior \u2014 but the story document is less granular than its own source PRD on these two references.",
+          "evidence": "USER-STORIES-conversational-crm-v1.0.md, US-8 AC2 reads \"(per F-1)\"; PRD-conversational-crm-v1.5.md F-2 AC3 reads \"(per F-1 AC4)\" for the equivalent statement. Similarly US-13 AC3 reads \"(per F-2)\" against PRD F-4 AC4's \"(per F-2 AC2/AC4)\".",
+          "suggested_fix": "Tighten both citations to the specific AC numbers (F-1 AC4 and F-2 AC2/AC4 respectively) for consistency with the rest of the document, which otherwise cites PRD ACs precisely (e.g. US-4, US-5, US-13 AC2, US-15 AC2, US-16, US-21 all cite specific Assumption/Open Question numbers)."
+        }
+      ],
+      "checked": [
+        "self_verification field present and result = PASS (not missing/FAIL) \u2014 no structural finding needed on that front",
+        "Every story's feature_id resolves against an actual PRD feature ID (F-1 through F-7); none invented or mistyped",
+        "Every non-blocked PRD feature (all 7, since blocked_features = []) has at least one story \u2014 cross-checked via the document's own Traceability table and independently by walking each PRD feature's ACs against the story set",
+        "Every PRD acceptance criterion (all of F-1 AC1-5, F-2 AC1-4, F-3 AC1-4, F-4 AC1-4, F-5 AC1-4, F-6 AC1-2, F-7 AC1-2) traced forward to at least one story AC \u2014 none silently dropped",
+        "Success/failure (or success/empty) branch pairing preserved from the PRD, either within one story's ACs or correctly split across sibling stories (e.g. F-1 AC1 split across US-1 AC1 success / US-2 AC2 failure)",
+        "The specific claim that 6 distinct unresolved mechanisms (business-card OCR, attendee-name disambiguation, due-soon window, brief length bound, deal-status synthesis, concurrent-edit conflict handling) are carried forward as inline [INFERRED \u2014 needs confirmation] tags rather than dropped \u2014 verified true; all 6 are present, correctly tagged, and each cites a real, matching PRD Assumption/Open Question row",
+        "F-1 AC5's capability-vs-mechanism split (PRD's [Confirmed \u2014 capability] vs [INFERRED \u2014 needs confirmation] mechanism tagging) correctly mirrored in US-5 (AC1/AC2 untagged as confirmed capability, AC3 tagged as inferred mechanism)",
+        "Every cited PRD Assumption/Open Question/Section number in the stories document read directly against the PRD to confirm it exists and matches the cited topic (no citation to a nonexistent section or a mismatched topic found)",
+        "Security/PII scan across the full USER-STORIES document \u2014 no API keys, tokens, credential-like strings, or real-looking personal data; example names (Priya, Arjun, Acme) are the canonical synthetic example carried consistently from the original idea document and PRD, not real data",
+        "Placeholder check \u2014 no bare \"TBD\" or \"Coming soon\" anywhere in the document; all placeholders are the permitted [INFERRED \u2014 needs confirmation] tags",
+        "Persona check \u2014 all 21 stories use \"Sales Rep,\" the PRD's single confirmed persona; no generic \"user\" and no invented second persona",
+        "Filename/version convention checked against CLAUDE.md (kebab-case + version suffix) and against stories.json's own version field (\"1.0\") for consistency",
+        "gate.status = \"pending\" and project.phase = \"stories_review\" cross-checked against the stated invocation phase"
+      ],
+      "not_checked": [
+        "No hash comparison was run by me; I read the document files directly rather than computing/comparing SHA-256. The orchestrator/record-validation tooling should perform the actual hash comparison before the gate.",
+        "The 6 open mechanism questions themselves (OCR approach, name-disambiguation method, due-soon window value, brief length bound, deal-stage representation, concurrency conflict handling) remain genuinely unresolved upstream in the PRD \u2014 this review confirms they are honestly carried forward, not that they are answered; resolving them is Architecture/human work, not something a story-document review can settle.",
+        "Whether the Architecture stage (workflow 2) will actually honor these open items was not and cannot yet be checked \u2014 that artifact does not exist yet."
+      ],
+      "checked_at": "2026-09-17T12:37:20.876Z"
+    },
+    "checks": [
+      {
+        "name": "Independent validation of v1.0",
+        "required": true,
+        "result": "pass",
+        "summary": "Ran. A separate agent reviewed v1.0 and raised no findings."
+      }
+    ],
+    "superseded_at": "2026-09-17T19:57:27Z",
+    "superseded_reason": "PRD advanced from v1.5 (what v1.0 stories were drafted against) to v1.8: F-6 and F-7 cut as standalone features, F-9 (never storied -- added in v1.6, after v1.0) cut, F-1 AC7 (voice-note, never storied either) cut, F-5's vocabulary changed from opportunity/deal-status to relationship-status, and F-8 (Unified Home / Conversational Entry Surface) added as a new feature. v1.0's approval and Jira publish record (RPOC-23..RPOC-43) are preserved here verbatim, not deleted -- those 21 issues reflect a real, valid gate decision made against PRD v1.5 and remain part of this project's audit history even though the artifact itself is now superseded."
+  },
   "validation": {
-    "result": "pass",
-    "version_reviewed": "1.0",
-    "summary": "User Stories v1.0 (21 stories, F-1..F-7, 0 blocked) hold up under independent cross-check: every story's feature_id resolves against an actual PRD feature, every non-blocked PRD feature has at least one story, no PRD acceptance criterion was dropped, and the self-verification's specific claim (6 distinct unresolved mechanisms carried forward as inline [INFERRED — needs confirmation] tags rather than dropped) is verified true against the PRD's own citations. One very low-severity quality observation noted below; no security, structural, or traceability defects found.",
-    "independence": "Read the full USER-STORIES document and the full PRD v1.5 document directly (not just the structured state blocks), plus discovery.json and workflow.json for context. Built the actual feature_id -> PRD-feature set myself and checked all 21 stories against it (5+3+4+2+3+2+2 = 21, all resolve to F-1..F-7, none invented). Independently walked every PRD acceptance criterion (F-1 AC1-AC5, F-2 AC1-AC4, F-3 AC1-AC4, F-4 AC1-AC4, F-5 AC1-AC4, F-6 AC1-AC2, F-7 AC1-AC2) against the story set to confirm none was silently dropped and that success/failure branch pairing was preserved or correctly split across sibling stories, rather than trusting the self_verification note's own claim. Individually verified each of the 6 [INFERRED — needs confirmation] mechanism citations (US-4 AC1/AC2 -> PRD Assumption 5 / Open Question 5; US-5 AC3 -> Assumption 14 / Open Question 15; US-13 AC2 -> Open Question 6; US-15 AC2 -> Open Question 7; US-16 AC1 -> Assumption 13 / Open Question 14, Section 13.1; US-21 AC1/AC2 -> Open Question 9) by reading each cited PRD Assumption/Open Question row directly and confirming it exists and actually matches the topic cited, rather than assuming the citation is accurate. Also confirmed the F-1 AC5 capability-vs-mechanism split (a defect class prior PRD reviews flagged as V-P8) landed correctly both in the published PRD text and in how US-5 AC1/AC2 (untagged, capability) vs. AC3 (tagged, mechanism) reflect that same split.",
+    "result": "issues_found",
+    "version_reviewed": "2.1",
+    "summary": "Focused re-validation of v2.1's two fixes to the findings raised against v2.0. V-S2 (low) is fixed cleanly with no residual problem. V-S1 (high)'s core defect -- US-6 having no AC covering F-1 AC6's active-prompt failure branch -- is genuinely fixed, and the new AC3 matches the PRD's own text almost verbatim. But the justification sentence added alongside AC3 asserts an unsupported claim about how AC6's mechanism coexists with US-1/US-2/US-3's passive-flag mechanism -- a claim the PRD itself does not make and, on the PRD's own internal evidence, does not cleanly resolve. This is a new, distinct finding (V-S3, medium).",
+    "independence": "Read the full text of v2.0 (308 lines) and v2.1 (328 lines) and diffed them directly. Cross-checked US-6 AC3's wording against PRD F-1 AC6's exact text (Section 6). Cross-checked the added coexistence-justification sentence against PRD F-1's own Description ('every capture entry -- typed or business-card -- is submitted through the single home conversational input (F-8)'), Section 5's Alternate Flows (which still describes only the passive unmatched-customer mechanism, not reconciled with AC6), and F-1 AC6's own text ('rather than AC1/AC4's original mechanism', not 'in addition to'). Contrasted against F-3 AC5, which the PRD explicitly states IS the same mechanism as AC4 -- confirming the story-level treatment there (US-14 deferring to US-13) is correct specifically because the PRD says so, which is exactly why the parallel claim added for F-1 AC6 needed the same textual support and didn't have it. Cross-checked US-23 AC1's reworded text against PRD F-8 AC1/AC4 directly. Confirmed via full diff that no other story, AC, Open Item, Blocked Features text, or Traceability entry differs between v2.0 and v2.1 beyond the three disclosed changes. Checked roles/stories.json's version/document/artifacts fields and self_verification.result legality.",
+    "fix_verification": {
+      "V-S1": "Partially fixed. Root defect closed: US-6 AC3 now states the active-prompt failure behavior, matching PRD F-1 AC6's text almost verbatim, and AC2 was correctly narrowed (the '(per US-1/US-2)' citation implying an identical mechanism was removed). New consistency issue surfaced by the fix itself -- see V-S3.",
+      "V-S2": "Fixed, cleanly. US-23 AC1's reworded claim ('covers only the no-qualifying-commitments case') matches PRD F-8 AC1 exactly, with no new unsupported claim introduced."
+    },
     "findings": [
       {
-        "id": "V-S1",
-        "severity": "low",
-        "finding": "Minor precision loss versus the PRD's own citations: US-8 AC2 cites the dependency generically as \"(per F-1)\" where the PRD's equivalent AC (F-2 AC3) cites it specifically as \"(per F-1 AC4)\"; similarly US-13 AC3 cites \"(per F-2)\" where the PRD's equivalent AC (F-4 AC4) cites \"(per F-2 AC2/AC4)\". Neither instance is inaccurate — F-1 and F-2 as a whole do cover the cited behavior — but the story document is less granular than its own source PRD on these two references.",
-        "evidence": "USER-STORIES-conversational-crm-v1.0.md, US-8 AC2 reads \"(per F-1)\"; PRD-conversational-crm-v1.5.md F-2 AC3 reads \"(per F-1 AC4)\" for the equivalent statement. Similarly US-13 AC3 reads \"(per F-2)\" against PRD F-4 AC4's \"(per F-2 AC2/AC4)\".",
-        "suggested_fix": "Tighten both citations to the specific AC numbers (F-1 AC4 and F-2 AC2/AC4 respectively) for consistency with the rest of the document, which otherwise cites PRD ACs precisely (e.g. US-4, US-5, US-13 AC2, US-15 AC2, US-16, US-21 all cite specific Assumption/Open Question numbers)."
+        "id": "V-S3",
+        "severity": "medium",
+        "finding": "US-6 AC3's added justification text asserts, without an [INFERRED -- needs confirmation] tag, that AC6's active-prompt mechanism and AC1/AC4's passive-flag mechanism (US-2/US-3) 'exist side by side because AC6 governs entry through the single conversational input specifically, while AC1/AC4 ... describe the underlying match/flag/resolve behavior generally.' This distinction is not supported by the PRD: F-1's Description states every capture entry is submitted through the single conversational input (F-8) -- there is no capture entry that goes through some other, non-F-8 path for AC1/AC4 to apply to 'generally.' As written, US-2 AC2 (flags any unmatched entry passively) and US-6 AC3 (asks conversationally, same turn, when any F-8 entry is ambiguous) describe the same trigger condition with two different system responses, and nothing in the story set says which one actually fires, or whether AC3's active prompt falls back to AC1's passive flag if the rep's answer to the prompt is itself still unresolved.",
+        "evidence": "PRD F-1 Description: 'Every capture entry -- typed or business-card -- is submitted through the single home conversational input (F-8); the rep is never required to select, open, or confirm a customer account before capturing (AC6).' PRD F-1 AC6: '...but through the conversation itself, as an active prompt in the same turn, rather than AC1/AC4's original mechanism of a passive flag resolved via a later, separate step' (rather than, not in addition to). PRD Section 5 Alternate Flows still describes only the passive mechanism ('system flags the note \"unmatched -- needs customer selection\" and asks the rep to pick the correct account (F-1 AC1, AC4)'), not reconciled with AC6's active-prompt override -- a pre-existing ambiguity in the PRD itself that the story-level fix inherited and then resolved with an invented, unflagged rationale rather than surfacing as an open item. Contrast with F-3 AC5, which the PRD explicitly states IS the same mechanism as AC4 -- the parallel US-14/US-13 treatment is correct there specifically because the PRD says so; F-1 AC6 says the opposite, which is why the coexistence claim needed textual support it doesn't have.",
+        "suggested_fix": "Remove the invented coexistence rationale from US-6 AC3 and replace it with an honest [INFERRED -- needs confirmation] tag stating the open question plainly (does the active-turn prompt replace the passive flag entirely for F-8-submitted entries, or does the passive flag still apply as a fallback if the rep's answer to the prompt remains ambiguous), and add it to the document's Open Items list, citing PRD F-1 AC6 vs. Section 5's Alternate Flows as the source of the ambiguity."
       }
     ],
     "checked": [
-      "self_verification field present and result = PASS (not missing/FAIL) — no structural finding needed on that front",
-      "Every story's feature_id resolves against an actual PRD feature ID (F-1 through F-7); none invented or mistyped",
-      "Every non-blocked PRD feature (all 7, since blocked_features = []) has at least one story — cross-checked via the document's own Traceability table and independently by walking each PRD feature's ACs against the story set",
-      "Every PRD acceptance criterion (all of F-1 AC1-5, F-2 AC1-4, F-3 AC1-4, F-4 AC1-4, F-5 AC1-4, F-6 AC1-2, F-7 AC1-2) traced forward to at least one story AC — none silently dropped",
-      "Success/failure (or success/empty) branch pairing preserved from the PRD, either within one story's ACs or correctly split across sibling stories (e.g. F-1 AC1 split across US-1 AC1 success / US-2 AC2 failure)",
-      "The specific claim that 6 distinct unresolved mechanisms (business-card OCR, attendee-name disambiguation, due-soon window, brief length bound, deal-status synthesis, concurrent-edit conflict handling) are carried forward as inline [INFERRED — needs confirmation] tags rather than dropped — verified true; all 6 are present, correctly tagged, and each cites a real, matching PRD Assumption/Open Question row",
-      "F-1 AC5's capability-vs-mechanism split (PRD's [Confirmed — capability] vs [INFERRED — needs confirmation] mechanism tagging) correctly mirrored in US-5 (AC1/AC2 untagged as confirmed capability, AC3 tagged as inferred mechanism)",
-      "Every cited PRD Assumption/Open Question/Section number in the stories document read directly against the PRD to confirm it exists and matches the cited topic (no citation to a nonexistent section or a mismatched topic found)",
-      "Security/PII scan across the full USER-STORIES document — no API keys, tokens, credential-like strings, or real-looking personal data; example names (Priya, Arjun, Acme) are the canonical synthetic example carried consistently from the original idea document and PRD, not real data",
-      "Placeholder check — no bare \"TBD\" or \"Coming soon\" anywhere in the document; all placeholders are the permitted [INFERRED — needs confirmation] tags",
-      "Persona check — all 21 stories use \"Sales Rep,\" the PRD's single confirmed persona; no generic \"user\" and no invented second persona",
-      "Filename/version convention checked against CLAUDE.md (kebab-case + version suffix) and against stories.json's own version field (\"1.0\") for consistency",
-      "gate.status = \"pending\" and project.phase = \"stories_review\" cross-checked against the stated invocation phase"
+      "Full text of v2.0 (308 lines) and v2.1 (328 lines) read in full and diffed by hand -- confirmed the only substantive changes are US-6 AC2/AC3, US-23 AC1, and the Self-Verification checklist's F-1 line, plus disclosed front-matter/changelog additions",
+      "US-6 AC3 wording cross-checked against PRD F-1 AC6's exact text",
+      "US-6 AC2's narrowing confirmed (the '(per US-1/US-2)' citation removed)",
+      "US-6 AC3's coexistence claim cross-checked against PRD F-1 Description, Section 5 Alternate Flows, F-1 AC6's own text, and the contrasting F-3 AC5 treatment -- found V-S3",
+      "US-23 AC1's reworded claim cross-checked against PRD F-8 AC1/AC4 -- confirmed accurate",
+      "roles/stories.json version (2.1), document, and artifacts[0].path fields confirmed pointing to v2.1",
+      "self_verification.result confirmed 'PASS' (legal value)",
+      "Security/PII and placeholder scan on all changed passages -- clean",
+      "sha256 of v2.1 independently recomputed via sha256sum by the orchestrator and confirmed to match the value recorded in state: 4a94f6d0388dd7aaff779c99c4d5be2c23dcab9adb8eff18f77cedebff22e2d1"
     ],
     "not_checked": [
-      "No hash comparison was run by me; I read the document files directly rather than computing/comparing SHA-256. The orchestrator/record-validation tooling should perform the actual hash comparison before the gate.",
-      "The 6 open mechanism questions themselves (OCR approach, name-disambiguation method, due-soon window value, brief length bound, deal-stage representation, concurrency conflict handling) remain genuinely unresolved upstream in the PRD — this review confirms they are honestly carried forward, not that they are answered; resolving them is Architecture/human work, not something a story-document review can settle.",
-      "Whether the Architecture stage (workflow 2) will actually honor these open items was not and cannot yet be checked — that artifact does not exist yet."
+      "Did not re-review superseded_v1_0 or the v1.0 gate/publish history -- out of scope for this targeted re-review, already independently validated previously",
+      "Did not re-check the six carried-forward [INFERRED -- needs confirmation] open mechanism questions unrelated to this fix (business-card OCR, attendee disambiguation, due-soon window, brief length bound, relationship-status synthesis, top-N bound) -- unchanged from the already-reviewed v2.0 content",
+      "Whether Workflow 2 (architecture, not yet drafted) will honor these open items or the new V-S3 ambiguity -- that artifact doesn't exist yet"
     ],
-    "checked_at": "2026-09-17T12:37:20.876Z"
+    "checked_at": "2026-09-17T20:12:00.863Z"
   },
-  "checks": [
-    {
-      "name": "Independent validation of v1.0",
-      "required": true,
-      "result": "pass",
-      "summary": "Ran. A separate agent reviewed v1.0 and raised no findings."
-    }
-  ]
+  "published": {
+    "target": "jira",
+    "project_key": "RPOC",
+    "published_at": "2026-09-17T20:22:12Z",
+    "note": "Jira project id 17069, key RPOC, name 'Conversational-CRM' -- the same project used for v1.0's publish. The user confirmed the prior 21 issues (RPOC-23..RPOC-43, v1.0 against PRD v1.5) were already deleted directly in Jira before this publish; verified via JQL (project = RPOC) that it held 0 issues immediately before creating these 23, and 23 immediately after.",
+    "issues": [
+      {
+        "story_id": "US-1",
+        "jira_key": "RPOC-44"
+      },
+      {
+        "story_id": "US-2",
+        "jira_key": "RPOC-45"
+      },
+      {
+        "story_id": "US-3",
+        "jira_key": "RPOC-46"
+      },
+      {
+        "story_id": "US-4",
+        "jira_key": "RPOC-47"
+      },
+      {
+        "story_id": "US-5",
+        "jira_key": "RPOC-48"
+      },
+      {
+        "story_id": "US-6",
+        "jira_key": "RPOC-49"
+      },
+      {
+        "story_id": "US-7",
+        "jira_key": "RPOC-50"
+      },
+      {
+        "story_id": "US-8",
+        "jira_key": "RPOC-51"
+      },
+      {
+        "story_id": "US-9",
+        "jira_key": "RPOC-52"
+      },
+      {
+        "story_id": "US-10",
+        "jira_key": "RPOC-53"
+      },
+      {
+        "story_id": "US-11",
+        "jira_key": "RPOC-54"
+      },
+      {
+        "story_id": "US-12",
+        "jira_key": "RPOC-55"
+      },
+      {
+        "story_id": "US-13",
+        "jira_key": "RPOC-56"
+      },
+      {
+        "story_id": "US-14",
+        "jira_key": "RPOC-57"
+      },
+      {
+        "story_id": "US-15",
+        "jira_key": "RPOC-58"
+      },
+      {
+        "story_id": "US-16",
+        "jira_key": "RPOC-59"
+      },
+      {
+        "story_id": "US-17",
+        "jira_key": "RPOC-60"
+      },
+      {
+        "story_id": "US-18",
+        "jira_key": "RPOC-61"
+      },
+      {
+        "story_id": "US-19",
+        "jira_key": "RPOC-62"
+      },
+      {
+        "story_id": "US-20",
+        "jira_key": "RPOC-63"
+      },
+      {
+        "story_id": "US-21",
+        "jira_key": "RPOC-64"
+      },
+      {
+        "story_id": "US-22",
+        "jira_key": "RPOC-65"
+      },
+      {
+        "story_id": "US-23",
+        "jira_key": "RPOC-66"
+      }
+    ]
+  }
 }

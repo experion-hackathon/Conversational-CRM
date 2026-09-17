@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversational CRM — TASK-QA-CHAT prototype (SIMULATED)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="simulated-banner">
+  SIMULATED LOCAL PROTOTYPE — synthetic data only. No real login, no real save, no network calls.
+  Not an implementation; see UI-UX-conversational-crm-TASK-QA-CHAT-v1.0.md Section 11.
+</div>
+
+<div class="app-shell">
+
+  <nav class="nav-links" aria-label="Prototype state switcher (simulated navigation only)">
+    <button type="button" data-goto="qa-empty">Global Ask (empty)</button>
+    <button type="button" data-goto="qa-populated">Contextual Ask (populated)</button>
+    <button type="button" data-goto="qa-rejection">No clear customer</button>
+    <button type="button" data-goto="qa-empty-history">Empty history answer</button>
+    <button type="button" data-goto="qa-loading">Loading / awaiting answer</button>
+    <button type="button" data-goto="qa-error">Failed request / retry</button>
+  </nav>
+
+  <!-- STATE 1: Global Ask, no context set, no messages yet -->
+  <section id="qa-empty" class="screen is-visible" aria-labelledby="h-qa-empty">
+    <span class="screen-id">SCR-QA-CHAT — Global Ask, empty</span>
+    <h1 id="h-qa-empty">Ask about a customer</h1>
+
+    <div class="context-banner no-context">
+      <span>No customer selected — name one in your question, or
+        <button type="button" class="link-action">choose a customer</button>
+      </span>
+    </div>
+
+    <div class="empty-state">
+      <p>Ask a question about this customer's history to get started.</p>
+    </div>
+
+    <div class="suggested-queries">
+      <span class="chip-label">Example questions (not the only ones you can ask):</span>
+      <button type="button" class="chip">What did we discuss last time?</button>
+      <button type="button" class="chip">What did I commit to?</button>
+      <button type="button" class="chip">Who attended from their side?</button>
+    </div>
+
+    <form class="composer" onsubmit="return false;">
+      <label for="composer-1">Type a question</label>
+      <input id="composer-1" type="text" placeholder="e.g. What did we discuss last time?">
+      <button type="button" class="send" disabled>Send</button>
+    </form>
+    <p class="note">Send stays disabled until the field has at least one non-whitespace character (Section 4.1, Validation).</p>
+  </section>
+
+  <!-- STATE 2: Contextual Ask, populated conversation, all three successful answer types -->
+  <section id="qa-populated" class="screen" aria-labelledby="h-qa-populated">
+    <span class="screen-id">SCR-QA-CHAT — Contextual Ask, populated</span>
+    <h1 id="h-qa-populated">Ask about a customer</h1>
+
+    <div class="context-banner">
+      <span>Asking about: <span class="context-name">Acme Corp</span></span>
+      <button type="button" class="link-action">Change</button>
+    </div>
+
+    <div class="conversation" role="log" aria-live="polite" aria-label="Conversation">
+      <div class="turn turn-rep">
+        <div class="bubble">What did we discuss last time?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble">
+          Your most recent interaction with Acme Corp (2026-09-15) covered renewal
+          pricing and a request for a demo of Module X. [SIMULATED answer — synthetic
+          data; a real answer's exact sourcing/citation behavior is unresolved, see
+          Open Item OI-4.]
+        </div>
+        <div class="turn-meta">Answered from the most recent captured note (US-9 AC1)</div>
+      </div>
+
+      <div class="turn turn-rep">
+        <div class="bubble">What did I commit to?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble">
+          <ul>
+            <li>Send pricing details by Friday</li>
+            <li>Share Module X demo availability (due date unspecified)</li>
+          </ul>
+        </div>
+        <div class="turn-meta">Open commitments for Acme Corp (US-10 AC1)</div>
+      </div>
+
+      <div class="turn turn-rep">
+        <div class="bubble">Who attended from their side?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble">Priya, Arjun</div>
+        <div class="turn-meta">Attendee names captured for Acme Corp (US-11 AC1)</div>
+      </div>
+    </div>
+
+    <div class="suggested-queries">
+      <span class="chip-label">Example questions (not the only ones you can ask):</span>
+      <button type="button" class="chip">What did we discuss last time?</button>
+      <button type="button" class="chip">What did I commit to?</button>
+      <button type="button" class="chip">Who attended from their side?</button>
+    </div>
+
+    <form class="composer" onsubmit="return false;">
+      <label for="composer-2">Type a question</label>
+      <input id="composer-2" type="text" placeholder="Ask a follow-up about Acme Corp...">
+      <button type="button" class="send" disabled>Send</button>
+    </form>
+  </section>
+
+  <!-- STATE 3: No clear customer -->
+  <section id="qa-rejection" class="screen" aria-labelledby="h-qa-rejection">
+    <span class="screen-id">SCR-QA-CHAT — Rejection: no clear customer</span>
+    <h1 id="h-qa-rejection">Ask about a customer</h1>
+
+    <div class="context-banner no-context">
+      <span>No customer selected — name one in your question, or
+        <button type="button" class="link-action">choose a customer</button>
+      </span>
+    </div>
+
+    <div class="conversation" role="log" aria-live="polite" aria-label="Conversation">
+      <div class="turn turn-rep">
+        <div class="bubble">What did we discuss last time?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble rejection">
+          I couldn't tell which customer you mean. Try naming one in your question,
+          or choose one above.
+        </div>
+        <div class="turn-meta">Rejected — no clear customer identified (US-12 AC2)</div>
+      </div>
+    </div>
+
+    <form class="composer" onsubmit="return false;">
+      <label for="composer-3">Type a question</label>
+      <input id="composer-3" type="text" placeholder="Try: What did we discuss last time with Acme?">
+      <button type="button" class="send" disabled>Send</button>
+    </form>
+  </section>
+
+  <!-- STATE 4: Empty history answer -->
+  <section id="qa-empty-history" class="screen" aria-labelledby="h-qa-empty-history">
+    <span class="screen-id">SCR-QA-CHAT — Empty-history answer</span>
+    <h1 id="h-qa-empty-history">Ask about a customer</h1>
+
+    <div class="context-banner">
+      <span>Asking about: <span class="context-name">Nimbus Retail Group</span></span>
+      <button type="button" class="link-action">Change</button>
+    </div>
+
+    <div class="conversation" role="log" aria-live="polite" aria-label="Conversation">
+      <div class="turn turn-rep">
+        <div class="bubble">What did we discuss last time?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble">No history exists yet for Nimbus Retail Group.</div>
+        <div class="turn-meta">Empty-thread branch (US-9 AC2)</div>
+      </div>
+
+      <div class="turn turn-rep">
+        <div class="bubble">What did I commit to?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble">There are no open commitments for Nimbus Retail Group.</div>
+        <div class="turn-meta">No commitments branch (US-10 AC2)</div>
+      </div>
+
+      <div class="turn turn-rep">
+        <div class="bubble">Who attended from their side?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="bubble">No attendee information was captured for Nimbus Retail Group.</div>
+        <div class="turn-meta">No attendee-info branch (US-11 AC2)</div>
+      </div>
+    </div>
+
+    <form class="composer" onsubmit="return false;">
+      <label for="composer-4">Type a question</label>
+      <input id="composer-4" type="text" placeholder="Ask a follow-up...">
+      <button type="button" class="send" disabled>Send</button>
+    </form>
+  </section>
+
+  <!-- STATE 5: Loading -->
+  <section id="qa-loading" class="screen" aria-labelledby="h-qa-loading">
+    <span class="screen-id">SCR-QA-CHAT — Loading / awaiting answer</span>
+    <h1 id="h-qa-loading">Ask about a customer</h1>
+
+    <div class="context-banner">
+      <span>Asking about: <span class="context-name">Acme Corp</span></span>
+      <button type="button" class="link-action" disabled>Change</button>
+    </div>
+
+    <div class="conversation" role="log" aria-live="polite" aria-label="Conversation">
+      <div class="turn turn-rep">
+        <div class="bubble">What did we discuss last time?</div>
+      </div>
+      <div class="turn turn-system">
+        <span class="thinking-indicator">Thinking…</span>
+      </div>
+    </div>
+
+    <form class="composer" onsubmit="return false;">
+      <label for="composer-5">Type a question</label>
+      <input id="composer-5" type="text" disabled placeholder="Waiting for an answer...">
+      <button type="button" class="send" disabled>Send</button>
+    </form>
+    <p class="note">Composer and Send are disabled only while a turn is awaiting its answer (Section 4.1, Loading state).</p>
+  </section>
+
+  <!-- STATE 6: Error / retry -->
+  <section id="qa-error" class="screen" aria-labelledby="h-qa-error">
+    <span class="screen-id">SCR-QA-CHAT — Failed request, retry</span>
+    <h1 id="h-qa-error">Ask about a customer</h1>
+
+    <div class="context-banner">
+      <span>Asking about: <span class="context-name">Acme Corp</span></span>
+      <button type="button" class="link-action">Change</button>
+    </div>
+
+    <div class="conversation" role="log" aria-live="polite" aria-label="Conversation">
+      <div class="turn turn-rep">
+        <div class="bubble">What did we discuss last time?</div>
+      </div>
+      <div class="turn turn-system">
+        <div class="inline-error-banner">
+          <span>Couldn't get an answer. Retry.</span>
+          <button type="button">Retry</button>
+        </div>
+        <div class="turn-meta">Original question preserved; Retry resubmits it unchanged (Section 4.1, Error state)</div>
+      </div>
+    </div>
+
+    <form class="composer" onsubmit="return false;">
+      <label for="composer-6">Type a question</label>
+      <input id="composer-6" type="text" placeholder="Ask a follow-up...">
+      <button type="button" class="send" disabled>Send</button>
+    </form>
+  </section>
+
+  <p class="note">
+    This is a static prototype: the composer's Send stays disabled by design
+    (nothing here is wired to a real backend) except where a state deliberately
+    demonstrates the enabled affordance in its own markup. Use the nav above to
+    inspect each named state directly.
+  </p>
+
+</div>
+
+<script>
+  // SIMULATED navigation only — swaps which state section is visible. No network calls.
+  document.querySelectorAll('.nav-links button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.getAttribute('data-goto');
+      document.querySelectorAll('.screen').forEach(function (s) {
+        s.classList.toggle('is-visible', s.id === target);
+      });
+    });
+  });
+
+  // SIMULATED composer affordance: enable Send only when the field is non-whitespace,
+  // matching Section 4.1's stated validation rule. Does not send anything anywhere.
+  document.querySelectorAll('.composer input[type="text"]').forEach(function (input) {
+    if (input.disabled) return;
+    var sendBtn = input.parentElement.querySelector('button.send');
+    input.addEventListener('input', function () {
+      sendBtn.disabled = input.value.trim().length === 0;
+    });
+  });
+
+  // SIMULATED suggestion chips: populate the composer, never auto-send.
+  document.querySelectorAll('.chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var composer = chip.closest('section').querySelector('.composer input[type="text"]');
+      if (composer && !composer.disabled) {
+        composer.value = chip.textContent;
+        composer.dispatchEvent(new Event('input'));
+        composer.focus();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-17T13:39:39.072Z",
-  "generated_from": "../output/conversational-crm/state/workflow-1-discovery-to-stories",
+  "generated_at": "2026-09-17T20:25:25.133Z",
+  "generated_from": "../sparc-output/conversational-crm/state/workflow-1-discovery-to-stories",
   "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
-  "owner": "gayathry",
+  "owner": "Harikrishnan M",
   "project": {
     "name": "conversational-crm",
     "phase": "locked"
@@ -11,12 +11,12 @@
   "workflow": {
     "name": "workflow-1-discovery-to-stories",
     "status": "locked",
-    "locked_at": "2026-09-17T13:45:00Z"
+    "locked_at": "2026-09-17T20:24:58Z"
   },
   "signoff": {
     "status": "approved",
-    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
-    "reviewed_at": "2026-09-17T13:45:00Z"
+    "reviewed_by": "Harikrishnan M (sparc.team_10@experionglobal.com)",
+    "reviewed_at": "2026-09-17T20:24:58Z"
   },
   "stages": [
     {
@@ -47,17 +47,17 @@
       "status": "drafted",
       "gate": {
         "status": "approved",
-        "reviewed_by": "Harikrishnan M",
-        "reviewed_at": "2026-09-17T11:26:09.915Z"
+        "reviewed_by": "Harikrishnan M (sparc.team_10@experionglobal.com)",
+        "reviewed_at": "2026-09-17T19:49:42Z"
       },
       "artifacts": [
         {
           "role": "requirements",
-          "path": "docs/requirements/PRD-conversational-crm-v1.5.md",
-          "version": "1.5",
-          "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5",
-          "sha256_lf": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5",
-          "sha256_crlf": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64"
+          "path": "docs/requirements/PRD-conversational-crm-v1.8.md",
+          "version": "1.8",
+          "sha256": "d950f813e332b35ac7cb4bfd0a70602eb1db034a7fcad702e1bac9282a357265",
+          "sha256_lf": "d950f813e332b35ac7cb4bfd0a70602eb1db034a7fcad702e1bac9282a357265",
+          "sha256_crlf": "abd2a718babe2896d0729154e34406c7148292d256cb0b06faeeabd9f951972e"
         }
       ],
       "consumed": [],
@@ -69,17 +69,17 @@
       "status": "drafted",
       "gate": {
         "status": "approved",
-        "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
-        "reviewed_at": "2026-09-17T13:15:00Z"
+        "reviewed_by": "Harikrishnan M (sparc.team_10@experionglobal.com)",
+        "reviewed_at": "2026-09-17T20:14:59Z"
       },
       "artifacts": [
         {
           "role": "stories",
-          "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
-          "version": "1.0",
-          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
-          "sha256_lf": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
-          "sha256_crlf": "40cf591ca4c0cc32fd4a963d5f6c2e9b38cb7855ad3910f1734ba68d96099b0f"
+          "path": "docs/stories/USER-STORIES-conversational-crm-v2.2.md",
+          "version": "2.2",
+          "sha256": "8671abc2dc22f4106e536e58a00a3b0bc3a884ae14d37a1435142ada71afb94c",
+          "sha256_lf": "8671abc2dc22f4106e536e58a00a3b0bc3a884ae14d37a1435142ada71afb94c",
+          "sha256_crlf": "2526ebd6a617c477621fe1c28b84dea6590d6b41bb08f33ef5b8356e5c978217"
         }
       ],
       "consumed": [],
@@ -87,7 +87,7 @@
     }
   ],
   "counts": {
-    "audit_entries": 53,
-    "cost_entries": 20
+    "audit_entries": 74,
+    "cost_entries": 34
   }
 }

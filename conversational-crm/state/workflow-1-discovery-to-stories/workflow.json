@@ -2,14 +2,14 @@
   "schema_version": "1.0",
   "project": {
     "name": "conversational-crm",
-    "idea_input": "Idea 5: Enterprise Sales — Conversational CRM / Relationship Memory Assistant (B2B)\nPitch: A CRM that's updated by talking to it instead of filling forms. After a meeting, a sales rep scans a business card or drops a one-line summary (\"met Priya and Arjun from Acme, discussed renewal pricing, they want a demo of module X by Friday\"), and the agent extracts the contacts, logs the meeting, tags key discussion points and commitments, and files it into a running conversational thread for that customer. Instead of dashboards, reps ask questions — \"what did we discuss last time?\", \"what did I commit to?\", \"who attended from their side?\" — and get an instant answer pulled straight from that relationship's history. The assistant doesn't just wait to be asked: it keeps an eye on open commitments and proactively nudges the rep when one is coming due (\"you told Acme you'd send pricing by Friday — that's tomorrow\"). And before the next meeting, a single request — \"brief me on Acme\" — has it synthesize a pre-meeting briefing from the whole thread: history, open commitments, key stakeholders, and where the opportunity stands.\nRelevance: Conversational/agentic CRM that updates itself is a major 2025–26 enterprise sales-tech theme — Salesforce Agentforce, HubSpot Breeze, and a wave of \"CRM that fills itself in\" startups are all chasing this, because sales rep adoption and data quality have always been traditional CRM's biggest failure point. Proactive commitment-tracking and AI-generated meeting-prep briefings are the natural next layer on top of that, and map directly onto how Experion's own client-facing teams already work relationships across multiple stakeholders and touchpoints.\nScope: Seed few customer accounts with a handful of contacts and a short prior interaction history → capture agent takes a business-card photo or a typed one-line meeting summary and extracts contact details, structuring them into a meeting note → extraction agent pulls out key discussion points, commitments/follow-ups, and next steps (with a due date where one was mentioned) and tags them to the right customer thread → memory/Q&A agent answers natural-language questions over that thread (\"what did we discuss last time?\", \"what did I commit to?\") → a lightweight commitment-tracking agent surfaces a \"due soon / overdue\" list of open commitments across accounts → a \"brief me on [customer]\" agent synthesizes a short pre-meeting summary from the thread (recent history, open items, stakeholders) → a simple shared view so a second team member (e.g. an account manager) can see and add to the same customer thread → a customer profile view showing the running conversational history.\nTreat enterprise-grade access control/governance as a stretch (a single shared team view is enough for the demo), and treat voice-note capture as optional — a typed one-liner is an acceptable substitute for \"quick capture\" if speech-to-text eats into build time. Keep commitment tracking to a simple due-soon list with no real notification/calendar integration, and keep the pre-meeting briefing to a short generated summary rather than a polished report.",
+    "idea_input": "Idea 5: Enterprise Sales \u2014 Conversational CRM / Relationship Memory Assistant (B2B)\nPitch: A CRM that's updated by talking to it instead of filling forms. After a meeting, a sales rep scans a business card or drops a one-line summary (\"met Priya and Arjun from Acme, discussed renewal pricing, they want a demo of module X by Friday\"), and the agent extracts the contacts, logs the meeting, tags key discussion points and commitments, and files it into a running conversational thread for that customer. Instead of dashboards, reps ask questions \u2014 \"what did we discuss last time?\", \"what did I commit to?\", \"who attended from their side?\" \u2014 and get an instant answer pulled straight from that relationship's history. The assistant doesn't just wait to be asked: it keeps an eye on open commitments and proactively nudges the rep when one is coming due (\"you told Acme you'd send pricing by Friday \u2014 that's tomorrow\"). And before the next meeting, a single request \u2014 \"brief me on Acme\" \u2014 has it synthesize a pre-meeting briefing from the whole thread: history, open commitments, key stakeholders, and where the opportunity stands.\nRelevance: Conversational/agentic CRM that updates itself is a major 2025\u201326 enterprise sales-tech theme \u2014 Salesforce Agentforce, HubSpot Breeze, and a wave of \"CRM that fills itself in\" startups are all chasing this, because sales rep adoption and data quality have always been traditional CRM's biggest failure point. Proactive commitment-tracking and AI-generated meeting-prep briefings are the natural next layer on top of that, and map directly onto how Experion's own client-facing teams already work relationships across multiple stakeholders and touchpoints.\nScope: Seed few customer accounts with a handful of contacts and a short prior interaction history \u2192 capture agent takes a business-card photo or a typed one-line meeting summary and extracts contact details, structuring them into a meeting note \u2192 extraction agent pulls out key discussion points, commitments/follow-ups, and next steps (with a due date where one was mentioned) and tags them to the right customer thread \u2192 memory/Q&A agent answers natural-language questions over that thread (\"what did we discuss last time?\", \"what did I commit to?\") \u2192 a lightweight commitment-tracking agent surfaces a \"due soon / overdue\" list of open commitments across accounts \u2192 a \"brief me on [customer]\" agent synthesizes a short pre-meeting summary from the thread (recent history, open items, stakeholders) \u2192 a simple shared view so a second team member (e.g. an account manager) can see and add to the same customer thread \u2192 a customer profile view showing the running conversational history.\nTreat enterprise-grade access control/governance as a stretch (a single shared team view is enough for the demo), and treat voice-note capture as optional \u2014 a typed one-liner is an acceptable substitute for \"quick capture\" if speech-to-text eats into build time. Keep commitment tracking to a simple due-soon list with no real notification/calendar integration, and keep the pre-meeting briefing to a short generated summary rather than a polished report.",
     "phase": "locked",
     "created_at": "2026-09-17"
   },
   "workflow": {
     "name": "workflow-1-discovery-to-stories",
     "status": "locked",
-    "locked_at": "2026-09-17T13:45:00Z"
+    "locked_at": "2026-09-17T20:24:58Z"
   },
   "publish_targets": {
     "confluence_parent_page": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/overview",
@@ -24,8 +24,8 @@
   "gates": {
     "workflow_signoff": {
       "status": "approved",
-      "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
-      "reviewed_at": "2026-09-17T13:45:00Z",
+      "reviewed_by": "Harikrishnan M (sparc.team_10@experionglobal.com)",
+      "reviewed_at": "2026-09-17T20:24:58Z",
       "reply": "lock",
       "artifact_manifest": [
         {
@@ -36,20 +36,20 @@
         },
         {
           "role": "requirements",
-          "path": "docs/requirements/PRD-conversational-crm-v1.5.md",
-          "version": "1.5",
-          "sha256": "e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5"
+          "path": "docs/requirements/PRD-conversational-crm-v1.8.md",
+          "version": "1.8",
+          "sha256": "d950f813e332b35ac7cb4bfd0a70602eb1db034a7fcad702e1bac9282a357265"
         },
         {
           "role": "stories",
-          "path": "docs/stories/USER-STORIES-conversational-crm-v1.0.md",
-          "version": "1.0",
-          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b"
+          "path": "docs/stories/USER-STORIES-conversational-crm-v2.2.md",
+          "version": "2.2",
+          "sha256": "8671abc2dc22f4106e536e58a00a3b0bc3a884ae14d37a1435142ada71afb94c"
         }
       ],
       "owner_role": null,
-      "owner_note": "Sign-off is cross-cutting and belongs to whoever drives the workflow, not to one specialist.",
-      "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
+      "owner_note": "Sign-off is cross-cutting and belongs to whoever drives the workflow, not to one discipline.",
+      "answered_by": "Harikrishnan M (sparc.team_10@experionglobal.com)"
     }
   },
   "audit_trail": [
@@ -58,7 +58,42 @@
       "actor": "human",
       "phase": "workflow_signoff",
       "event": "locked",
-      "detail": "Reply: sign-off (treated as lock, given immediately after the sign-off summary's lock/revise prompt). Workflow 1 locked -- all 3 artifacts (Discovery Brief v1.1, PRD v1.5, User Stories v1.0) presented together and confirmed complete/consistent: single persona used throughout, all 7 PRD features trace to at least one story, 0 blocked features, the 6 still-open mechanism questions consistently tagged [INFERRED -- needs confirmation] across PRD and Stories rather than dropped or silently resolved, no open item anywhere flagged blocks_development:true. gates.workflow_signoff set to approved (not left pending) so a downstream workflow (e.g. Workflow 2) checking this gate sees a genuinely locked run."
+      "detail": "Reply: sign-off (treated as lock, given immediately after the sign-off summary's lock/revise prompt). Workflow 1 locked -- all 3 artifacts (Discovery Brief v1.1, PRD v1.5, User Stories v1.0) presented together and confirmed complete/consistent: single persona used throughout, all 7 PRD features trace to at least one story, 0 blocked features, the 6 still-open mechanism questions consistently tagged [INFERRED -- needs confirmation] across PRD and Stories rather than dropped or silently resolved, no open item anywhere flagged blocks_development:true. gates.workflow_signoff set to approved (not left pending) so a downstream workflow (e.g. Workflow 2) checking this gate sees a genuinely locked run. [SUPERSEDED 2026-09-17T17:48:25Z -- see 'reopened' entry below.] Original sign-off record: status approved, reviewed_by/answered_by 'DAI Team3 (sparc.team5@experionglobal.com)', reviewed_at 2026-09-17T13:45:00Z, reply 'lock', artifact_manifest [{discovery, DISCOVERY-BRIEF-conversational-crm-v1.1.md, v1.1, sha256 04d6a1eb...}, {requirements, PRD-conversational-crm-v1.5.md, v1.5, sha256 e5da9f8d...}, {stories, USER-STORIES-conversational-crm-v1.0.md, v1.0, sha256 43fc3c06...}]."
+    },
+    {
+      "timestamp": "2026-09-17T17:48:25Z",
+      "actor": "orchestrator",
+      "phase": "workflow_signoff",
+      "event": "reopened",
+      "detail": "Workflow 1 explicitly reopened by human instruction, after a genuine requirements change surfaced from reviewing an exploratory UI concept built in Workflow 3 (a unified sales-rep home page: a to-do/activities list plus a single conversational input handling both capture and Q&A with implicit customer identification, a new prospect/lead/qualified-lead contact-categorization behavior, and voice-note as an active capture modality -- the last of these was already named as an optional stretch in the canonical idea_input text, not invented fresh). This is not a passing second thought: it changes real acceptance-criteria-level behavior in F-1 and F-3 and adds new business rules (lead categorization) that must be authored through the normal requirements process, not inferred by a UI/UX agent. workflow.status reset from 'locked' to 'in_progress', locked_at cleared, project.phase reset to 'requirements', gates.workflow_signoff reset to 'pending'. The original approved sign-off record is preserved verbatim in the entry above rather than deleted. Discovery Brief v1.1 is not being reopened -- the core problem/persona are unchanged; this is a requirements/stories-level revision. Downstream: Workflow 2 (architecture) is independently confirmed still not_started, so no locked downstream artifact is invalidated by this reopening."
+    },
+    {
+      "timestamp": "2026-09-17T19:49:42Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "gate-reply",
+      "detail": "requirements role gate: reply 'publish'. PRD v1.8 approved and published (Confluence page 5883166742, version 6) -- see roles/requirements.json gate/published_v1_8/audit_trail for full detail. project.phase advanced from 'requirements_review' to 'stories'. No User Stories work started as part of this advance -- the human's standing instruction ('Do NOT create User Stories or write code yet') remains in force; roles/stories.json is known-stale relative to PRD v1.8's cut features (F-6/F-7/F-9, F-1 AC7) per the requirements validator's own note, and a stories revision is expected but not yet requested."
+    },
+    {
+      "timestamp": "2026-09-17T19:57:27Z",
+      "actor": "user-story-agent",
+      "phase": "stories",
+      "event": "drafted",
+      "detail": "User Stories v2.0 drafted against PRD v1.8, superseding v1.0 (which was gated/published against PRD v1.5 and is now stale). project.phase advanced from 'stories' to 'stories_review'. See roles/stories.json for full detail (superseded_v1_0 preserves the prior record)."
+    },
+    {
+      "timestamp": "2026-09-17T20:22:12Z",
+      "actor": "orchestrator",
+      "phase": "stories_review",
+      "event": "published",
+      "detail": "stories role: Stories v2.2 gate approved and published to Jira (project RPOC, 23 Story issues RPOC-44..RPOC-66). All three stages (discovery, requirements, stories) now have approved gates. project.phase advanced from 'stories_review' to 'workflow_signoff'."
+    },
+    {
+      "timestamp": "2026-09-17T20:24:58Z",
+      "actor": "human",
+      "phase": "workflow_signoff",
+      "event": "locked",
+      "detail": "Reply: lock. Workflow 1 re-locked after the 2026-09-17T17:48:25Z reopening -- all 3 artifacts presented together and confirmed complete/consistent: Discovery Brief v1.1 (unchanged, not reopened), PRD v1.8 (data-ownership reversal, F-6/F-7/F-9 cut, F-1 AC7 cut, F-5 vocabulary reframed, F-8 added), User Stories v2.2 (full redraft against PRD v1.8, 23 stories across F-1/F-2/F-3/F-4/F-5/F-8, 0 blocked). No returned_findings outstanding in any role file, no open item anywhere flagged blocks_development:true. One risk explicitly disclosed and accepted at sign-off, not silently passed: coherence.cjs reports VALIDATION_VERSION_MISMATCH (high) on stories -- v2.2's bytes were never independently re-validated after the last (v2.1) pass, since only a medium-severity, purely textual finding (V-S3) was fixed after that pass and a third validator round was judged disproportionate. Severity reads high specifically because the gate is now approved/published, which is the framework's designed escalation, not a new defect. gates.workflow_signoff set to approved, workflow.status set to 'locked', locked_at recorded. All 3 artifacts are now read-only inputs for any workflow (2, 3, 4) that depends on them. Artifact manifest: [discovery, DISCOVERY-BRIEF-conversational-crm-v1.1.md, v1.1, sha256 04d6a1eb...], [requirements, PRD-conversational-crm-v1.8.md, v1.8, sha256 d950f813...], [stories, USER-STORIES-conversational-crm-v2.2.md, v2.2, sha256 8671abc2...]."
     }
   ],
   "note": "Workflow-level facts. Stage state lives in roles/. Never store stage output here."

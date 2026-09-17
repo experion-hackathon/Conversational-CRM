@@ -1,0 +1,340 @@
+/* SIMULATED PROTOTYPE STYLES — Conversational CRM — TASK-QA-CHAT
+   Reuses TASK-CAPTURE-PROFILE's approved token set (see that report's Section 5.1
+   and this task's report Section 5.1) unchanged, plus two new chat-bubble tokens. */
+
+:root {
+  /* Reused, unchanged from TASK-CAPTURE-PROFILE */
+  --color-bg-canvas: #f7f8fa;
+  --color-bg-surface: #ffffff;
+  --color-text-primary: #1a1d23;
+  --color-text-secondary: #5b6270;
+  --color-border-default: #d8dce3;
+  --color-action-primary: #2454b8;
+  --color-action-primary-hover: #1d4494;
+  --color-status-success-fg: #1b7a43;
+  --color-status-success-bg: #e6f4ea;
+  --color-status-attention-fg: #8a5a00;
+  --color-status-attention-bg: #fff3d6;
+  --color-status-danger-fg: #b3261e;
+  --color-status-danger-bg: #fbe9e7;
+  --color-focus-ring: #2454b8;
+
+  --type-xs: 0.75rem;
+  --type-sm: 0.875rem;
+  --type-base: 1rem;
+  --type-lg: 1.25rem;
+  --type-xl: 1.5rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius-control: 4px;
+  --radius-card: 8px;
+
+  /* New for this task (report Section 5.1) */
+  --color-bg-message-rep: #2454b8;
+  --color-text-oninverse: #ffffff;
+  --color-bg-message-system: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  font-size: var(--type-base);
+  line-height: 1.5;
+}
+
+.simulated-banner {
+  background: #1a1d23;
+  color: #fff;
+  text-align: center;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--type-sm);
+}
+
+.app-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-12);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.nav-links button {
+  font-size: var(--type-xs);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-control);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.nav-links button:hover { color: var(--color-text-primary); }
+
+.nav-links button:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.screen { display: none; }
+.screen.is-visible { display: block; }
+
+.screen-id {
+  display: inline-block;
+  font-size: var(--type-xs);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-control);
+  padding: 2px 6px;
+  margin-bottom: var(--space-2);
+}
+
+h1 {
+  font-size: var(--type-xl);
+  margin: 0 0 var(--space-4);
+}
+
+/* Customer context banner */
+.context-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  margin-bottom: var(--space-6);
+  font-size: var(--type-sm);
+}
+
+.context-banner.no-context {
+  background: var(--color-status-attention-bg);
+  border-color: var(--color-status-attention-fg);
+  color: var(--color-status-attention-fg);
+}
+
+.context-banner .context-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.context-banner button.link-action {
+  background: none;
+  border: none;
+  color: var(--color-action-primary);
+  font-size: var(--type-sm);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Conversation area */
+.conversation {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.turn.turn-rep {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.turn.turn-system {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.bubble {
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-base);
+  line-height: 1.5;
+}
+
+.turn-rep .bubble {
+  background: var(--color-bg-message-rep);
+  color: var(--color-text-oninverse);
+}
+
+.turn-system .bubble {
+  background: var(--color-bg-message-system);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+}
+
+.turn-system .bubble.rejection {
+  border-color: var(--color-status-danger-fg);
+  background: var(--color-status-danger-bg);
+  color: var(--color-status-danger-fg);
+}
+
+.turn-system .bubble ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.turn-meta {
+  font-size: var(--type-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.thinking-indicator {
+  font-size: var(--type-sm);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Empty state (reused component pattern from TASK-CAPTURE-PROFILE) */
+.empty-state {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  border: 1px dashed var(--color-border-default);
+  border-radius: var(--radius-card);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.empty-state p {
+  margin: 0 0 var(--space-4);
+}
+
+/* Inline error banner (reused component) */
+.inline-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  background: var(--color-status-danger-bg);
+  color: var(--color-status-danger-fg);
+  border: 1px solid var(--color-status-danger-fg);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--type-sm);
+  max-width: 80%;
+}
+
+.inline-error-banner button {
+  background: var(--color-status-danger-fg);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-control);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  font-size: var(--type-xs);
+}
+
+/* Suggestion chips */
+.suggested-queries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.suggested-queries .chip-label {
+  font-size: var(--type-xs);
+  color: var(--color-text-secondary);
+  width: 100%;
+}
+
+.chip {
+  font-size: var(--type-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  color: var(--color-action-primary);
+  cursor: pointer;
+}
+
+.chip:hover { background: var(--color-bg-canvas); }
+
+/* Composer */
+.composer {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.composer label {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.composer input[type="text"] {
+  flex: 1;
+  font-size: var(--type-base);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-control);
+  font-family: inherit;
+}
+
+.composer input[type="text"]:disabled {
+  background: var(--color-bg-canvas);
+  color: var(--color-text-secondary);
+}
+
+.composer button.send {
+  background: var(--color-action-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--type-base);
+  cursor: pointer;
+}
+
+.composer button.send:hover { background: var(--color-action-primary-hover); }
+
+.composer button.send:disabled {
+  background: var(--color-border-default);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.note {
+  font-size: var(--type-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-6);
+}
