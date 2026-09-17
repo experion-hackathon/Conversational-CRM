@@ -6,11 +6,11 @@
   "owner": "Harikrishnan M",
   "project": {
     "name": "conversational-crm",
-    "phase": "solution"
+    "phase": "security_nfr"
   },
   "workflow": {
     "name": "workflow-2-solution-architecture",
-    "status": "not_started",
+    "status": "in_progress",
     "locked_at": null
   },
   "signoff": {
@@ -22,28 +22,280 @@
     {
       "name": "solution",
       "field": "solution",
-      "status": "not_started",
+      "status": "drafted",
       "gate": {
-        "status": "pending",
-        "reviewed_by": null,
-        "reviewed_at": null
+        "status": "approved",
+        "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+        "reviewed_at": "2026-09-17T14:20:00Z"
       },
-      "artifacts": [],
-      "consumed": [],
-      "open_items": 0
+      "artifacts": [
+        {
+          "role": "solution",
+          "path": "docs/architecture/SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md",
+          "version": "1.0",
+          "sha256": "99038391a4a33ae850e1ddc50e4709cfebb2b66525b10614f848c44b8368cc04",
+          "sha256_lf": "99038391a4a33ae850e1ddc50e4709cfebb2b66525b10614f848c44b8368cc04",
+          "sha256_crlf": "9ce0bcc662679a12606858e4af5209fc720a329805ff5c151f859422e91bb603"
+        }
+      ],
+      "consumed": [
+        {
+          "role": "product_state",
+          "path": "../state/workflow-1-discovery-to-stories/workflow.json",
+          "version": "locked",
+          "sha256": "fb25e9c8829f6e0d0d9ccf9cddf5db8ae9b0cb7eba5873baff9e7e8bffc21b27",
+          "ids": [
+            "F-1",
+            "F-2",
+            "F-3",
+            "F-4",
+            "F-5",
+            "F-6",
+            "F-7",
+            "US-1",
+            "US-2",
+            "US-3",
+            "US-4",
+            "US-5",
+            "US-6",
+            "US-7",
+            "US-8",
+            "US-9",
+            "US-10",
+            "US-11",
+            "US-12",
+            "US-13",
+            "US-14",
+            "US-15",
+            "US-16",
+            "US-17",
+            "US-18",
+            "US-19",
+            "US-20",
+            "US-21"
+          ]
+        },
+        {
+          "role": "prd",
+          "path": "../workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md",
+          "version": "1.5",
+          "sha256": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64",
+          "ids": [
+            "F-1",
+            "F-2",
+            "F-3",
+            "F-4",
+            "F-5",
+            "F-6",
+            "F-7",
+            "US-1",
+            "US-2",
+            "US-3",
+            "US-4",
+            "US-5",
+            "US-6",
+            "US-7",
+            "US-8",
+            "US-9",
+            "US-10",
+            "US-11",
+            "US-12",
+            "US-13",
+            "US-14",
+            "US-15",
+            "US-16",
+            "US-17",
+            "US-18",
+            "US-19",
+            "US-20",
+            "US-21"
+          ]
+        },
+        {
+          "role": "user_stories",
+          "path": "../workflow-1-discovery-to-stories/docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+          "version": "1.0",
+          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+          "ids": [
+            "F-1",
+            "F-2",
+            "F-3",
+            "F-4",
+            "F-5",
+            "F-6",
+            "F-7",
+            "US-1",
+            "US-2",
+            "US-3",
+            "US-4",
+            "US-5",
+            "US-6",
+            "US-7",
+            "US-8",
+            "US-9",
+            "US-10",
+            "US-11",
+            "US-12",
+            "US-13",
+            "US-14",
+            "US-15",
+            "US-16",
+            "US-17",
+            "US-18",
+            "US-19",
+            "US-20",
+            "US-21"
+          ]
+        }
+      ],
+      "open_items": 5
     },
     {
       "name": "data_integration",
       "field": "data_integration",
-      "status": "not_started",
+      "status": "drafted",
       "gate": {
-        "status": "pending",
-        "reviewed_by": null,
-        "reviewed_at": null
+        "status": "approved",
+        "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+        "reviewed_at": "2026-09-17T16:15:00Z"
       },
-      "artifacts": [],
-      "consumed": [],
-      "open_items": 0
+      "artifacts": [
+        {
+          "role": "architecture",
+          "path": "docs/architecture/DATA-AND-INTEGRATION-conversational-crm-T-1-v1.0.md",
+          "version": "1.0",
+          "sha256": "98933f68639a8cf1640bc1d74c3007a17283bb6e35fd4970f4becb87318c4001",
+          "sha256_lf": "98933f68639a8cf1640bc1d74c3007a17283bb6e35fd4970f4becb87318c4001",
+          "sha256_crlf": "96d6a8f8bade64286f7ce010cd3cf70abf6589877aa34d05861db8827709384b"
+        },
+        {
+          "role": "api_contract",
+          "path": "docs/architecture/API-CONTRACT-conversational-crm-T-1-v1.0.json",
+          "version": "1.0",
+          "sha256": "b048e263f2b43c43ee99e4844df48b12856a1cef977d3af2e65041db8d2ec745",
+          "sha256_lf": "b048e263f2b43c43ee99e4844df48b12856a1cef977d3af2e65041db8d2ec745",
+          "sha256_crlf": "1f8310c32096779f936419694c51f507c1caaca0ffb34a5fe8d36e1c628462aa"
+        },
+        {
+          "role": "data_model",
+          "path": "docs/architecture/DATA-MODEL-conversational-crm-T-1-v1.0.md",
+          "version": "1.0",
+          "sha256": "66b0f4fb0b3462e8706eb48969efd704f7106777b33bc0fe1e895390e5da8dab",
+          "sha256_lf": "66b0f4fb0b3462e8706eb48969efd704f7106777b33bc0fe1e895390e5da8dab",
+          "sha256_crlf": "26915e42e651bdac8c3569400027293b4f672dd8743b5c2dee58d70d49ca8f29"
+        }
+      ],
+      "consumed": [
+        {
+          "role": "product_state",
+          "path": "../state/workflow-1-discovery-to-stories/workflow.json",
+          "version": "locked",
+          "sha256": "fb25e9c8829f6e0d0d9ccf9cddf5db8ae9b0cb7eba5873baff9e7e8bffc21b27",
+          "ids": [
+            "F-1",
+            "F-2",
+            "F-3",
+            "F-4",
+            "F-5",
+            "F-6",
+            "F-7",
+            "US-1",
+            "US-2",
+            "US-3",
+            "US-4",
+            "US-5",
+            "US-6",
+            "US-7",
+            "US-8",
+            "US-9",
+            "US-10",
+            "US-11",
+            "US-12",
+            "US-13",
+            "US-14",
+            "US-15",
+            "US-16",
+            "US-17",
+            "US-18",
+            "US-19",
+            "US-20",
+            "US-21"
+          ]
+        },
+        {
+          "role": "prd",
+          "path": "../workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md",
+          "version": "1.5",
+          "sha256": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64",
+          "ids": [
+            "F-1",
+            "F-2",
+            "F-3",
+            "F-4",
+            "F-5",
+            "F-6",
+            "F-7",
+            "US-1",
+            "US-2",
+            "US-3",
+            "US-4",
+            "US-5",
+            "US-6",
+            "US-7",
+            "US-8",
+            "US-9",
+            "US-10",
+            "US-11",
+            "US-12",
+            "US-13",
+            "US-14",
+            "US-15",
+            "US-16",
+            "US-17",
+            "US-18",
+            "US-19",
+            "US-20",
+            "US-21"
+          ]
+        },
+        {
+          "role": "user_stories",
+          "path": "../workflow-1-discovery-to-stories/docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+          "version": "1.0",
+          "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+          "ids": [
+            "F-1",
+            "F-2",
+            "F-3",
+            "F-4",
+            "F-5",
+            "F-6",
+            "F-7",
+            "US-1",
+            "US-2",
+            "US-3",
+            "US-4",
+            "US-5",
+            "US-6",
+            "US-7",
+            "US-8",
+            "US-9",
+            "US-10",
+            "US-11",
+            "US-12",
+            "US-13",
+            "US-14",
+            "US-15",
+            "US-16",
+            "US-17",
+            "US-18",
+            "US-19",
+            "US-20",
+            "US-21"
+          ]
+        }
+      ],
+      "open_items": 3
     },
     {
       "name": "security_nfr",
@@ -73,7 +325,7 @@
     }
   ],
   "counts": {
-    "audit_entries": 0,
-    "cost_entries": 0
+    "audit_entries": 12,
+    "cost_entries": 2
   }
 }

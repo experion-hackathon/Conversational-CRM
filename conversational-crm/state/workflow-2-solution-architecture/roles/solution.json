@@ -1,37 +1,809 @@
 {
   "role": "solution",
   "field": "solution",
-  "document": null,
-  "version": null,
-  "status": "not_started",
-  "summary": null,
-  "drafted_at": null,
-  "readiness": null,
-  "source_references": [],
-  "artifacts": [],
-  "decisions": [],
-  "traceability": [],
-  "open_items": [],
-  "checks": [],
+  "document": "docs/architecture/SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md",
+  "version": "1.0",
+  "status": "drafted",
+  "summary": "Named the 5 human-decided stack components (CRM API Service, CRM Web App, Structured Data Store, Vector Store, NLU/Extraction & Q&A Layer), each with a stated responsibility and non-responsibility, and clarified that the PRD's 5 named 'agents' are logical capability modules inside the single backend component (CRM API Service), not separate services -- the human-decided stack names one backend, not five. Documented system context and call/data flow (all crossings synchronous; no queue/worker component exists in the declared stack). Recorded 9 technology-compatibility decisions (SOL-1..SOL-9): 7 proposed (backend topology, web-API protocol, NLU invocation pattern, FastAPI rationale, React rationale, embedding-source integration point, vector/NLU access boundary) and 2 fixed-upstream (SQLite, Chroma -- rationale recorded, not re-decided). Traced all 21 stories across all 7 features to components, with operation_ids/entity_names marked not_applicable throughout since data_integration has not run yet. Found and disclosed a real hash discrepancy on the upstream PRD file (current CRLF bytes hash differently than the LF bytes Workflow 1's lock recorded against) -- verified content-identical after line-ending normalization, recorded as non-blocking Open Item OI-1 rather than silently resolved.",
+  "drafted_at": "2026-09-17T13:50:00Z",
+  "readiness": "ready",
+  "source_references": [
+    {
+      "role": "product_state",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../state/workflow-1-discovery-to-stories/workflow.json",
+      "version": "locked",
+      "sha256": "fb25e9c8829f6e0d0d9ccf9cddf5db8ae9b0cb7eba5873baff9e7e8bffc21b27",
+      "note": "Workflow 1's own workflow.json, confirming its locked status at the moment this discipline read it. Backfilled by the coordinator after check-artifacts required a third source_reference entry the drafting agent had not written."
+    },
+    {
+      "role": "prd",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md",
+      "version": "1.5",
+      "sha256": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64",
+      "note": "Computed directly by this discipline against the current file bytes (CRLF line terminators). Does not match the hash recorded in workflow-1's gate/sign-off manifest (e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5) -- investigated and found to be a line-ending representation drift only (stripping \\r from the current file reproduces the recorded hash exactly); content is byte-identical once normalized. Disclosed as Open Item OI-1 in the document rather than silently using either hash."
+    },
+    {
+      "role": "user_stories",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../workflow-1-discovery-to-stories/docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+      "version": "1.0",
+      "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+      "note": "Computed directly by this discipline; matches the hash recorded in workflow-1's gate/sign-off manifest exactly. No discrepancy."
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "solution",
+      "path": "docs/architecture/SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "99038391a4a33ae850e1ddc50e4709cfebb2b66525b10614f848c44b8368cc04"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "SOL-1",
+      "category": "Backend architecture pattern",
+      "choice": "Single modular-monolith CRM API Service (FastAPI) containing five logical capability modules (Capture, Extraction, Memory/Q&A, Commitment Tracking, Brief-Me) plus an adapter layer, rather than one microservice per PRD 'agent'.",
+      "alternatives": [
+        "One microservice per PRD agent (5 backend services)"
+      ],
+      "rationale": "stack.components[] names exactly one backend component with implemented_by: backend -- the human decision already fixed the deployment grain. Splitting into 5 services adds inter-service network calls and cross-service consistency risk against a single SQLite file, with no PRD/Stories requirement driving it for this single-persona, single-shared-login demo.",
+      "source": "stack.components[] (backend = 1 entry); PRD Section 4/5",
+      "owner": "architect",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-2",
+      "category": "Inter-component protocol",
+      "choice": "Synchronous REST/JSON over HTTPS between CRM Web App and CRM API Service.",
+      "alternatives": [
+        "WebSocket/streaming",
+        "GraphQL"
+      ],
+      "rationale": "Every PRD/Stories AC for capture, Q&A, and brief requests is phrased as one-shot request/response with no NFR calling for streaming or partial responses. FastAPI's OpenAPI generation from REST/JSON directly feeds data_integration's contract work.",
+      "source": "PRD Sections 6, 8; User Stories document",
+      "owner": "architect",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-3",
+      "category": "Processing pattern",
+      "choice": "Every call from CRM API Service to the NLU/Extraction & Q&A Layer happens synchronously in-request; no message broker or background-worker component exists.",
+      "alternatives": [
+        "Asynchronous background processing with a task queue/worker and a polled status"
+      ],
+      "rationale": "stack.components[] declares no queue/broker/worker component; F-6 AC2 requires a newly captured note to appear automatically without further rep action, consistent with immediate synchronous consistency rather than a pending state. No NFR states a response-time budget forcing offload.",
+      "source": "stack.components[] (no queue/worker entry); PRD F-6 AC2",
+      "owner": "architect",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-4",
+      "category": "Technology compatibility rationale",
+      "choice": "Python (FastAPI) for the backend, confirmed coherent with the NLU and vector-store technologies.",
+      "alternatives": [
+        "Node.js/Express",
+        "Django"
+      ],
+      "rationale": "Both boto3 (AWS/Bedrock) and chromadb (Chroma) are first-class Python libraries; keeping the backend in Python avoids splitting extraction/retrieval logic across languages. FastAPI's async I/O suits the mostly I/O-bound calls to Bedrock/Chroma/SQLite, and its OpenAPI generation gives data_integration a machine-checkable contract starting point.",
+      "source": "stack.components[] (backend = Python (FastAPI)); NLU/vector store's own declared technologies",
+      "owner": "architect",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-5",
+      "category": "Technology compatibility rationale",
+      "choice": "React (web SPA) for the frontend, confirmed coherent with the backend/protocol choices.",
+      "alternatives": [
+        "Server-rendered templates (e.g. Jinja2 via FastAPI)",
+        "Vue/Angular"
+      ],
+      "rationale": "F-6 AC2's 'appear automatically' and F-7's identical-content-across-sessions requirements are naturally served by an SPA re-fetching client-side state rather than full-page reloads. React's ecosystem tools well against an OpenAPI-described REST backend, easing the Workflow 3 frontend build.",
+      "source": "stack.components[] (frontend = React (web SPA)); PRD F-6 AC2, F-7",
+      "owner": "architect",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-6",
+      "category": "Cross-component compatibility / integration point",
+      "choice": "AWS Bedrock (NLU/Extraction & Q&A Layer) is the sole source of embeddings stored in Chroma (Vector Store); no separate embedding-model provider is introduced.",
+      "alternatives": [
+        "A dedicated third-party/local embedding model distinct from the LLM provider"
+      ],
+      "rationale": "PRD Assumption 10 leaves the specific embedding model open but already fixed the NLU/LLM technology as Bedrock. Sourcing embeddings from the same already-declared component avoids a sixth technology dependency purely for embeddings. Does not resolve which specific Bedrock embedding model, dimension, or re-embedding trigger -- left to data_integration (Open Item OI-1a).",
+      "source": "PRD Section 13.2, Assumption 10; stack.components[]",
+      "owner": "architect (integration point) / data_integration (specific model)",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-7",
+      "category": "Component boundary",
+      "choice": "Vector Store and NLU/Extraction & Q&A Layer are reachable only from CRM API Service; CRM Web App never calls either directly.",
+      "alternatives": [
+        "Allowing CRM Web App to call the NLU layer directly for perceived Q&A latency savings"
+      ],
+      "rationale": "Keeps every cross-cutting concern (matching, retrieval composition, synthesis) inside the one backend component, avoiding duplicated business logic client-side and giving security_nfr a single boundary to reason about.",
+      "source": "Component responsibilities (Section 2); SOL-1",
+      "owner": "architect",
+      "status": "proposed"
+    },
+    {
+      "id": "SOL-8",
+      "category": "Data-store technology compatibility (fixed upstream)",
+      "choice": "SQLite for the Structured Data Store.",
+      "alternatives": [
+        "Not weighed by this discipline -- fixed directly by human decision at Requirements Gate 2"
+      ],
+      "rationale": "Self-contained, serverless, file-based engine consistent with the no-budget-ceiling demo scope; fully compatible with the Python/FastAPI backend (stdlib sqlite3 driver, no separate service). Compatibility constraint not yet resolved: SQLite's single-writer-at-a-time behavior is in tension with F-7/US-21's concurrent-write requirement (Open Item OI-2).",
+      "source": "PRD Section 13.1; stack.components[] note field",
+      "owner": "Fixed by human decision (Requirements Gate 2)",
+      "status": "user_confirmed"
+    },
+    {
+      "id": "SOL-9",
+      "category": "Data-store technology compatibility (fixed upstream)",
+      "choice": "Chroma (with semantic chunking) for the Vector Store.",
+      "alternatives": [
+        "Not weighed by this discipline -- fixed directly by human decision at Requirements Gate 2"
+      ],
+      "rationale": "Chroma ships a first-class Python client (chromadb), consistent with the Python/FastAPI backend. Can run embedded or as a lightweight local server for this demo's scope; exact deployment mode left to platform.",
+      "source": "PRD Section 13.2; stack.components[] note field",
+      "owner": "Fixed by human decision (Requirements Gate 2)",
+      "status": "user_confirmed"
+    }
+  ],
+  "traceability": [
+    {
+      "feature_id": "F-1",
+      "story_id": "US-1",
+      "acceptance_criteria": [
+        "The system must create a structured interaction note and associate it with the correct customer thread when the rep's typed entry unambiguously matches exactly one seeded customer account.",
+        "The system must save the entry as a new interaction note when the entry contains at least one non-whitespace character."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Type a one-line note unambiguously naming exactly one seeded account; confirm a new interaction record is created and thread-tagged to that account."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; neither exists yet -- solution is the first discipline in this workflow."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-2",
+      "acceptance_criteria": [
+        "The system must reject the submission with an explicit 'cannot save an empty note' message, and must not create any note record, when the rep submits an empty or whitespace-only entry.",
+        "The system must flag the note as 'unmatched — needs customer selection' — rather than attaching it to a default or incorrect account — when no seeded customer account can be unambiguously identified from the entry text."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit a whitespace-only entry, confirm rejection with no record created.",
+        "Submit an entry naming no/an ambiguous account, confirm 'unmatched' flag rather than default attachment."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-3",
+      "acceptance_criteria": [
+        "The system must attach a previously flagged 'unmatched' note to the customer thread the rep selects when the rep manually resolves the flag.",
+        "The system must leave the note in the unmatched/needs-selection state — rather than guessing an account — when the rep has not yet resolved it."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Resolve an unmatched note to a selected customer; confirm re-tag.",
+        "Confirm an unresolved unmatched note is never auto-assigned."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-4",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must extract the contact's name, company and role from a scanned business-card image into the structured interaction note when the image is legible and contains recognizable contact fields. The OCR mechanism was never discussed in discovery (PRD Assumption 5, Open Question 5); whether this is worth building for the demo at all is still open.",
+        "[INFERRED — needs confirmation] The system must inform the rep that manual entry is required — without fabricating contact details — when the image cannot be read or no contact fields are recognized."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit a legible business-card image, confirm structured contact fields populate.",
+        "Submit an unreadable image, confirm manual-entry prompt with no fabricated fields."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted. See OI-3 (OCR technology sufficiency)."
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-5",
+      "acceptance_criteria": [
+        "The system must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item — recording one item per distinct person named (e.g., 'met Priya and Arjun from Acme...' must yield two attendee items, not one merged string) — when the entry text names at least one identifiable person.",
+        "The system must record zero attendee items for that interaction — rather than fabricating a name — when the entry text names no one.",
+        "[INFERRED — needs confirmation] The exact name-recognition/disambiguation mechanism was never discussed in discovery (PRD Assumption 14, Open Question 15); only the underlying capability (AC1/AC2) is treated as confirmed."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit the canonical 'met Priya and Arjun from Acme' example; confirm two distinct attendee rows.",
+        "Submit an entry naming no one; confirm zero attendee rows."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted. See OI-4 (mechanism inference)."
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-6",
+      "acceptance_criteria": [
+        "The system must extract each distinct commitment, follow-up or next step mentioned in a captured note's text as a separate tracked item when the note contains one or more of them.",
+        "The system must record no commitment items when the note describes discussion only, with no forward-looking commitment."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit a note with two distinct commitments; confirm two tracked items.",
+        "Submit a discussion-only note; confirm zero commitment items."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-7",
+      "acceptance_criteria": [
+        "The system must record a due date on an extracted commitment when the captured text states a concrete date or an unambiguous relative date term resolvable against the interaction's timestamp (e.g., 'by Friday').",
+        "The system must mark the commitment's due date as unspecified — rather than guessing a date — when the text uses a vague temporal reference (e.g., 'soon,' 'sometime') or gives no date information at all."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit a commitment with 'by Friday'; confirm resolved due date.",
+        "Submit one with 'soon'; confirm due date recorded as unspecified."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-8",
+      "acceptance_criteria": [
+        "The system must tag every extracted discussion point and commitment to the same customer thread as its source interaction note when that note is matched to a thread.",
+        "The system must flag an extracted item for manual thread assignment — rather than tagging it to an incorrect thread — when the source note itself is unmatched to a customer thread (per F-1)."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm extracted items on a matched note land on the same thread.",
+        "Confirm extracted items on an unmatched note are held for manual assignment."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-9",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about a customer's most recent discussion by returning content drawn from that customer's most recent interaction note(s) when the thread has at least one captured note.",
+        "The system must respond that no history exists yet for that customer when the thread is empty."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Ask 'what did we discuss last time' against a thread with history; confirm answer drawn from that thread.",
+        "Ask against an empty thread; confirm explicit 'no history yet'."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-10",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about the rep's own open commitments for a customer by listing the commitments extracted and tagged to that thread when any exist.",
+        "The system must state that there are no open commitments for that customer when none exist."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Ask about open commitments against a thread with commitments; confirm list matches tagged commitments.",
+        "Ask against a thread with none; confirm explicit empty response."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-11",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about interaction attendees by returning the contact names extracted from that thread's interaction notes when attendee names were captured.",
+        "The system must state that no attendee information was captured when none was extracted."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Ask who attended against a thread with captured attendees; confirm names match F-1 AC5 output.",
+        "Ask against a thread with none; confirm explicit empty response."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-12",
+      "acceptance_criteria": [
+        "The system must resolve and answer against the correct customer thread when a query names exactly one customer that matches a seeded account.",
+        "The system must respond that it could not identify the customer — rather than guessing or returning another customer's data — when the query names no customer or an unrecognized one."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Ask a question naming exactly one seeded account; confirm correct thread answers.",
+        "Ask one naming no/unrecognized customer; confirm explicit 'could not identify' response."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-4",
+      "story_id": "US-13",
+      "acceptance_criteria": [
+        "The system must list every open commitment whose due date has passed as 'overdue' when the current date is past that due date, and must exclude a commitment from this list once it is marked complete.",
+        "[INFERRED — needs confirmation] The system must list every open commitment whose due date falls within the next 7 days as 'due soon,' and must reclassify it as 'overdue' instead once its due date has passed. The 7-day window is a carried-over illustrative placeholder from the PRD, not a confirmed value (PRD Open Question 6).",
+        "The system must list a commitment with an unspecified due date (per F-2) separately from the due-soon/overdue list — rather than omitting it entirely or treating it as overdue — when no due date was captured."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Seed commitments past due, within 7 days, beyond 7 days, and with no due date; confirm each classifies correctly on a known reference date. No NLU call in this flow."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-4",
+      "story_id": "US-14",
+      "acceptance_criteria": [
+        "The system must state explicitly that there are no due-soon or overdue commitments — rather than showing an empty list with no explanation — when none exist."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Query the list when no commitment qualifies; confirm explicit 'none' message rather than silent empty list."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-15",
+      "acceptance_criteria": [
+        "The system must generate a summary containing recent discussion history, open commitments and stakeholder/contact names for a named customer when that customer has at least one captured note, and must state that no history exists yet for that customer — rather than generating a summary with fabricated content — when the thread is empty.",
+        "[INFERRED — needs confirmation] The system must return a bounded, short-form summary (a few sentences or bullets, not a multi-page document) under normal conditions, and must still return whatever partial content is available, rather than failing the whole request, when data for one of the summary components is missing (PRD Open Question 7)."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Request a brief for a customer with history; confirm summary combines structured + semantically-retrieved content and remains short-form.",
+        "Request a brief for an empty thread; confirm explicit no-history response."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-16",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must synthesize the opportunity/deal-status component narratively from that customer's recorded interaction notes and commitments — since no discrete deal-stage field exists in the structured store — when the thread contains content indicating where the deal/opportunity stands (PRD Assumption 13, Open Question 14).",
+        "The system must state that no opportunity/deal-status information has been captured yet for that customer — rather than fabricating a stage or outcome — when the thread contains no such content."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Request a brief for a customer whose notes discuss deal progress; confirm narrative synthesis draws only from existing content.",
+        "Request one with no such content; confirm explicit 'not captured' response."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted. Depends on data_integration ratifying no new deal-stage entity (PRD Section 13.1)."
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-17",
+      "acceptance_criteria": [
+        "The system must generate the summary for a named customer when the request unambiguously identifies exactly one seeded customer account.",
+        "The system must respond that it could not identify the requested customer — rather than guessing — when the request names an unrecognized or ambiguous customer."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Request a brief naming exactly one seeded account; confirm it generates.",
+        "Request one naming an ambiguous/unrecognized account; confirm explicit rejection."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-6",
+      "story_id": "US-18",
+      "acceptance_criteria": [
+        "The system must display a customer's captured notes and extracted items in chronological order on that customer's profile view when at least one note exists.",
+        "The system must display an explicit 'no history yet' state when none exists."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Open a profile with captured notes; confirm chronological ordering.",
+        "Open one with none; confirm explicit empty state."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-6",
+      "story_id": "US-19",
+      "acceptance_criteria": [
+        "The system must display a newly captured note and its extracted items on the correct customer's profile view automatically, without requiring the rep to take further action, when the note is tagged to that customer's thread.",
+        "The system must not display that note or its items on any other customer's profile view when it is not tagged to that customer."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Capture a note, then reopen that customer's profile; confirm it appears without extra action.",
+        "Confirm it does not appear on a different customer's profile."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-7",
+      "story_id": "US-20",
+      "acceptance_criteria": [
+        "The system must show the same customer thread content to every session authenticated via the shared login when two sessions view the same customer.",
+        "The system must not partition data by which physical person is at the keyboard, since no per-rep identity exists in this version."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Open the same customer in two sessions under the shared login; confirm identical content, no per-session partitioning."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted."
+    },
+    {
+      "feature_id": "F-7",
+      "story_id": "US-21",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must persist a note added from one session so that it is immediately visible to another concurrent session viewing the same customer thread. The conflict-handling mechanism was never discussed in discovery (PRD Open Question 9).",
+        "[INFERRED — needs confirmation] The system must not silently lose one session's addition when another session adds to the same thread at nearly the same time."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Add notes from two sessions to the same thread at nearly the same time; confirm both persist as distinct records."
+      ],
+      "operation_ids": [],
+      "entity_names": [],
+      "not_applicable": "data_integration owns the API contract and data model; not yet drafted. See OI-2 (SQLite concurrent-writer behavior)."
+    }
+  ],
+  "open_items": [
+    {
+      "id": "OI-1",
+      "detail": "The PRD v1.5 file's line endings on disk (CRLF) no longer match what Workflow 1's lock recorded a hash against (LF). Content is verified byte-identical once line endings are normalized (stripping \\r from the current file reproduces the recorded hash exactly) -- this is a representation drift, not a content change.",
+      "source": "This discipline's own source_references hash computation, Section 1 of the document",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "Whoever maintains the Workflow 1 output tree (human/orchestrator) -- not this discipline's to silently fix",
+      "resolution_needed": "Re-hash the current PRD file, or normalize its line endings back to LF, so the recorded lock hash and the on-disk file agree again."
+    },
+    {
+      "id": "OI-1a",
+      "detail": "The specific Bedrock embedding model, its vector dimension, and the re-embedding trigger strategy (PRD Assumption 10) remain unconfirmed. SOL-6 fixes which component supplies embeddings; it does not fix which model.",
+      "source": "PRD Assumption 10; SOL-6",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "data_integration (this workflow)",
+      "resolution_needed": "data_integration (or a human decision) must pick a specific Bedrock embedding model, its vector dimension, and define the re-embedding trigger strategy."
+    },
+    {
+      "id": "OI-2",
+      "detail": "SQLite (fixed upstream) has single-writer-at-a-time behavior by default, in tension with F-7/US-21's requirement that two concurrent sessions' additions both persist without silent loss. Whether WAL mode, retry-on-busy logic, or another mechanism resolves this is not decided here.",
+      "source": "PRD Open Question 9; SOL-8",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "data_integration and/or platform",
+      "resolution_needed": "data_integration and/or platform must decide a concrete concurrency mechanism (e.g. SQLite WAL mode, retry-on-busy) for the shared-login concurrent-write case."
+    },
+    {
+      "id": "OI-3",
+      "detail": "If business-card OCR (F-1 AC2/US-4) proceeds, it is not yet confirmed whether Bedrock's own multimodal/vision-capable models suffice, or whether a dedicated OCR technology would need to be introduced as a sixth stack component.",
+      "source": "PRD Assumption 5, Open Question 5",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "Product owner (whether to build it), then Architect (which technology, if yes)",
+      "resolution_needed": "Product owner decides whether business-card OCR ships at all; if yes, Architect confirms whether Bedrock's multimodal models suffice or a dedicated OCR technology must be added as a new stack component."
+    },
+    {
+      "id": "OI-4",
+      "detail": "F-1 AC5/US-5's attendee-name-recognition mechanism (PRD Assumption 14) is treated in this document as prompt-driven extraction against the already-declared NLU/Extraction & Q&A Layer (no new component implied) -- this is this discipline's own reasonable inference, not a human confirmation of that specific mechanism.",
+      "source": "PRD Assumption 14, Open Question 15",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "Architect / data_integration",
+      "resolution_needed": "Architect / data_integration confirms (or revises) that prompt-driven extraction against the existing NLU layer is the intended attendee-name-recognition mechanism, rather than a separate NER component."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Every component has a stated responsibility and non-responsibility",
+      "required": true,
+      "result": "pass",
+      "summary": "All 5 stack components (Section 2 of the document) carry an explicit Responsibility and Non-responsibility."
+    },
+    {
+      "name": "Every selected story maps to at least one component",
+      "required": true,
+      "result": "pass",
+      "summary": "All 21 stories (US-1..US-21) carry non-empty component_ids in the traceability table."
+    },
+    {
+      "name": "Every declared technology has recorded alternatives and rationale",
+      "required": true,
+      "result": "pass",
+      "summary": "9 decisions (SOL-1..SOL-9) cover all 5 components -- 7 proposed with weighed alternatives, 2 fixed-upstream with compatibility rationale recorded."
+    },
+    {
+      "name": "No endpoint, table, threat, or pipeline specified",
+      "required": true,
+      "result": "pass",
+      "summary": "Document explicitly declines table/column/route detail throughout; all operation_ids/entity_names marked not_applicable; no threat model or measurable target present."
+    },
+    {
+      "name": "source_references records every upstream artifact consumed, with real hashes",
+      "required": true,
+      "result": "pass",
+      "summary": "PRD v1.5 and User Stories v1.0 both hashed directly by this discipline; a genuine PRD hash discrepancy (line-ending drift vs. Workflow 1's recorded hash) was found and disclosed as OI-1 rather than silently resolved."
+    },
+    {
+      "name": "Independent validation of v1.0",
+      "required": true,
+      "result": "fail",
+      "summary": "Ran. A separate agent reviewed v1.0 and raised 3 finding(s): 2 medium, 1 low. Worst severity: medium."
+    }
+  ],
   "self_verification": {
-    "result": null,
-    "checked_at": null
+    "result": "PASS",
+    "checked_at": "2026-09-17T13:50:00Z"
   },
-  "report_sha256": null,
-  "validation": null,
+  "report_sha256": "99038391a4a33ae850e1ddc50e4709cfebb2b66525b10614f848c44b8368cc04",
+  "validation": {
+    "result": "issues_found",
+    "version_reviewed": "1.0",
+    "summary": "Solution discipline v1.0 is substantively solid: all 5 components carry real responsibility/non-responsibility pairs, all 21 stories trace to at least one component, all 9 SOL-N decisions record genuine weighed alternatives (not just 'it was chosen'), stack.components[] matches the document's component inventory exactly, and the document holds its own scope boundary (no endpoints/tables/threats/cloud detail specified). Independently spot-checked all 21 traceability rows' acceptance_criteria against workflow-1/state/roles/stories.json word-for-word (not the published Stories markdown, which uses different quoting) -- all 21 match verbatim, confirming the coordinator's claimed fix #3 landed correctly. Fixes #1 (source_reference role/path correction) and #2 (added product_state entry) also verified correct against actual on-disk directory structure. However, fixes #2 and #4 introduced a document/state drift: the published document's own Section 1 table and Section 6 prose were never updated to match the corrected solution.json, so a human reviewing the document at the solution_review gate sees information that disagrees with the state the check-artifacts tool actually validated. Also flagging a hash-verification limitation: I have no hashing tool in this session.",
+    "independence": "Read the full SOLUTION-ARCHITECTURE document, solution.json, workflow.json, the full PRD v1.5, the full User Stories v1.0 document, workflow-1's roles/stories.json (the actual source the drafting agent's traceability was copied from, per its own audit-trail claim), workflow-1's roles/requirements.json and roles/discovery.json (gate status), and workflow-1's workflow.json (lock/sign-off). Diffed all 21 traceability rows in solution.json against workflow-1 roles/stories.json's acceptance_criteria arrays character-for-character rather than trusting the audit trail's claim of 'verbatim, no paraphrasing'. Independently walked the relative path math for both corrected source_references entries against the actual directory layout on disk rather than trusting the coordinator's own description of the fix.",
+    "findings": [
+      {
+        "id": "V-SOL1",
+        "severity": "medium",
+        "finding": "Document/state drift on source_references: solution.json's source_references array (post-correction) has 3 entries (product_state, prd, user_stories), but the published document's own Section 1 'Source references' table lists only 2 rows (PRD, User Stories) -- the product_state entry added during the coordinator's mechanical fix #2 (confirming Workflow 1's lock at read time, with its own sha256) was never added to the document text a human actually reviews at the gate. Separately, the 2 rows the document does show print paths without the '../' prefix (e.g. 'workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md'), while the corrected state file's equivalent entries correctly use '../workflow-1-discovery-to-stories/...' relative to workflow_root (verified against the actual on-disk layout: workflow_root = .../workflow-2-solution-architecture/, and Workflow 1's docs sit one level up as a sibling directory). Read literally from workflow_root, the document's printed paths do not resolve to the real file location; only the state file's paths do.",
+        "evidence": "solution.json source_references[] has role values product_state, prd, user_stories (3 entries). SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md Section 1 table has exactly 2 rows: PRD and User Stories. Document paths shown: 'workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md' (no '../'); state file's equivalent: '../workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md'."
+      },
+      {
+        "id": "V-SOL2",
+        "severity": "medium",
+        "finding": "Document/state drift on SOL-8/SOL-9 status terminology: the coordinator's fix #4 changed solution.json's decisions[7].status and decisions[8].status from 'fixed_upstream' to 'user_confirmed' to satisfy check-artifacts' schema (which only accepts two status values). This was applied only to the structured decisions[] array. The published document's own Section 6 prose still reads 'Status: fixed_upstream (documented, not proposed)' verbatim for both SOL-8 and SOL-9, and solution.json's own top-level `summary` field still describes '2 fixed-upstream (SQLite, Chroma...)'. The corrected state and the human-facing document now disagree about the governance status of the same two decisions -- not a new fabricated fact, but a new inconsistency the mechanical fix did not catch or propagate.",
+        "evidence": "solution.json decisions[7].id=SOL-8, status='user_confirmed'; decisions[8].id=SOL-9, status='user_confirmed'. SOLUTION-ARCHITECTURE document lines under SOL-8 and SOL-9 headings both read: '**Owner:** Fixed by human decision (Requirements Gate 2). Status: fixed_upstream (documented, not proposed).' solution.json top-level `summary` field also still says '2 fixed-upstream (SQLite, Chroma -- rationale recorded, not re-decided)'."
+      },
+      {
+        "id": "V-SOL3",
+        "severity": "low",
+        "finding": "Hash-verification limitation, disclosed rather than papered over: I have no hashing/Bash tool available in this session and could not independently compute or compare any of the SHA-256 values in solution.json's source_references, artifacts, or report_sha256 fields. In particular I could not verify the specific byte-level claim behind Open Item OI-1 (that stripping \\r from the current on-disk PRD file reproduces Workflow 1's recorded lock hash e5da9f8d...ecf5 exactly). I confirmed only that all recorded hash strings are plausible 64-hex-character values and that the PRD hash workflow-2 computed (3960abda...cc64) is a genuinely different string from Workflow 1's recorded manifest hash (e5da9f8d...ecf5) -- i.e. a real, visible discrepancy exists, consistent with OI-1 being disclosed rather than silently resolved -- but the underlying 'content-identical modulo line endings' claim itself needs an actual hash tool to confirm, not a Read-based review.",
+        "evidence": "solution.json source_references[1] (prd) sha256='3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64' (64 hex chars); workflow-1 roles/requirements.json gate.artifact_manifest[0].sha256='e5da9f8da5765ecd96978b56fc6b610f77be9212f66f283ad9d73216fda0ecf5' (64 hex chars, different string). No tool available to me to strip line endings and recompute."
+      }
+    ],
+    "fix_verification": {
+      "V-SOL1": "fixed -- coordinator added the missing product_state row to the document's Section 1 table and corrected both existing rows' paths to the actual '../workflow-1-discovery-to-stories/...' form solution.json already used, immediately after this review returned (same v1.0, carve-out applies -- no gate has approved this draft yet).",
+      "V-SOL2": "fixed -- coordinator changed Section 6's 'Status: fixed_upstream (documented, not proposed)' line for both SOL-8 and SOL-9 to 'Status: user_confirmed -- confirmed by a human, but at that earlier Requirements gate, not proposed or decided by this discipline now', matching decisions[].status exactly.",
+      "V-SOL3": "resolved -- coordinator independently ran sha256sum on the actual PRD file and on its CR-stripped bytes: raw hash reproduces 3960abda...cc64 exactly, CR-stripped hash reproduces e5da9f8d...ecf5 exactly (Workflow 1's recorded lock hash). The byte-identical-modulo-line-endings claim is now confirmed with real tooling, not merely asserted; documented in Section 1 of the report."
+    },
+    "checked": [
+      "self_verification field present and result = PASS (not missing/FAIL) -- no structural finding needed on that front",
+      "Workflow 1 lock confirmed via workflow-1/state/workflow.json (workflow.status='locked', gates.workflow_signoff.status='approved') and via roles/discovery.json and roles/requirements.json gate.status='approved' individually",
+      "project.phase in workflow-2's workflow.json = 'solution_review', matching the invocation's stated phase",
+      "All 5 components (Section 2) carry an explicit Responsibility and Non-responsibility",
+      "All 21 stories (US-1..US-21) carry non-empty component_ids and resolve to a real feature_id (F-1..F-7) matching workflow-1's own feature/story map",
+      "All 21 traceability rows' acceptance_criteria arrays diffed directly against workflow-1 roles/stories.json's acceptance_criteria arrays (not the published Stories markdown, which uses different quote-mark conventions) -- all 21 match byte-for-byte",
+      "All 9 SOL-N decisions record real alternatives-considered and rationale explaining why the alternative loses, not just 'it was chosen'",
+      "stack.components[] (workflow.json) cross-checked against the document's Section 2 component inventory -- names and technologies match exactly (5 for 5)",
+      "Scanned the full document for endpoint/route, table/column, threat, and cloud/CI/rollback detail that would belong to data_integration/security_nfr/platform -- none found; every such topic is explicitly deferred with a named owning discipline",
+      "Security/PII scan across the full document -- no API keys, tokens, credential-like strings, or real-looking personal data; example names (Priya, Arjun, Acme) are the canonical synthetic examples carried from the PRD/Stories",
+      "Placeholder check -- no bare 'TBD' or 'Coming soon' anywhere in the document; all placeholders are permitted [INFERRED -- needs confirmation] tags",
+      "Inference-honesty spot check -- confident-sounding statements in Sections 2-4 traced back to stack.components[]/PRD citations; Section 7's version matrix and Section 8's open items correctly carry every inference made, none stated with the confidence of fact",
+      "Relative-path math for both corrected source_references entries walked against the actual on-disk directory layout"
+    ],
+    "not_checked": [
+      "No hash comparison was run by me -- see V-SOL3. The coordinator/record-validation tooling should perform actual SHA-256 comparison before the gate, not rely on this review's Read-based inspection.",
+      "Whether data_integration, security_nfr, and platform will actually honor this document's open items (OI-1a, OI-2, OI-3, OI-4) cannot yet be checked -- those artifacts do not exist yet.",
+      "Whether the check-artifacts tool itself would flag V-SOL1/V-SOL2 was not tested -- I do not have a way to run node scripts/architecture-tools.cjs in this session; these are document-vs-state consistency findings from direct reading, not tool output."
+    ],
+    "checked_at": "2026-09-17T14:10:30Z"
+  },
   "validation_history": [],
   "published": null,
   "gate": {
-    "status": "pending",
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "reply": null,
-    "artifact_manifest": [],
+    "status": "approved",
+    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+    "reviewed_at": "2026-09-17T14:20:00Z",
+    "reply": "publish",
+    "artifact_manifest": [
+      {
+        "role": "solution",
+        "path": "docs/architecture/SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md",
+        "version": "1.0",
+        "sha256": "99038391a4a33ae850e1ddc50e4709cfebb2b66525b10614f848c44b8368cc04"
+      }
+    ],
     "owner_role": "architect",
-    "answered_by": null
+    "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
   },
-  "cost_log": [],
-  "audit_trail": [],
+  "cost_log": [
+    {
+      "stage": "solution",
+      "agent": "solution-architect-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 26000,
+      "note": "Drafted the Solution Architecture document: confirmed Workflow 1 lock and all 3 upstream role gates approved, read PRD v1.5 and User Stories v1.0 in full, computed real SHA-256 hashes for both (found and investigated a genuine PRD hash discrepancy against Workflow 1's recorded manifest -- line-ending drift, content verified unchanged), named 5 components with responsibility/non-responsibility, drew system-context and 2 sequence diagrams, recorded 9 technology decisions (7 proposed, 2 fixed-upstream), and built a full 21-story traceability table.",
+      "timestamp": "2026-09-17T13:50:00Z"
+    }
+  ],
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-17T13:50:00Z",
+      "actor": "solution-architect-agent",
+      "phase": "solution",
+      "event": "drafted",
+      "detail": "Solution Architecture v1.0 written: 5 components named with responsibility/non-responsibility, system context + 2 sequence diagrams (all crossings synchronous, no queue/worker component), 9 technology decisions (SOL-1..SOL-9: 7 proposed, 2 fixed-upstream), all 21 stories across 7 features traced to components (operation_ids/entity_names not_applicable throughout -- data_integration has not run). Self-verification PASS. Found and disclosed a genuine PRD-file hash discrepancy against Workflow 1's recorded manifest (CRLF vs LF line endings; content verified byte-identical) as Open Item OI-1, rather than silently using either hash."
+    },
+    {
+      "timestamp": "2026-09-17T14:00:00Z",
+      "actor": "orchestrator",
+      "phase": "solution",
+      "event": "corrected",
+      "detail": "`node scripts/architecture-tools.cjs check-artifacts --discipline solution` failed 5 times in sequence against the drafting agent's output and was fixed in place (carve-out applies: v1.0 has no gate approval yet): (1) source_references used field name `artifact` instead of the required `role`, and used `role` values 'PRD'/'User Stories' instead of the schema's 'prd'/'user_stories', and paths relative to Workflow 1's own docs root instead of relative to Workflow 2's own artifact root -- corrected both entries' role/path; (2) a required third source_reference entry, role 'product_state' pointing at Workflow 1's workflow.json with version 'locked', was missing entirely -- added it, computing its sha256 fresh; (3) every one of the 21 traceability rows omitted the `acceptance_criteria` field the agent's own contract requires (verbatim from Workflow 1) -- backfilled all 21 rows with the exact verbatim acceptance_criteria arrays read directly from workflow-1's roles/stories.json, no paraphrasing; (4) decisions SOL-8 and SOL-9 used status 'fixed_upstream', not one of the tool's two accepted values -- changed both to 'user_confirmed', since a human did confirm them (at Requirements Gate 2), just not in this workflow; (5) all 5 open_items used field name `text` instead of the required `detail`, and none had the required `resolution_needed` field -- renamed and added a concrete resolution_needed for each. No new facts were introduced by any of these five fixes: every corrected value was either already present elsewhere in the same file (the sha256, the verbatim ACs already existed in Workflow 1) or a direct, mechanical rename/reclassification into the schema the checking tool actually enforces. check-artifacts now returns PASS for the solution discipline (9 decisions, 5 open items, 1 artifact)."
+    },
+    {
+      "timestamp": "2026-09-17T14:10:00.000Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "solution_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.0 recorded: 3 finding(s) (2 medium, 1 low). Gate manifest pinned to docs/architecture/SOLUTION-ARCHITECTURE-conversational-crm-T-1-v1.0.md@99038391a4a3. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T14:15:00Z",
+      "actor": "orchestrator",
+      "phase": "solution_review",
+      "event": "corrected",
+      "detail": "Fixed all 3 validator findings in place before the gate reply (v1.0, no gate approval yet at the time): V-SOL1 -- added the missing product_state row to the document's Section 1 table and corrected both existing rows' printed paths to the actual '../workflow-1-discovery-to-stories/...' form solution.json already used. V-SOL2 -- changed Section 6's 'Status: fixed_upstream (documented, not proposed)' line for SOL-8 and SOL-9 to 'Status: user_confirmed -- confirmed by a human, but at that earlier Requirements gate, not proposed or decided by this discipline now', matching decisions[].status exactly. V-SOL3 -- independently ran sha256sum on the actual PRD file and its CR-stripped bytes: raw hash reproduces 3960abda...cc64 exactly, CR-stripped hash reproduces e5da9f8d...ecf5 exactly (Workflow 1's recorded lock hash) -- the byte-identical-modulo-line-endings claim is now confirmed with real tooling, documented in Section 1. Separately discovered and fixed a self-inflicted staleness: editing the document after the drafting agent computed report_sha256/artifacts[0].sha256 left those two fields pointing at the pre-fix bytes (5c0c95669b...) while gate.artifact_manifest (recomputed fresh by record-validation.cjs) correctly held the post-fix hash (99038391a4a3...) -- updated report_sha256 and artifacts[0].sha256 to match, re-ran check-artifacts to confirm PASS again before proceeding to the gate."
+    },
+    {
+      "timestamp": "2026-09-17T14:20:00Z",
+      "actor": "human",
+      "phase": "solution_review",
+      "event": "gate-reply",
+      "detail": "Reply: publish. Gate 1 (solution discipline) approved."
+    },
+    {
+      "timestamp": "2026-09-17T14:20:05Z",
+      "actor": "orchestrator",
+      "phase": "solution_review",
+      "event": "published",
+      "detail": "confluence -- https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5885493391/Conversational+CRM+Solution+Architecture+v1.0 (approval comment 5886050400). Published directly in the orchestrator turn (consistent with this project's established Workflow 1 precedent: publisher-agent could not reach live Atlassian tools from within a spawned subagent context in this session)."
+    }
+  ],
+  "published": {
+    "target": "confluence",
+    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5885493391/Conversational+CRM+Solution+Architecture+v1.0",
+    "published_at": "2026-09-17T14:20:05Z",
+    "approval_comment_id": "5886050400"
+  },
   "owner_role": null,
   "note": "Owned by this stage's agent. Single writer -- never edit another role's file. Scope, components, context, sequence and responsibility boundaries, plus the technology alternatives and compatibility reasoning behind the declared stack. Source disciplines: solution-arch, tech-stack."
 }

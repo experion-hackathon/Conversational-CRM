@@ -1,39 +1,889 @@
 {
   "role": "data_integration",
   "field": "data_integration",
-  "document": null,
-  "version": null,
-  "api_contract": null,
-  "data_model": null,
-  "status": "not_started",
-  "summary": null,
-  "drafted_at": null,
-  "readiness": null,
-  "source_references": [],
-  "artifacts": [],
-  "decisions": [],
-  "traceability": [],
-  "open_items": [],
-  "checks": [],
+  "document": "docs/architecture/DATA-AND-INTEGRATION-conversational-crm-T-1-v1.0.md",
+  "version": "1.0",
+  "api_contract": "docs/architecture/API-CONTRACT-conversational-crm-T-1-v1.0.json",
+  "data_model": "docs/architecture/DATA-MODEL-conversational-crm-T-1-v1.0.md",
+  "status": "drafted",
+  "summary": "Designed the ER model and self-contained OpenAPI 3.1 contract for the full T-1 scope (7 features, 21 stories) against solution's approved 5-component architecture (C-WEB, C-API, C-SQL, C-VEC, C-NLU). Five SQLite tables (accounts, contacts, interactions, interaction_attendees, commitments) plus one Chroma collection (embedded_content), all traced to real read patterns (e.g. commitments.account_id denormalized specifically for F-4's cross-account due-soon/overdue query). Nine API operations covering all 21 stories, with error semantics that distinguish true rejections (400 EMPTY_NOTE) from valid conversational negative outcomes (unmatched, manual-entry-required, no-history, not-identified -- all 2xx with a resolution discriminator) and a shared 503/Retry-After shape for transient SQLite write contention. Recorded 9 decisions (DAT-1..DAT-9): DAT-2 resolves solution's Open Item OI-1a (Bedrock embedding model = Titan Text Embeddings V2, 1024-dim, re-embedding trigger = embed-once-at-capture plus a metadata-only upsert on customer-thread resolution); DAT-3 resolves OI-2 (SQLite WAL mode + busy_timeout + bounded retry-on-busy, surfaced to the client as 503/Retry-After if exhausted, never a silent drop). Found and addressed one genuine gap no story described: F-4 AC1 (US-13 AC1) requires excluding a commitment once 'marked complete' but no story specifies how that state is reached -- added commitments.status and a minimal PATCH endpoint (DAT-5), disclosed as Open Item OI-5 rather than presented as a confirmed product decision. Traced all 21 stories to operation_ids and entity_names (0 not_applicable). Independently recomputed all three Workflow 1 source hashes and solution's own document hash; all four matched solution.json's recorded values exactly, including the already-disclosed PRD line-ending drift (not re-litigated as a new finding).",
+  "drafted_at": "2026-09-17T15:30:00Z",
+  "readiness": "ready",
+  "source_references": [
+    {
+      "role": "product_state",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../state/workflow-1-discovery-to-stories/workflow.json",
+      "version": "locked",
+      "sha256": "fb25e9c8829f6e0d0d9ccf9cddf5db8ae9b0cb7eba5873baff9e7e8bffc21b27",
+      "note": "Workflow 1's own workflow.json, confirming its locked status (workflow.status='locked', all 3 stage gates approved) at the moment this discipline read it, before drafting against solution's output."
+    },
+    {
+      "role": "prd",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../workflow-1-discovery-to-stories/docs/requirements/PRD-conversational-crm-v1.5.md",
+      "version": "1.5",
+      "sha256": "3960abdacf6ba3a27217d913aca01fa932bfb65373e572cdc4eeb6ac77dccc64",
+      "note": "Computed directly by this discipline against current file bytes (CRLF). Matches exactly the hash solution.json independently recorded -- including the already-disclosed, already-resolved discrepancy against Workflow 1's own LF-based lock hash (solution's Open Item OI-1, not re-raised here as new)."
+    },
+    {
+      "role": "user_stories",
+      "workflow": "workflow-1-discovery-to-stories",
+      "path": "../workflow-1-discovery-to-stories/docs/stories/USER-STORIES-conversational-crm-v1.0.md",
+      "version": "1.0",
+      "sha256": "43fc3c0690db8cc6a0d85a837286912072fbcfdbfa55d3d37cb74c6abe8de73b",
+      "note": "Computed directly by this discipline; matches solution.json's recorded value and Workflow 1's lock manifest exactly. Acceptance criteria for the traceability table below were copied verbatim from workflow-1's roles/stories.json stories[].acceptance_criteria, the authoritative source, not from this published Markdown (different quoting conventions)."
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "architecture",
+      "path": "docs/architecture/DATA-AND-INTEGRATION-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "98933f68639a8cf1640bc1d74c3007a17283bb6e35fd4970f4becb87318c4001"
+    },
+    {
+      "role": "api_contract",
+      "path": "docs/architecture/API-CONTRACT-conversational-crm-T-1-v1.0.json",
+      "version": "1.0",
+      "sha256": "b048e263f2b43c43ee99e4844df48b12856a1cef977d3af2e65041db8d2ec745"
+    },
+    {
+      "role": "data_model",
+      "path": "docs/architecture/DATA-MODEL-conversational-crm-T-1-v1.0.md",
+      "version": "1.0",
+      "sha256": "66b0f4fb0b3462e8706eb48969efd704f7106777b33bc0fe1e895390e5da8dab"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DAT-1",
+      "category": "Data modeling",
+      "choice": "Five SQLite tables (accounts, contacts, interactions, interaction_attendees, commitments), with commitments.account_id denormalized from its parent interaction.",
+      "alternatives": [
+        "A single wide interactions table with fixed attendee/commitment columns instead of child tables",
+        "A normalized commitments table with no denormalized account_id, requiring every reader to join through interactions"
+      ],
+      "rationale": "PRD Section 13.1 already states the zero-to-many, nullable-field shape is 'exactly what a relational schema is suited for... rather than a fixed set of attendee/commitment columns'; this implements that narrative decision as real DDL. The denormalized account_id exists specifically because F-4's due-soon/overdue query (US-13) reads across every account at once and needs the account directly in its result rows.",
+      "source": "PRD Section 13.1; solution.json C-SQL responsibility statement",
+      "owner": "data_integration",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-2",
+      "category": "Vector-store technology finalization",
+      "choice": "Amazon Titan Text Embeddings V2 (amazon.titan-embed-text-v2:0), 1024-dimension output, cosine similarity. Re-embedding trigger: embed once at capture/seed-ingestion time; metadata-only upsert of account_id (not a vector re-embed) when an unmatched interaction is resolved to a customer (US-3). No other re-embedding trigger exists in this scope.",
+      "alternatives": [
+        "A non-Bedrock embedding model (already rejected at the solution level by SOL-6, not re-opened)",
+        "Titan V2 at 3072 dimensions, or Titan V1"
+      ],
+      "rationale": "Resolves Open Item OI-1a: SOL-6 already fixed Bedrock as the sole embedding source; this fixes the specific model, dimension and re-embedding trigger PRD Assumption 10 explicitly left open. No story in scope edits previously-captured content, so 're-embed on change' has no case to fire except the customer-resolution metadata update, which does not change the embedded text.",
+      "source": "PRD Section 13.2, Assumption 10 (OI-1a); solution.json SOL-6",
+      "owner": "data_integration",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-3",
+      "category": "Data-access / concurrency",
+      "choice": "SQLite WAL journal mode, busy_timeout=5000ms, bounded application-level retry-on-SQLITE_BUSY (up to 3 attempts with backoff) around every write; 503 with Retry-After if retries are exhausted.",
+      "alternatives": [
+        "Last-write-wins with no retry (rejected -- contradicts US-21 AC2)",
+        "Migrating off SQLite to a multi-writer database (rejected -- SQLite is fixed upstream by human decision, not this discipline's to re-open)"
+      ],
+      "rationale": "Resolves Open Item OI-2. WAL allows concurrent readers alongside a single writer; SQLite's real constraint is serialized writes, not serialized reads-and-writes. With F-7's expected concurrency (two shared-login sessions), a short busy-timeout plus a few retries resolves real contention without introducing a queue/broker component solution already ruled out (SOL-3). Two concurrent captures still create two distinct interactions rows -- WAL/retry only serializes the brief write, it never merges or rejects either session's content.",
+      "source": "PRD Open Question 9 (OI-2); solution.json SOL-8",
+      "owner": "data_integration and/or platform",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-4",
+      "category": "API design / cross-cutting behavior",
+      "choice": "POST /qa and POST /briefs both accept an optional account_id hint and, when omitted, resolve the customer from the free-text question/request itself via C-NLU.",
+      "alternatives": [
+        "Always requiring account_id as a parameter (rejected -- contradicts F-3 AC4/US-12 and F-5 AC3/US-17's own wording of resolving a customer from the query's own text)",
+        "Always requiring free-text resolution with no account_id hint (rejected -- PRD Section 5 step 1 has the rep select an account before asking questions)"
+      ],
+      "rationale": "Reconciles PRD Section 5's step ordering (select account, then ask) against F-3/F-5's own acceptance-criteria wording (the query names the customer). Supporting both costs nothing at the contract level and lets Workflow 3 pick either UI flow without a contract change.",
+      "source": "PRD Section 5 step 1; F-3 AC4, F-5 AC3",
+      "owner": "data_integration, informed by Workflow 3's UI design",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-5",
+      "category": "Data modeling / API design (gap discovered, not requested by any story)",
+      "choice": "Add commitments.status (open/complete, default open) and PATCH /commitments/{commitmentId}/complete.",
+      "alternatives": [
+        "Leaving F-4 AC1's 'excluded... once marked complete' unimplemented since no story explicitly requests a mark-complete action (rejected -- an AC already in scope, via US-13 AC1, cannot be left silently unimplementable)",
+        "Inferring completion automatically from a later note mentioning fulfillment (rejected -- would require an NLU-driven inference no PRD text describes at all, a materially larger invention than a plain status-toggle operation)"
+      ],
+      "rationale": "F-4 AC1 (US-13 AC1) confirms a 'marked complete' state must exist and be excluded from the list but never says how a commitment reaches it. A minimal explicit operation is the smallest addition that makes the already-scoped acceptance criterion testable, replaceable later without touching any other operation.",
+      "source": "PRD F-4 AC1 (US-13 AC1)",
+      "owner": "data_integration (mechanism), Product owner (whether this is the intended mechanism)",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-6",
+      "category": "Data access / determinism",
+      "choice": "interactions ordered by captured_at ascending, id ascending as tie-breaker, for both the profile view (F-6) and internal 'most recent' resolution (F-3 AC1).",
+      "alternatives": [
+        "Newest-first display order (a common activity-feed UX convention) -- not chosen as the default; flagged as Open Item OI-7 since it is an equally defensible, contract-reversible presentation choice"
+      ],
+      "rationale": "Without a stated tie-breaker, two interactions captured at the same timestamp (a real case under US-21's concurrent-write scenario) would sort nondeterministically, violating this discipline's own contract to provide deterministic, documented ordering wherever a story requires stable results.",
+      "source": "PRD F-6 AC1 (US-18); US-21",
+      "owner": "data_integration",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-7",
+      "category": "Integration design",
+      "choice": "Ratify PRD Section 14.1a's four adapter interface contracts (CRM fetchAccounts/fetchContacts, Calendar getUpcomingEvents, SharePoint listDocuments/fetchDocument, Email fetchMessages) unchanged, as internal C-API adapter-layer interfaces feeding accounts/contacts and the embedded_content collection. None exposed as a public API-CONTRACT operation (C-WEB never calls an adapter directly, per SOL-7).",
+      "alternatives": [
+        "Refining the method signatures further before ratifying (considered and rejected -- no gap found requiring a change)"
+      ],
+      "rationale": "PRD Assumption 11/12 delegated this shape to requirements-agent's judgment and left ratification to Architecture (solution.json: 'data_integration's to ratify or refine'). Ratifying unchanged, with no invented deficiency to fix, keeps this decision honest about what is genuinely new here (nothing).",
+      "source": "PRD Section 14.1a; solution.json Section 2 (adapter layer)",
+      "owner": "data_integration",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-8",
+      "category": "Data retention",
+      "choice": "The uploaded business-card image is processed synchronously and not persisted afterward; only extracted fields (interaction_attendees) and the interaction's own raw_text/metadata are stored.",
+      "alternatives": [
+        "Persisting the original image for later manual review of an OCR failure (rejected -- invents a storage/retention requirement no story asks for)"
+      ],
+      "rationale": "No feature or story ever re-displays or re-processes a previously submitted business-card image; F-1 AC2/US-4's full requirement is satisfiable without retaining the source image.",
+      "source": "PRD F-1 AC2 (US-4); Section 7 Security/Privacy NFR (seeded-data-only)",
+      "owner": "data_integration",
+      "status": "proposed"
+    },
+    {
+      "id": "DAT-9",
+      "category": "Data modeling",
+      "choice": "Satisfy PRD Section 13.2's embedded-item traceability requirement using Chroma's own per-chunk metadata (account_id, source_type, source_id, chunk_index) rather than a new SQLite embeddings mapping table.",
+      "alternatives": [
+        "A SQLite embeddings table mirroring Chroma's own metadata (rejected -- a duplicated source of truth with no reader in this scope that needs SQL-side querying of embedding metadata)"
+      ],
+      "rationale": "Introducing a second store for the same facts risks the two drifting apart with no feature ever cross-checking them; Chroma's metadata is authoritative and sufficient on its own.",
+      "source": "PRD Section 13.2",
+      "owner": "data_integration",
+      "status": "proposed"
+    }
+  ],
+  "traceability": [
+    {
+      "feature_id": "F-1",
+      "story_id": "US-1",
+      "acceptance_criteria": [
+        "The system must create a structured interaction note and associate it with the correct customer thread when the rep's typed entry unambiguously matches exactly one seeded customer account.",
+        "The system must save the entry as a new interaction note when the entry contains at least one non-whitespace character."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Submit a typed one-liner unambiguously naming exactly one seeded account via POST /interactions; confirm 201 with match_status='matched' and the correct account_id."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "interactions",
+        "accounts"
+      ]
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-2",
+      "acceptance_criteria": [
+        "The system must reject the submission with an explicit 'cannot save an empty note' message, and must not create any note record, when the rep submits an empty or whitespace-only entry.",
+        "The system must flag the note as 'unmatched — needs customer selection' — rather than attaching it to a default or incorrect account — when no seeded customer account can be unambiguously identified from the entry text."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit whitespace-only raw_text; confirm 400 EMPTY_NOTE and no row created. Submit text naming no/an ambiguous account; confirm 201 with match_status='unmatched', account_id=null."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "interactions"
+      ]
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-3",
+      "acceptance_criteria": [
+        "The system must attach a previously flagged 'unmatched' note to the customer thread the rep selects when the rep manually resolves the flag.",
+        "The system must leave the note in the unmatched/needs-selection state — rather than guessing an account — when the rep has not yet resolved it."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "List unmatched notes via GET /interactions/unmatched; resolve one via POST /interactions/{id}/resolve-customer, confirm 200 with match_status='matched'; confirm an unresolved note is never auto-assigned."
+      ],
+      "operation_ids": [
+        "listUnmatchedInteractions",
+        "resolveInteractionCustomer"
+      ],
+      "entity_names": [
+        "interactions"
+      ]
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-4",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must extract the contact's name, company and role from a scanned business-card image into the structured interaction note when the image is legible and contains recognizable contact fields. The OCR mechanism was never discussed in discovery (PRD Assumption 5, Open Question 5); whether this is worth building for the demo at all is still open.",
+        "[INFERRED — needs confirmation] The system must inform the rep that manual entry is required — without fabricating contact details — when the image cannot be read or no contact fields are recognized."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit a legible business-card image via multipart/form-data; confirm 201 with populated attendees. Submit an unreadable image; confirm 201 with manual_entry_required=true, attendees=[]."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "interactions",
+        "interaction_attendees"
+      ]
+    },
+    {
+      "feature_id": "F-1",
+      "story_id": "US-5",
+      "acceptance_criteria": [
+        "The system must extract every distinct attendee name mentioned in a typed free-text interaction entry as a separate structured attendee item — recording one item per distinct person named (e.g., 'met Priya and Arjun from Acme...' must yield two attendee items, not one merged string) — when the entry text names at least one identifiable person.",
+        "The system must record zero attendee items for that interaction — rather than fabricating a name — when the entry text names no one.",
+        "[INFERRED — needs confirmation] The exact name-recognition/disambiguation mechanism was never discussed in discovery (PRD Assumption 14, Open Question 15); only the underlying capability (AC1/AC2) is treated as confirmed."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit 'met Priya and Arjun from Acme...'; confirm two interaction_attendees rows. Submit text naming no one; confirm zero rows."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "interaction_attendees"
+      ]
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-6",
+      "acceptance_criteria": [
+        "The system must extract each distinct commitment, follow-up or next step mentioned in a captured note's text as a separate tracked item when the note contains one or more of them.",
+        "The system must record no commitment items when the note describes discussion only, with no forward-looking commitment."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit a note with two commitments; confirm two commitments rows. Submit a discussion-only note; confirm zero rows."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-7",
+      "acceptance_criteria": [
+        "The system must record a due date on an extracted commitment when the captured text states a concrete date or an unambiguous relative date term resolvable against the interaction's timestamp (e.g., 'by Friday').",
+        "The system must mark the commitment's due date as unspecified — rather than guessing a date — when the text uses a vague temporal reference (e.g., 'soon,' 'sometime') or gives no date information at all."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Submit 'by Friday'; confirm a resolved due_date. Submit 'soon'; confirm due_date=null."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-2",
+      "story_id": "US-8",
+      "acceptance_criteria": [
+        "The system must tag every extracted discussion point and commitment to the same customer thread as its source interaction note when that note is matched to a thread.",
+        "The system must flag an extracted item for manual thread assignment — rather than tagging it to an incorrect thread — when the source note itself is unmatched to a customer thread (per F-1)."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Confirm commitments on a matched note carry that account's account_id. Confirm commitments on an unmatched note have account_id=null until resolveInteractionCustomer sets it."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "commitments",
+        "interactions"
+      ]
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-9",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about a customer's most recent discussion by returning content drawn from that customer's most recent interaction note(s) when the thread has at least one captured note.",
+        "The system must respond that no history exists yet for that customer when the thread is empty."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Ask against a thread with history; confirm resolution='answered' drawing on that thread's most recent interaction. Ask against an empty thread; confirm resolution='no_history'."
+      ],
+      "operation_ids": [
+        "askQuestion"
+      ],
+      "entity_names": [
+        "interactions",
+        "embedded_content (Chroma collection)"
+      ]
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-10",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about the rep's own open commitments for a customer by listing the commitments extracted and tagged to that thread when any exist.",
+        "The system must state that there are no open commitments for that customer when none exist."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Ask against a thread with open commitments; confirm the answer matches status='open' commitments rows. Ask against a thread with none; confirm resolution='no_open_commitments'."
+      ],
+      "operation_ids": [
+        "askQuestion"
+      ],
+      "entity_names": [
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-11",
+      "acceptance_criteria": [
+        "The system must answer a natural-language question about interaction attendees by returning the contact names extracted from that thread's interaction notes when attendee names were captured.",
+        "The system must state that no attendee information was captured when none was extracted."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Ask against a thread with captured attendees; confirm names match interaction_attendees rows. Ask against a thread with none; confirm resolution='no_attendees_captured'."
+      ],
+      "operation_ids": [
+        "askQuestion"
+      ],
+      "entity_names": [
+        "interaction_attendees"
+      ]
+    },
+    {
+      "feature_id": "F-3",
+      "story_id": "US-12",
+      "acceptance_criteria": [
+        "The system must resolve and answer against the correct customer thread when a query names exactly one customer that matches a seeded account.",
+        "The system must respond that it could not identify the customer — rather than guessing or returning another customer's data — when the query names no customer or an unrecognized one."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Ask naming exactly one seeded account; confirm the correct thread answers. Ask naming no/an unrecognized account; confirm resolution='not_identified'."
+      ],
+      "operation_ids": [
+        "askQuestion"
+      ],
+      "entity_names": [
+        "accounts"
+      ]
+    },
+    {
+      "feature_id": "F-4",
+      "story_id": "US-13",
+      "acceptance_criteria": [
+        "The system must list every open commitment whose due date has passed as 'overdue' when the current date is past that due date, and must exclude a commitment from this list once it is marked complete.",
+        "[INFERRED — needs confirmation] The system must list every open commitment whose due date falls within the next 7 days as 'due soon,' and must reclassify it as 'overdue' instead once its due date has passed. The 7-day window is a carried-over illustrative placeholder from the PRD, not a confirmed value (PRD Open Question 6).",
+        "The system must list a commitment with an unspecified due date (per F-2) separately from the due-soon/overdue list — rather than omitting it entirely or treating it as overdue — when no due date was captured."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Seed commitments past due, within 7 days, beyond 7 days, no due date, and one complete; call GET /commitments/due with a fixed reference_date; confirm each bucket classifies correctly and the completed one appears in none."
+      ],
+      "operation_ids": [
+        "listDueCommitments",
+        "markCommitmentComplete"
+      ],
+      "entity_names": [
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-4",
+      "story_id": "US-14",
+      "acceptance_criteria": [
+        "The system must state explicitly that there are no due-soon or overdue commitments — rather than showing an empty list with no explanation — when none exist."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Call GET /commitments/due when no commitment qualifies for overdue/due_soon; confirm message is populated rather than a bare empty response."
+      ],
+      "operation_ids": [
+        "listDueCommitments"
+      ],
+      "entity_names": [
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-15",
+      "acceptance_criteria": [
+        "The system must generate a summary containing recent discussion history, open commitments and stakeholder/contact names for a named customer when that customer has at least one captured note, and must state that no history exists yet for that customer — rather than generating a summary with fabricated content — when the thread is empty.",
+        "[INFERRED — needs confirmation] The system must return a bounded, short-form summary (a few sentences or bullets, not a multi-page document) under normal conditions, and must still return whatever partial content is available, rather than failing the whole request, when data for one of the summary components is missing (PRD Open Question 7)."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Request a brief for a customer with history; confirm resolution='generated' with a populated summary. Request one for an empty thread; confirm resolution='no_history'."
+      ],
+      "operation_ids": [
+        "generateBrief"
+      ],
+      "entity_names": [
+        "interactions",
+        "commitments",
+        "contacts",
+        "interaction_attendees",
+        "embedded_content (Chroma collection)"
+      ]
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-16",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must synthesize the opportunity/deal-status component narratively from that customer's recorded interaction notes and commitments — since no discrete deal-stage field exists in the structured store — when the thread contains content indicating where the deal/opportunity stands (PRD Assumption 13, Open Question 14).",
+        "The system must state that no opportunity/deal-status information has been captured yet for that customer — rather than fabricating a stage or outcome — when the thread contains no such content."
+      ],
+      "component_ids": [
+        "C-API",
+        "C-SQL",
+        "C-VEC",
+        "C-NLU"
+      ],
+      "verification_scenarios": [
+        "Request a brief for a customer whose notes discuss deal progress; confirm summary.opportunity_status is non-null. Request one with no such content; confirm summary.opportunity_status=null."
+      ],
+      "operation_ids": [
+        "generateBrief"
+      ],
+      "entity_names": [
+        "embedded_content (Chroma collection)",
+        "interactions",
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-5",
+      "story_id": "US-17",
+      "acceptance_criteria": [
+        "The system must generate the summary for a named customer when the request unambiguously identifies exactly one seeded customer account.",
+        "The system must respond that it could not identify the requested customer — rather than guessing — when the request names an unrecognized or ambiguous customer."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-NLU",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Request naming exactly one seeded account; confirm resolution='generated'. Request naming an ambiguous/unrecognized account; confirm resolution='not_identified'."
+      ],
+      "operation_ids": [
+        "generateBrief"
+      ],
+      "entity_names": [
+        "accounts"
+      ]
+    },
+    {
+      "feature_id": "F-6",
+      "story_id": "US-18",
+      "acceptance_criteria": [
+        "The system must display a customer's captured notes and extracted items in chronological order on that customer's profile view when at least one note exists.",
+        "The system must display an explicit 'no history yet' state when none exists."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Open a profile with captured notes; confirm interactions returned in captured_at ascending order. Open one with none; confirm is_empty=true."
+      ],
+      "operation_ids": [
+        "getAccountProfile"
+      ],
+      "entity_names": [
+        "interactions",
+        "interaction_attendees",
+        "commitments"
+      ]
+    },
+    {
+      "feature_id": "F-6",
+      "story_id": "US-19",
+      "acceptance_criteria": [
+        "The system must display a newly captured note and its extracted items on the correct customer's profile view automatically, without requiring the rep to take further action, when the note is tagged to that customer's thread.",
+        "The system must not display that note or its items on any other customer's profile view when it is not tagged to that customer."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Capture a note, then call GET /accounts/{id}/profile for that account; confirm it appears with no separate action. Confirm it is absent from every other account's profile call."
+      ],
+      "operation_ids": [
+        "captureInteraction",
+        "getAccountProfile"
+      ],
+      "entity_names": [
+        "interactions"
+      ]
+    },
+    {
+      "feature_id": "F-7",
+      "story_id": "US-20",
+      "acceptance_criteria": [
+        "The system must show the same customer thread content to every session authenticated via the shared login when two sessions view the same customer.",
+        "The system must not partition data by which physical person is at the keyboard, since no per-rep identity exists in this version."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Call getAccountProfile for the same account from two sessions; confirm byte-identical interactions content."
+      ],
+      "operation_ids": [
+        "listAccounts",
+        "getAccountProfile"
+      ],
+      "entity_names": [
+        "accounts",
+        "interactions"
+      ]
+    },
+    {
+      "feature_id": "F-7",
+      "story_id": "US-21",
+      "acceptance_criteria": [
+        "[INFERRED — needs confirmation] The system must persist a note added from one session so that it is immediately visible to another concurrent session viewing the same customer thread. The conflict-handling mechanism was never discussed in discovery (PRD Open Question 9).",
+        "[INFERRED — needs confirmation] The system must not silently lose one session's addition when another session adds to the same thread at nearly the same time."
+      ],
+      "component_ids": [
+        "C-WEB",
+        "C-API",
+        "C-SQL"
+      ],
+      "verification_scenarios": [
+        "Call captureInteraction from two sessions against the same account at nearly the same instant; confirm both succeed as distinct interactions rows, or the rare exhausted-retry case returns 503 RetryLater with a successful retry -- never a silent loss."
+      ],
+      "operation_ids": [
+        "captureInteraction"
+      ],
+      "entity_names": [
+        "interactions"
+      ]
+    }
+  ],
+  "open_items": [
+    {
+      "id": "OI-5",
+      "detail": "No PRD feature or story describes how a rep (or the system) marks a commitment complete, yet F-4 AC1 (US-13 AC1) requires excluding a completed commitment from the due-soon/overdue list. PATCH /commitments/{id}/complete (decision DAT-5) is this discipline's own minimal inferred mechanism, not a confirmed product decision.",
+      "source": "PRD F-4 AC1 (US-13 AC1); decision DAT-5",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "Product owner (whether/how a rep marks a commitment complete), then data_integration/Workflow 3 if the mechanism changes",
+      "resolution_needed": "Product owner confirms whether an explicit 'mark complete' action is the intended mechanism, or specifies a different one (e.g. inferred from a later note) for Workflow 3 to build against."
+    },
+    {
+      "id": "OI-6",
+      "detail": "The exact UI flow behind POST /qa and POST /briefs's customer-resolution pattern (decision DAT-4 -- account_id hint vs. free-text resolution) is this discipline's own reconciliation of PRD Section 5's step ordering against F-3/F-5's own acceptance-criteria wording, not a confirmed UX decision.",
+      "source": "PRD Section 5 step 1; F-3 AC4; F-5 AC3; decision DAT-4",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "Architect / Workflow 3 (UI/UX)",
+      "resolution_needed": "Confirm, when Workflow 3 designs the actual Q&A/Brief-Me screens, whether the rep asks from within a profile view (hint path), a global query box (free-text path), or both -- no contract change needed either way."
+    },
+    {
+      "id": "OI-7",
+      "detail": "GET /accounts/{id}/profile's chronological order (decision DAT-6 -- oldest-first, the literal reading of 'chronological order') is one of two equally defensible readings; a newest-first activity-feed convention is common UX practice and was not chosen as the default.",
+      "source": "PRD F-6 AC1 (US-18); decision DAT-6",
+      "blocks_development": false,
+      "resolved": false,
+      "owner": "UI/UX (Workflow 3)",
+      "resolution_needed": "Confirm the desired display order with a human before Workflow 3 builds the profile view; reversible client-side without any contract change."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Every operation is reachable from traceability and every traceability operation exists in the contract",
+      "required": true,
+      "result": "pass",
+      "summary": "All 9 operationIds cross-checked against Section 4's operation_ids in both directions in the report; no orphan on either side."
+    },
+    {
+      "name": "Every OpenAPI reference resolves locally; nothing external",
+      "required": true,
+      "result": "pass",
+      "summary": "Every $ref targets #/components/... in the same file; no external $ref, no remote servers dependency beyond a relative base path."
+    },
+    {
+      "name": "Both appendices are byte-identical to the standalone files",
+      "required": true,
+      "result": "pass",
+      "summary": "Verified programmatically: extracted the content between the api-contract and data-model markers in the report and diffed it character-for-character against the standalone API-CONTRACT and DATA-MODEL files after UTF-8-correct reads -- exact match on both."
+    },
+    {
+      "name": "Every constraint the data model states is expressible and expressed in the contract schema, or the difference is recorded as an open item",
+      "required": true,
+      "result": "pass",
+      "summary": "DATA-MODEL Section 3 ('Constraint-to-contract expressibility check') walks every stated constraint; the one genuine gap (JSON Schema cannot express 'not all-whitespace') is disclosed there, not silently assumed solved."
+    },
+    {
+      "name": "source_references records every upstream artifact consumed, with real hashes",
+      "required": true,
+      "result": "pass",
+      "summary": "All 3 hashes (product_state, prd, user_stories) computed independently via sha256sum and cross-checked against solution.json's own recorded values -- exact match on all 3, including the already-disclosed PRD line-ending drift."
+    },
+    {
+      "name": "Every selected story maps to at least one operation and one entity",
+      "required": true,
+      "result": "pass",
+      "summary": "All 21 stories (US-1..US-21) carry non-empty operation_ids and entity_names; 0 not_applicable."
+    },
+    {
+      "name": "Independent validation of v1.0",
+      "required": true,
+      "result": "fail",
+      "summary": "Ran. A separate agent reviewed v1.0 and raised 2 finding(s): 1 high, 1 low. Worst severity: high."
+    }
+  ],
   "self_verification": {
-    "result": null,
-    "checked_at": null
+    "result": "PASS",
+    "checked_at": "2026-09-17T15:30:00Z"
   },
-  "report_sha256": null,
-  "validation": null,
+  "report_sha256": "98933f68639a8cf1640bc1d74c3007a17283bb6e35fd4970f4becb87318c4001",
+  "validation": {
+    "result": "issues_found",
+    "version_reviewed": "1.0",
+    "summary": "Data and Integration bundle v1.0 (report + API contract + data model) is substantively strong: all 9 operations reachable both ways from traceability, all 21 stories trace to real operation_ids/entity_names, all citations to PRD sections/assumptions/open questions independently verified to actually exist and match their cited topic, and all 21 traceability acceptance_criteria independently diffed word-for-word against workflow-1's roles/stories.json (the true source) with no discrepancy. However, one real contract/data-model schema defect survived self-verification's own 'every constraint expressible and expressed, or recorded as an open item' check: commitments.account_id is documented as NULLABLE in the data model (null exactly when the parent interaction is unmatched, per F-2 AC3/DAT-1) but the API contract's Commitment schema declares account_id as a non-nullable required string, with no open item disclosing the gap. This is exactly the class of self-verification blind spot independent review exists to catch. All 4 of the coordinator's disclosed mechanical fixes were independently re-derived and confirmed correct and mutually consistent across both the report and the standalone files.",
+    "independence": "Read the full DATA-AND-INTEGRATION report, the standalone API-CONTRACT JSON, the standalone DATA-MODEL document, data_integration.json, workflow.json, solution.json (upstream input), the full PRD v1.5, and workflow-1's roles/stories.json (the actual verbatim acceptance-criteria source, not the published Stories markdown). Diffed all 21 traceability acceptance_criteria entries in data_integration.json against roles/stories.json character-for-character rather than trusting the report's own 'copied verbatim' claim. Independently re-derived the correct x-story-ids set for every one of the 9 operations from the traceability table's own operation_ids columns (not just spot-checking the 2 named fixes) and confirmed full self-consistency. Read every PRD section/assumption/open-question cited anywhere in the bundle (13.1, 13.2, Section 5 step 1, Section 7, Section 14.1a, Assumptions 5/10/11/12/13/14, Open Questions 6/7/9) directly against the PRD text to confirm each exists and matches its cited topic -- none invented or mismatched. Walked every field in every schema referenced by an operation (Interaction, Commitment, Attendee, AccountProfile, QAResponse, BriefResponse, DueCommitmentsResponse) against the data model's own field-level nullability/constraint statements rather than trusting Data Model Section 3's own expressibility table or the report's Section 6 self-verification PASS claims.",
+    "findings": [
+      {
+        "id": "V-DI1",
+        "severity": "high",
+        "finding": "commitments.account_id is documented in DATA-MODEL Section 1.5 as NULLABLE ('NULL exactly when the parent interaction is unmatched... set at the same time the parent interaction is resolved'), and this nullability is load-bearing for US-8 AC2/F-2 AC3 (an extracted commitment on an unmatched note must exist with no account tag rather than being tagged to an incorrect thread). But the API-CONTRACT's Commitment schema declares 'account_id': { 'type': 'string' } -- not nullable -- while also listing 'account_id' in the schema's 'required' array. A real payload consistent with the data model (e.g. captureInteraction's 201 response for an unmatched note, which embeds Interaction.commitments -> Commitment[]) would return account_id: null for such a commitment, which violates this exact schema. This is precisely the constraint the bundle's own self-verification claims to have checked -- DATA-MODEL Section 3 ('Constraint-to-contract expressibility check') and the report's Section 6 self-verification both claim PASS on 'every constraint the data model states is expressible and expressed in the contract schema, or the difference is recorded as an open item' -- but Section 3's table has six rows covering interactions.account_id, raw_text, interaction_attendees.name, commitments.due_date, commitments.status, and vector-store scoping, with no row at all for commitments.account_id's nullability. The gap is neither expressed in the schema nor recorded in Section 5's open items (OI-5/OI-6/OI-7, none of which mention this).",
+        "evidence": "DATA-MODEL-conversational-crm-T-1-v1.0.md Section 1.5, commitments.account_id row: 'NULLABLE, FOREIGN KEY -> accounts(id), denormalized...' / 'NULL exactly when the parent interaction is unmatched (F-2 AC3...)'. API-CONTRACT-conversational-crm-T-1-v1.0.json components.schemas.Commitment: '\"required\": [\"id\", \"account_id\", \"interaction_id\", \"text\", \"due_date\", \"status\"]' with '\"account_id\": { \"type\": \"string\" }' (no null variant), in contrast to the same schema's 'due_date': { 'type': ['string','null'] } which correctly mirrors its own NULLABLE data-model field. Identical text appears in both the standalone API-CONTRACT-conversational-crm-T-1-v1.0.json and the report's embedded Appendix A copy (verified byte-identical between the two). DATA-MODEL Section 3's expressibility table omits any commitments.account_id row."
+      },
+      {
+        "id": "V-DI2",
+        "severity": "low",
+        "finding": "Hash-verification limitation, disclosed rather than papered over: this review has no hashing/Bash tool and could not independently compute or compare any of the SHA-256 values in data_integration.json's source_references, artifacts[], or report_sha256 fields, nor the claim that all three Workflow 1 source hashes and solution's document hash were independently recomputed and matched. All recorded hash strings were confirmed to be well-formed 64-hex-character values and internally consistent (e.g. artifacts[].sha256 values match each other's cross-references where repeated), but the underlying byte-level computation itself needs an actual hash tool to confirm, not a Read-based review.",
+        "evidence": "data_integration.json source_references[] sha256 values and artifacts[].sha256 values are each 64 hex characters; no tool available in this session to run sha256sum or equivalent to verify them against actual file bytes."
+      }
+    ],
+    "fix_verification": {
+      "coordinator-fix-1-artifact-role-renames": "confirmed correct -- data_integration.json artifacts[] now has exactly three entries with role values 'architecture', 'api_contract', 'data_model' (paths pointing at the report, the standalone API-CONTRACT JSON, and the standalone DATA-MODEL markdown respectively), matching the three-artifact bundle shape this workflow's WORKFLOW.md requires for the data_integration discipline (distinct from solution's single-artifact 'solution' role).",
+      "coordinator-fix-2-version-string": "confirmed correct and consistent -- both the standalone API-CONTRACT-conversational-crm-T-1-v1.0.json (info.version) and the report's embedded Appendix A copy read \"version\": \"1.0\" identically; no remaining \"1.0.0\" semver string found in either file.",
+      "coordinator-fix-3-story-id-crossrefs": "confirmed correct -- independently re-derived the expected x-story-ids set for all 9 operations directly from the traceability table's own operation_ids columns (not just the two named changes) and found the contract's actual x-story-ids match exactly for every operation: captureInteraction correctly includes US-19 (US-19's own traceability row lists captureInteraction in operation_ids, consistent with its verification_scenario 'Capture a note, then call GET /accounts/{id}/profile'), listAccounts correctly excludes US-18 (US-18's traceability row's operation_ids is only ['getAccountProfile'], never listAccounts -- only US-20 references listAccounts). Both the standalone contract and the report's embedded copy agree on every operation's x-story-ids.",
+      "coordinator-fix-4-json-fence": "confirmed well-formed and byte-identical after whitespace normalization -- the report's <!-- api-contract:start --> block opens with a ```json fence and <!-- api-contract:end --> closes after a matching ``` fence; direct line-by-line textual comparison of the fenced content (report lines 589-1033) against the standalone API-CONTRACT-conversational-crm-T-1-v1.0.json (lines 1-445, exact same 445-line count) found identical content on every line compared, including the specific two x-story-ids fixes and the version string fix above. Note: this is a direct textual comparison, not a hash computation (no Bash/hashing tool available in this session -- see finding V-DI2).",
+      "V-DI1": "fixed -- coordinator changed Commitment.account_id from { \"type\": \"string\" } to { \"type\": [\"string\", \"null\"], \"description\": \"Null exactly when the parent interaction is unmatched (F-2 AC3) -- denormalized from the parent interaction; set when it is resolved via resolve-customer.\" } in both the standalone API-CONTRACT JSON and the report's embedded appendix, matching Interaction.account_id's existing nullable treatment. Also added the previously-missing row to DATA-MODEL Section 3's expressibility table (in both the standalone file and the report's embedded data-model appendix), explicitly naming the gap this review caught rather than silently closing it. All three files' hashes recomputed with real sha256sum and kept in sync."
+    },
+    "checked": [
+      "self_verification field present and result = PASS (not missing/FAIL) -- no structural finding needed on that front",
+      "project.phase in workflow-2's workflow.json = 'data_integration_review', matching the invocation's stated phase",
+      "data_integration designs against solution's approved 5 components (C-WEB, C-API, C-SQL, C-VEC, C-NLU) without redrawing any boundary -- confirmed by reading solution.json's decisions/component list and cross-checking every component_id used in data_integration's traceability table",
+      "All 9 operationIds cross-checked against traceability's operation_ids columns in both directions -- no orphan on either side",
+      "All 9 operations' x-story-ids independently re-derived from the traceability table and confirmed to match the contract exactly (not just the 2 coordinator-fixed operations)",
+      "Every $ref in the standalone and embedded contract targets #/components/... in the same file -- no external reference",
+      "Both appendices (API contract, data model) directly line-compared against their standalone files -- content identical on every line checked, correct fence markers present",
+      "Every PRD citation used anywhere in the bundle (Section 13.1, 13.2, Section 5 step 1, Section 7, Section 14.1a, Assumptions 5/10/11/12/13/14, Open Questions 6/7/9) read directly against the actual PRD v1.5 text -- all exist and match their cited topic; no invented or mismatched citation found",
+      "All 21 traceability acceptance_criteria entries in data_integration.json diffed word-for-word against workflow-1's roles/stories.json stories[].acceptance_criteria -- all match verbatim, confirming the report's own claim not to have copied from the published (differently-quoted) Markdown",
+      "DAT-3's WAL/busy_timeout/retry concurrency claim checked against the actual contract mechanism (shared 503 RetryLater response with Retry-After header on every write operation) and against its own stated scope limit (serializes the write only, does not merge or reject either session's content, does not claim atomicity across services) -- consistent, not overclaimed",
+      "Every failure mode a story requires distinguishing was checked against the actual contract: captureInteraction's 400 EMPTY_NOTE vs. 201 unmatched vs. 201 manual_entry_required vs. 422 UNSUPPORTED_IMAGE_FORMAT; resolveInteractionCustomer's 404 INTERACTION_NOT_FOUND vs. 404 ACCOUNT_NOT_FOUND (via error_code) vs. 409 INTERACTION_ALREADY_MATCHED; askQuestion/generateBrief's resolution-discriminator pattern for every empty/not-identified state -- all genuinely distinguished, not folded into one generic error",
+      "Every field referenced by an operation's schema walked against the data model's own stated type/nullability/constraint for that field (Interaction, Attendee, Commitment, AccountProfile, QAResponse, BriefResponse, DueCommitmentsResponse) -- found the one commitments.account_id mismatch reported as V-DI1; all other fields checked matched",
+      "Security/PII scan across the report, standalone contract, and standalone data model -- no API keys, tokens, credential-like strings, or real-looking personal data found; example names (Priya, Arjun, Acme) are the canonical synthetic examples carried from the PRD/Stories -- this is a pattern check, not a guarantee",
+      "Placeholder check -- no bare 'TBD' or 'Coming soon' anywhere in any of the three documents; all placeholders are the permitted [INFERRED -- needs confirmation] tags",
+      "Inference-honesty spot check -- decisions DAT-1 through DAT-9 are labeled 'status: proposed' (not presented as confirmed fact) and every genuinely unconfirmed mechanism (commitments.status/OI-5, the /qa /briefs resolution pattern/OI-6, chronological order direction/OI-7) is tagged [INFERRED -- needs confirmation] both inline and carried to Section 5 open items",
+      "No document/state drift found between data_integration.json and the DATA-AND-INTEGRATION report (unlike the drift the prior solution-discipline review caught) -- source_references count, decision statuses, and readiness value all agree between the state file and the human-facing document text"
+    ],
+    "not_checked": [
+      "No hash comparison was run -- see finding V-DI2. The coordinator/record-validation tooling should perform actual SHA-256 comparison before the gate, not rely on this review's Read-based textual comparison.",
+      "Whether security_nfr and platform (not yet drafted) will actually honor this bundle's open items (OI-5, OI-6, OI-7) and inherited items (OI-1, OI-1a, OI-2, OI-3, OI-4) cannot yet be checked -- those artifacts do not exist yet.",
+      "Whether check-artifacts / record-validation tooling itself would independently flag V-DI1 was not tested -- this review has no way to run node scripts/architecture-tools.cjs in this session; V-DI1 is a schema-vs-data-model consistency finding from direct reading, not tool output.",
+      "Runtime/implementation-level behavior (e.g. whether SQLite WAL mode is actually configured, whether the retry logic actually bounds at 3 attempts) cannot be checked from design documents alone -- this is a design review, not a build verification."
+    ],
+    "checked_at": "2026-09-17T16:05:00.000Z"
+  },
   "validation_history": [],
   "published": null,
   "gate": {
-    "status": "pending",
-    "reviewed_by": null,
-    "reviewed_at": null,
-    "reply": null,
-    "artifact_manifest": [],
+    "status": "approved",
+    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+    "reviewed_at": "2026-09-17T16:15:00Z",
+    "reply": "publish",
+    "artifact_manifest": [
+      {
+        "role": "data_integration",
+        "path": "docs/architecture/DATA-AND-INTEGRATION-conversational-crm-T-1-v1.0.md",
+        "version": "1.0",
+        "sha256": "98933f68639a8cf1640bc1d74c3007a17283bb6e35fd4970f4becb87318c4001"
+      },
+      {
+        "role": "data_integration",
+        "path": "docs/architecture/API-CONTRACT-conversational-crm-T-1-v1.0.json",
+        "version": "1.0",
+        "sha256": "b048e263f2b43c43ee99e4844df48b12856a1cef977d3af2e65041db8d2ec745"
+      },
+      {
+        "role": "data_integration",
+        "path": "docs/architecture/DATA-MODEL-conversational-crm-T-1-v1.0.md",
+        "version": "1.0",
+        "sha256": "66b0f4fb0b3462e8706eb48969efd704f7106777b33bc0fe1e895390e5da8dab"
+      }
+    ],
     "owner_role": "architect",
-    "answered_by": null
+    "answered_by": "DAI Team3 (sparc.team5@experionglobal.com)"
   },
-  "cost_log": [],
-  "audit_trail": [],
+  "cost_log": [
+    {
+      "stage": "data_integration",
+      "agent": "data-integration-agent",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 34000,
+      "note": "Drafted the Data and Integration bundle: confirmed Workflow 1 lock and all 3 upstream role gates approved, confirmed solution's gate approved and read its full document, read PRD v1.5 and User Stories v1.0 in full plus workflow-1 roles/stories.json for verbatim acceptance criteria, computed real SHA-256 hashes for all 3 upstream artifacts plus solution's own document (all matched solution.json's recorded values exactly). Designed 5 SQLite tables + 1 Chroma collection, a 9-operation self-contained OpenAPI 3.1 contract, recorded 9 decisions (DAT-1..DAT-9) resolving OI-1a and OI-2 and disclosing one newly-found gap (commitment completion, OI-5), and built a full 21-story traceability table with operation_ids/entity_names populated throughout.",
+      "timestamp": "2026-09-17T15:30:00Z"
+    }
+  ],
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-17T15:30:00Z",
+      "actor": "data-integration-agent",
+      "phase": "data_integration",
+      "event": "drafted",
+      "detail": "Data and Integration v1.0 written: 5 SQLite tables (accounts, contacts, interactions, interaction_attendees, commitments) plus 1 Chroma collection (embedded_content) with index rationale tied to real read patterns; a 9-operation self-contained OpenAPI 3.1 contract with error semantics distinguishing true rejections from valid conversational negative outcomes and a shared 503/Retry-After shape for SQLite write contention; 9 decisions (DAT-1..DAT-9) recorded, DAT-2 resolving solution's Open Item OI-1a (Bedrock embedding model/dimension/re-embedding trigger) and DAT-3 resolving OI-2 (SQLite concurrency mechanism); one new gap found and disclosed (commitment-completion mechanism, Open Item OI-5) rather than silently invented as a settled decision. All 21 stories traced to operation_ids and entity_names (0 not_applicable). Self-verification PASS. Both appendices verified programmatically byte-identical to the standalone API-CONTRACT and DATA-MODEL files."
+    },
+    {
+      "timestamp": "2026-09-17T15:55:00Z",
+      "actor": "orchestrator",
+      "phase": "data_integration",
+      "event": "corrected",
+      "detail": "`node scripts/architecture-tools.cjs check-artifacts --discipline data_integration` failed 4 times in sequence against the drafting agent's output and was fixed in place (carve-out applies: v1.0 has no gate approval yet): (1) all 3 bundle artifacts[] entries used role 'data_integration' instead of the schema's required 'architecture'/'api_contract'/'data_model' triple -- corrected each; (2) the API contract's info.version was '1.0.0' (semver) while the bundle version is '1.0' -- the tool compares these as plain strings after stripping a leading 'v', so '1.0.0' never matched '1.0' -- changed to '1.0' in both the standalone JSON and the report's embedded copy; (3) traceability/contract cross-reference gaps: US-19's row referenced captureInteraction as an operation_id but that operation's own x-story-ids didn't list US-19, even though the row's own verification_scenario already described calling captureInteraction then getAccountProfile for this exact story -- added US-19 to captureInteraction's x-story-ids (both files); separately, listAccounts' x-story-ids included US-18, but US-18's own traceability row never referenced listAccounts and its verification_scenario only exercises getAccountProfile -- removed US-18 from listAccounts' x-story-ids as the more semantically accurate fix, since F-7/US-20 (shared-session list consistency) is what actually needs listAccounts, not F-6/US-18 (single-profile detail); (4) the report's <!-- api-contract:start/end --> appendix held the raw JSON with no ```json code fence, but the checker's byte-identity comparison specifically requires and strips a ```json ... ``` fence around the embedded contract -- added the fence in the report. Every hash touched by these edits (report_sha256, artifacts[].sha256 for both the architecture and api_contract entries) was recomputed with real sha256sum and kept in sync at each step. No new facts were introduced: every fix was either a mechanical field/value rename into the schema the tool enforces, or a cross-reference correction using information the drafting agent's own traceability/verification_scenarios had already stated. check-artifacts now returns PASS for data_integration (9 operations, 9 decisions, 3 open items, 3 artifacts)."
+    },
+    {
+      "timestamp": "2026-09-17T16:08:40.178Z",
+      "run_id": null,
+      "actor": "validator",
+      "phase": "data_integration_review",
+      "event": "validation_recorded",
+      "detail": "Independent validation of v1.0 recorded: 2 finding(s) (1 high, 1 low). Gate manifest pinned to docs/architecture/DATA-AND-INTEGRATION-conversational-crm-T-1-v1.0.md@98933f68639a, docs/architecture/API-CONTRACT-conversational-crm-T-1-v1.0.json@b048e263f2b4, docs/architecture/DATA-MODEL-conversational-crm-T-1-v1.0.md@66b0f4fb0b34. No gate status was set: a validation is evidence for a human decision, not the decision."
+    },
+    {
+      "timestamp": "2026-09-17T16:12:00Z",
+      "actor": "orchestrator",
+      "phase": "data_integration_review",
+      "event": "corrected",
+      "detail": "Fixed validator finding V-DI1 (high) in place before the gate reply (v1.0, no gate approval yet at the time): Commitment.account_id was declared { \"type\": \"string\" } (non-nullable, and listed in the schema's required array) in both the standalone API-CONTRACT JSON and the report's embedded appendix, contradicting DATA-MODEL Section 1.5's own documentation that commitments.account_id is NULLABLE (null exactly when the parent interaction is unmatched -- load-bearing for US-8 AC2/F-2 AC3). Changed to { \"type\": [\"string\",\"null\"], \"description\": \"Null exactly when the parent interaction is unmatched (F-2 AC3) -- denormalized from the parent interaction; set when it is resolved via resolve-customer.\" } in both files, matching Interaction.account_id's existing treatment. Also added the previously-missing row to DATA-MODEL Section 3's expressibility table (both the standalone file and the report's embedded data-model appendix), explicitly naming that an independent review caught the gap rather than silently closing it. V-DI2 (low) was a disclosed reviewer-side tooling limitation, not a defect to fix. All three bundle file hashes (report_sha256, artifacts[].sha256 for architecture/api_contract/data_model) recomputed with real sha256sum and kept in sync; check-artifacts re-run and confirmed PASS again before the gate."
+    },
+    {
+      "timestamp": "2026-09-17T16:15:00Z",
+      "actor": "human",
+      "phase": "data_integration_review",
+      "event": "gate-reply",
+      "detail": "Reply: publish. Gate 2 (data_integration discipline) approved."
+    },
+    {
+      "timestamp": "2026-09-17T16:16:30Z",
+      "actor": "orchestrator",
+      "phase": "data_integration_review",
+      "event": "published",
+      "detail": "confluence -- https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5886050449/Conversational+CRM+Data+Integration+v1.0 (approval comment 5885329672). Published directly in the orchestrator turn (consistent with this project's established precedent)."
+    }
+  ],
+  "published": {
+    "target": "confluence",
+    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5886050449/Conversational+CRM+Data+Integration+v1.0",
+    "published_at": "2026-09-17T16:16:30Z",
+    "approval_comment_id": "5885329672"
+  },
   "owner_role": null,
   "note": "Owned by this stage's agent. Single writer -- never edit another role's file. The ER model and the API contract, reviewed together because a contract approved apart from the data model it implies is an approval of nothing. Owns the three-artifact bundle. Source disciplines: data-arch, integration-arch."
 }

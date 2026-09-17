@@ -2,24 +2,57 @@
   "schema_version": "1.0",
   "project": {
     "name": "conversational-crm",
-    "name_source": null,
-    "phase": "solution",
-    "created_at": null
+    "name_source": "workflow-1-discovery-to-stories (locked)",
+    "phase": "platform",
+    "created_at": "2026-09-17"
   },
   "workflow": {
     "name": "workflow-2-solution-architecture",
-    "status": "not_started",
+    "status": "in_progress",
     "locked_at": null
   },
   "stack": {
-    "components": [],
+    "components": [
+      {
+        "name": "CRM API Service",
+        "kind": "backend",
+        "technology": "Python (FastAPI)",
+        "implemented_by": "backend"
+      },
+      {
+        "name": "CRM Web App",
+        "kind": "frontend",
+        "technology": "React (web SPA)",
+        "implemented_by": "frontend"
+      },
+      {
+        "name": "Structured Data Store",
+        "kind": "data-store",
+        "technology": "SQLite",
+        "implemented_by": "backend",
+        "note": "[RESOLVED — Gate 2 decision, PRD v1.5 Section 13.1] Fixed upstream by human decision during Requirements, not chosen here."
+      },
+      {
+        "name": "Vector Store",
+        "kind": "data-store",
+        "technology": "Chroma",
+        "implemented_by": "backend",
+        "note": "[RESOLVED — Gate 2 decision, PRD v1.5 Section 13.2] Fixed upstream by human decision during Requirements, not chosen here. Chunking strategy also fixed upstream: semantic chunking."
+      },
+      {
+        "name": "NLU/Extraction & Q&A Layer",
+        "kind": "service",
+        "technology": "AWS Bedrock (foundation models)",
+        "implemented_by": "backend"
+      }
+    ],
     "components_note": "One entry per part of the product that gets built. `kind` is free text -- frontend, backend, desktop-app, cli, service, library, mobile-app, pipeline. `implemented_by` names the Workflow 3 role that builds it.",
-    "decision_source": null
+    "decision_source": "Human decision 2026-09-17: backend = Python (FastAPI), frontend = React (web SPA), NLU/LLM layer = AWS Bedrock foundation models. The two data-store technologies (SQLite, Chroma) were already fixed upstream during Requirements (PRD v1.5 Section 13, Gate 2 decision) and are carried here unchanged, not re-decided."
   },
   "constraints": {
     "budget_usd": null,
     "budget_currency": "USD",
-    "source": null,
+    "source": "Human decision 2026-09-17: no budget ceiling applies -- internal demo/hackathon project on seeded data, not a cost-constrained production deployment.",
     "synthetic_data_only": true
   },
   "inputs": {
@@ -27,11 +60,12 @@
       "workflow": "workflow-1-discovery-to-stories"
     },
     "task": {
-      "id": null,
-      "scope_name": null,
-      "feature_ids": [],
-      "story_ids": [],
-      "scope_exclusions": []
+      "id": "T-1",
+      "scope_name": "full-product-v1",
+      "feature_ids": ["F-1", "F-2", "F-3", "F-4", "F-5", "F-6", "F-7"],
+      "story_ids": ["US-1","US-2","US-3","US-4","US-5","US-6","US-7","US-8","US-9","US-10","US-11","US-12","US-13","US-14","US-15","US-16","US-17","US-18","US-19","US-20","US-21"],
+      "scope_exclusions": [],
+      "scope_source": "Human decision 2026-09-17: architect the full product in one pass (all 7 PRD features / 21 stories) rather than a sub-slice, since this is a small single-persona demo product, not a large speculative platform."
     },
     "target_repository": null,
     "target_repository_note": null,
