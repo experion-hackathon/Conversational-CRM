@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-17T13:32:41.763Z",
+  "generated_at": "2026-09-17T13:39:39.072Z",
   "generated_from": "../output/conversational-crm/state/workflow-1-discovery-to-stories",
   "warning": "Generated file. Regenerate rather than edit; hand edits drift from state.",
   "owner": "gayathry",
   "project": {
     "name": "conversational-crm",
-    "phase": "workflow_signoff"
+    "phase": "locked"
   },
   "workflow": {
     "name": "workflow-1-discovery-to-stories",
-    "status": "in_progress",
-    "locked_at": null
+    "status": "locked",
+    "locked_at": "2026-09-17T13:45:00Z"
   },
   "signoff": {
-    "status": "pending",
-    "reviewed_by": null,
-    "reviewed_at": null
+    "status": "approved",
+    "reviewed_by": "DAI Team3 (sparc.team5@experionglobal.com)",
+    "reviewed_at": "2026-09-17T13:45:00Z"
   },
   "stages": [
     {
