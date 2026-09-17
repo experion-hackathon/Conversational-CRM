@@ -214,9 +214,9 @@
   },
   "drafted_at": "2026-09-17T11:09:52.192Z",
   "published": {
-    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5883166742/Conversational+CRM+PRD+v1.2",
-    "published_at": "2026-09-17T09:40:51.194Z",
-    "approval_comment_id": "5883691066"
+    "url": "https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5883166742/Conversational+CRM+PRD+v1.5",
+    "published_at": "2026-09-17T12:04:06.932Z",
+    "approval_comment_id": "5885493282"
   },
   "gate": {
     "status": "approved",
@@ -329,6 +329,14 @@
       "approx_tokens": 26000,
       "note": "Independent re-review of PRD v1.5, covering BOTH the v1.3->v1.4 terminology rename (never independently validated before this cycle) and the v1.4->v1.5 content additions. Read the full text of v1.3, v1.4 and v1.5 directly and diffed them section-by-section, line-by-line myself (no Bash/shell tool available in this session, so diffing was done by direct side-by-side reading rather than a mechanical `diff -u`) rather than trusting the drafting agent's revision notes or requirements.json's self_verification claims. Confirmed the meeting->interaction rename is complete and correctly scoped, with all three legitimate exceptions (pre-meeting/next-meeting phrasing, the Calendar adapter's 'upcoming meeting(s)', the MOM acronym) correctly preserved and no missed or over-applied instance found. Confirmed F-1 AC5 states both a success and a failure/empty branch, confirmed F-3 AC3's dependency framing is accurate, confirmed the new Interaction-attendees entity (Section 13.1) matches AC5's cardinality/field treatment and cross-references correctly, and confirmed the discussion-points-get-no-entity reasoning is sound and matches F-3 AC1's existing design. Re-confirmed V-P1, V-P4 and V-P7's fixes still hold. Found 2 new medium findings, both the same recurring 'revision note/self-check misdescribes its own diff' defect class as V-P2/V-P4/V-P5/V-P6: V-P8, F-1 AC5's own leading [INFERRED -- needs confirmation] tag covers the whole AC including the capability assertion, contradicting AC5's own trailing text, F-1's Description/Source, Assumption 14 and Open Question 15, all of which treat the capability as confirmed and only the mechanism as inferred (unlike F-5's precedent, which used a distinct [Confirmed] tag for exactly this split); V-P9, Section 13.3's actual diff is 1 new bullet plus edits to 2 existing bullets, but the document's revision note says 'a new cross-reference bullet' (singular) and requirements.json's self_verification.note says 'two new cross-reference bullets' -- neither matches the actual 1-new-plus-2-edited reality. Re-ran universal security/PII/placeholder/inference-honesty checks and PRD-specific checks (Mermaid flowchart, feature sources, AC success+failure coverage) fresh against the complete v1.5 document.",
       "timestamp": "2026-09-17T11:34:18.657Z"
+    },
+    {
+      "stage": "requirements-publish",
+      "agent": "orchestrator",
+      "model": "claude-sonnet-5",
+      "approx_tokens": 15000,
+      "note": "Published v1.5 by updating the existing PRD Confluence page (id 5883166742), after resolving an Atlassian account-identity mismatch (session had reauthenticated as a different account, SPARC Team 10, which could not see the DAI Team3 space holding this page; user re-authenticated back to DAI Team3). Carried forward v1.3/v1.4 content that had never been published (page was last updated at v1.2). Made and self-corrected one mistake: a manual full-body paste accidentally duplicated Section 14.3 at the end; caught via token-level diff against the source and fixed with a second update before considering publish complete. One pre-existing cosmetic markdown-rendering quirk (F-3 Source citation's line-start \"+\" rendering as a stray bullet) was left as-is -- same root cause as a prior instance, non-substantive, present in the local pinned file itself, not worth another full-body paste to fix.",
+      "timestamp": "2026-09-17T12:04:06.932Z"
     }
   ],
   "audit_trail": [
@@ -546,6 +554,13 @@
       "phase": "requirements_review",
       "event": "gate-reply",
       "detail": "Gate 2 reply: publish. PRD v1.5 approved (validator issues_found: 2 medium -- V-P8 AC5 tag-scope error, V-P9 Section 13.3 change-count undercounting -- both corrected in place before this gate reply)."
+    },
+    {
+      "timestamp": "2026-09-17T12:04:06.932Z",
+      "actor": "orchestrator",
+      "phase": "requirements_review",
+      "event": "published",
+      "detail": "confluence -- https://experionglobal.atlassian.net/wiki/spaces/~712020cfea88f08c6844969dae6275717756c1/pages/5883166742/Conversational+CRM+PRD+v1.5 (approval comment 5885493282). Updated existing page after an Atlassian account mismatch was resolved (re-authenticated to DAI Team3). Self-corrected one publish-time mistake (duplicated Section 14.3) via token-level diff verification before considering the publish complete."
     }
   ],
   "owner_role": null,
